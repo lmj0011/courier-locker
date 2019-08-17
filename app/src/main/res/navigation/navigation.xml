@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools" android:id="@+id/navigation"
+            app:startDestination="@id/gateCodesFragment">
+    <fragment android:id="@+id/gateCodesFragment" android:name="name.lmj0011.courierlocker.fragments.GateCodesFragment"
+              android:label="GateCodesFragment"/>
+    <fragment android:id="@+id/customersFragment" android:name="name.lmj0011.courierlocker.fragments.CustomersFragment"
+              android:label="fragment_customers" tools:layout="@layout/fragment_customers"/>
+</navigation>

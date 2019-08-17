@@ -9,17 +9,25 @@ import com.google.android.material.navigation.NavigationView
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
+import androidx.navigation.NavController
+import androidx.navigation.findNavController
 import kotlinx.android.synthetic.main.app_bar_main.view.*
-import name.lmj0011.courierlocker.databinding.ActivityMainBinding
 import timber.log.Timber
+
+import name.lmj0011.courierlocker.databinding.ActivityMainBinding
+import name.lmj0011.courierlocker.fragments.CustomersFragment
+import name.lmj0011.courierlocker.fragments.GateCodesFragment
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var  binding: ActivityMainBinding
+    private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        navController = findNavController(R.id.navHostFragment)
         setContentView(binding.root)
         Timber.i("onCreate Called")
 
@@ -102,11 +110,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
         when (item.itemId) {
-            R.id.nav_customers -> {
-
-            }
             R.id.nav_gate_codes -> {
-
+                navController.navigate(R.id.gateCodesFragment)
+            }
+            R.id.nav_customers -> {
+                navController.navigate(R.id.customersFragment)
             }
             R.id.nav_settings -> {
 
