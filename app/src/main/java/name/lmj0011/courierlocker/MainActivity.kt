@@ -9,15 +9,12 @@ import com.google.android.material.navigation.NavigationView
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import kotlinx.android.synthetic.main.app_bar_main.view.*
 import timber.log.Timber
 
 import name.lmj0011.courierlocker.databinding.ActivityMainBinding
-import name.lmj0011.courierlocker.fragments.CustomersFragment
-import name.lmj0011.courierlocker.fragments.GateCodesFragment
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -87,6 +84,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
             binding.drawerLayout.closeDrawer(GravityCompat.START)
         } else {
+            when(navController.currentDestination?.label) {
+                "GateCodesFragment" -> {
+                    navController.popBackStack(R.id.gateCodesFragment, false)
+                    finish()
+                }
+                "fragment_customers" -> {
+                    navController.popBackStack(R.id.gateCodesFragment, false)
+                    finish()
+                }
+            }
+
             super.onBackPressed()
         }
     }
@@ -124,4 +132,5 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
+
 }
