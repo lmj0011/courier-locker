@@ -61,4 +61,11 @@ dependencies {
 
     // GSON
     implementation 'com.google.code.gson:gson:2.8.5'
+
+    // Lifecycle-aware components
+    // ref: https://developer.android.com/jetpack/androidx/releases/lifecycle
+    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
+
+    // useful for testing with mock data
+    implementation 'com.github.moove-it:fakeit:v0.7'
 }

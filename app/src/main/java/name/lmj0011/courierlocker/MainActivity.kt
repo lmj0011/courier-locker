@@ -1,9 +1,7 @@
 package name.lmj0011.courierlocker
 
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
 import androidx.core.view.GravityCompat
-import androidx.appcompat.app.ActionBarDrawerToggle
 import android.view.MenuItem
 import com.google.android.material.navigation.NavigationView
 import androidx.appcompat.app.AppCompatActivity
@@ -11,44 +9,41 @@ import android.view.Menu
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
+import androidx.navigation.ui.*
 import kotlinx.android.synthetic.main.app_bar_main.view.*
 import timber.log.Timber
-
 import name.lmj0011.courierlocker.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var  binding: ActivityMainBinding
     private lateinit var navController: NavController
+    private lateinit var appBarConfiguration : AppBarConfiguration
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Timber.i("onCreate Called")
+
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         navController = findNavController(R.id.navHostFragment)
         setContentView(binding.root)
-        Timber.i("onCreate Called")
+
+        // AppBar Navigation configuration
+        val topLevelDestinations = setOf(R.id.gateCodesFragment, R.id.customersFragment)
+        appBarConfiguration = AppBarConfiguration.Builder(topLevelDestinations)
+            .setDrawerLayout(binding.drawerLayout)
+            .build()
 
         setSupportActionBar(binding.drawerLayout.toolbar)
+        setupActionBarWithNavController(navController, appBarConfiguration)
+        binding.navView.setNavigationItemSelectedListener(this::onNavigationItemSelected)
+        /////
 
-        binding.drawerLayout.fab.let {
-            it.hide()
-            it.setOnClickListener { view ->
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
-            }
+        // hide the fab initially
+        binding.drawerLayout.fab.hide()
 
-        }
-
-        val toggle = ActionBarDrawerToggle(
-            this, binding.drawerLayout, binding.drawerLayout.toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
-        )
-
-        binding.drawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
-
-
-        binding.navView.setNavigationItemSelectedListener(this)
     }
+
 
     override fun onStart() {
         super.onStart()
@@ -78,6 +73,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onRestart() {
         super.onRestart()
         Timber.i("onRestart Called")
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        return findNavController(R.id.navHostFragment).navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 
     override fun onBackPressed() {
@@ -133,4 +132,22 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return true
     }
 
+
+    fun showFabAndSetListener(cb: () -> Unit, imgSrcId: Int) {
+        binding.drawerLayout.fab.let {
+            it.setOnClickListener(null) // should remove all attached listeners
+            it.setOnClickListener { cb() }
+
+            // hide and show to repaint the img src
+            it.hide()
+
+            it.setImageResource(imgSrcId)
+
+            it.show()
+        }
+    }
+
+    fun hideFab() {
+        binding.drawerLayout.fab.hide()
+    }
 }

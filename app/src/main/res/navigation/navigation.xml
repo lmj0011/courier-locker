@@ -4,7 +4,17 @@
             xmlns:tools="http://schemas.android.com/tools" android:id="@+id/navigation"
             app:startDestination="@id/gateCodesFragment">
     <fragment android:id="@+id/gateCodesFragment" android:name="name.lmj0011.courierlocker.fragments.GateCodesFragment"
-              android:label="GateCodesFragment"/>
+              android:label="GateCodesFragment">
+        <action
+                android:id="@+id/action_gateCodesFragment_to_createGateCodeFragment"
+                app:destination="@+id/createGateCodeFragment"
+                app:popUpTo="@+id/gateCodesFragment"
+                app:popUpToInclusive="false" />
+    </fragment>
     <fragment android:id="@+id/customersFragment" android:name="name.lmj0011.courierlocker.fragments.CustomersFragment"
               android:label="fragment_customers" tools:layout="@layout/fragment_customers"/>
+    <fragment
+            android:id="@+id/createGateCodeFragment"
+            android:name="name.lmj0011.courierlocker.fragments.CreateGateCodeFragment"
+            android:label="CreateGateCodeFragment" />
 </navigation>

@@ -7,7 +7,7 @@ import androidx.room.Query
 import androidx.room.Update
 
 @Dao
-interface GateCodesDao {
+interface GateCodeDao {
 
     @Insert
     fun insert(gateCode: GateCode)
@@ -22,6 +22,6 @@ interface GateCodesDao {
     fun clear()
 
     @Query("SELECT * FROM gate_codes_table ORDER BY id DESC")
-    fun getAllPersons(): LiveData<List<GateCode>>
+    fun getAllGateCodes(): LiveData<List<GateCode>>
 
 }

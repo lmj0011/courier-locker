@@ -10,7 +10,7 @@ import androidx.room.TypeConverters
 @TypeConverters(DataConverters::class)
 abstract class CourierLockerDatabase : RoomDatabase() {
 
-    abstract val gateCodesDao: GateCodesDao
+    abstract val gateCodeDao: GateCodeDao
 
     companion object {
 
@@ -32,6 +32,7 @@ abstract class CourierLockerDatabase : RoomDatabase() {
                         // migration with Room in this blog post:
                         // https://medium.com/androiddevelopers/understanding-migrations-with-room-f01e04b07929
                         .fallbackToDestructiveMigration()
+                        .allowMainThreadQueries() // TODO - comment this line out later
                         .build()
                 }
 

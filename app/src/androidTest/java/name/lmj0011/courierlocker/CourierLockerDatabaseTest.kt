@@ -5,7 +5,7 @@ import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.database.GateCode
-import name.lmj0011.courierlocker.database.GateCodesDao
+import name.lmj0011.courierlocker.database.GateCodeDao
 import org.junit.Assert.assertEquals
 import org.junit.After
 import org.junit.Before
@@ -22,7 +22,7 @@ import java.io.IOException
 @RunWith(AndroidJUnit4ClassRunner::class)
 class CourierLockerDatabaseTest {
 
-    private lateinit var gateCodesDao: GateCodesDao
+    private lateinit var gateCodeDao: GateCodeDao
     private lateinit var db: CourierLockerDatabase
 
     @Before
@@ -35,7 +35,7 @@ class CourierLockerDatabaseTest {
             .allowMainThreadQueries()
             .build()
 
-        gateCodesDao = db.gateCodesDao
+        gateCodeDao = db.gateCodeDao
     }
 
     @After
@@ -52,9 +52,9 @@ class CourierLockerDatabaseTest {
         gateCode.address = "1500 Old Monrovia Rd."
         gateCode.codes.addAll(arrayOf("#1546","#6578","#3592"))
 
-        gateCodesDao.insert(gateCode)
+        gateCodeDao.insert(gateCode)
 
-        val newGateCode = gateCodesDao.get(1)
+        val newGateCode = gateCodeDao.get(1)
 
         assertEquals(1L, newGateCode?.id)
 
