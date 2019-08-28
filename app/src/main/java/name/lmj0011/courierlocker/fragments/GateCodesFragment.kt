@@ -50,13 +50,14 @@ class GateCodesFragment : Fragment() {
         super.onResume()
         mainActivity.showFabAndSetListener(this::fabOnClickListenerCallback, R.drawable.ic_fab_add)
         mainActivity.supportActionBar?.title = "Gate Codes"
+
     }
 
 
     private fun fabOnClickListenerCallback() {
-//        binding.gateCodeViewModel?.generateAndInsertRandomNewGateCode()
-//        Toast.makeText(mainActivity, "New gate code added", Toast.LENGTH_SHORT).show()
-        findNavController().navigate(R.id.action_gateCodesFragment_to_createGateCodeFragment)
+        this.findNavController().navigate(GateCodesFragmentDirections.actionGateCodesFragmentToCreateGateCodeFragment())
+// TODO hook this back up after adding recycler view
+//        this.findNavController().navigate(GateCodesFragmentDirections.actionGateCodesFragmentToEditGateCodeFragment())
     }
 
 }

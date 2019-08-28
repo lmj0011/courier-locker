@@ -17,7 +17,7 @@ class GateCodeViewModel(
     application: Application
 ) : AndroidViewModel(application) {
 
-    private val gateCodes = database.getAllGateCodes()
+    private var gateCodes = database.getAllGateCodes()
 
     /**
      * Converted persons to Spanned for displaying.
@@ -26,18 +26,40 @@ class GateCodeViewModel(
         formatGateCodes(gateCodes)
     }
 
+    fun getGateCode(idx: Int): GateCode? {
+        return database.get(idx.toLong())
+    }
+
+    fun insertGateCode(address: String, codes: Array<String>) {
+
+        val gateCode = GateCode().apply {
+            this.address = address
+            this.codes.addAll(codes)
+        }
+
+        database.insert(gateCode)
+    }
+
+    fun updateGateCode(gateCode: GateCode?) {
+
+        gateCode?.let {
+            database.update(gateCode)
+        }
+    }
+
 
     fun generateAndInsertRandomNewGateCode() {
 
         val gateCode = GateCode(address= "${Fakeit.address().streetAddress()}")
-        val randomValuesList = List(5) { Random.nextInt(1000, 9999) }
+        val randomValuesList = List(6) { Random.nextInt(1000, 9999) }
 
         gateCode.codes.addAll(arrayOf(
             "#${randomValuesList[0]}",
             "#${randomValuesList[1]}",
             "#${randomValuesList[2]}",
             "#${randomValuesList[3]}",
-            "#${randomValuesList[4]}"
+            "#${randomValuesList[4]}",
+            "#${randomValuesList[5]}"
         ))
 
         database.insert(gateCode)

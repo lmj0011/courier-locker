@@ -10,6 +10,10 @@
                 app:destination="@+id/createGateCodeFragment"
                 app:popUpTo="@+id/gateCodesFragment"
                 app:popUpToInclusive="false" />
+        <action
+                android:id="@+id/action_gateCodesFragment_to_editGateCodeFragment"
+                app:destination="@id/editGateCodeFragment"
+                app:popUpTo="@+id/gateCodesFragment" />
     </fragment>
     <fragment android:id="@+id/customersFragment" android:name="name.lmj0011.courierlocker.fragments.CustomersFragment"
               android:label="fragment_customers" tools:layout="@layout/fragment_customers"/>
@@ -17,4 +21,8 @@
             android:id="@+id/createGateCodeFragment"
             android:name="name.lmj0011.courierlocker.fragments.CreateGateCodeFragment"
             android:label="CreateGateCodeFragment" />
+    <fragment
+            android:id="@+id/editGateCodeFragment"
+            android:name="name.lmj0011.courierlocker.fragments.EditGateCodeFragment"
+            android:label="EditGateCodeFragment" />
 </navigation>

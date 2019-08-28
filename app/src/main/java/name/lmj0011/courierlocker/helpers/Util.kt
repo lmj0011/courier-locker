@@ -26,9 +26,15 @@ fun formatGateCodes(gateCodes: List<GateCode>): Spanned {
     sb.apply {
         gateCodes.forEach {
             append("<br>")
-            append("\t<h4>${it.codes[0]}</h4>")
-            append("\t${it.address}<br>")
-            append("\t<b>other codes:</b> ${it.codes[1]} ${it.codes[2]} ${it.codes[3]} ${it.codes[4]}<br>")
+            append("\t<h4>${it.address}</h4>")
+            append("\tcode: <b>${it.codes[0]}</b><br>")
+
+            append("\t<small><i>alternatives:<i>")
+            it.codes.forEach { str ->
+                append(" $str")
+            }
+            append("<br></small>")
+
             append("<br>")
         }
     }

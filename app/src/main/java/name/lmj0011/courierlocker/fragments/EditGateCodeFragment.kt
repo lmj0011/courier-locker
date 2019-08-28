@@ -21,6 +21,7 @@ import name.lmj0011.courierlocker.databinding.FragmentCreateGateCodeBinding
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.database.GateCode
+import name.lmj0011.courierlocker.databinding.FragmentEditGateCodeBinding
 import name.lmj0011.courierlocker.factories.GateCodeViewModelFactory
 import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
 import timber.log.Timber
@@ -30,10 +31,11 @@ import timber.log.Timber
  * A simple [Fragment] subclass.
  *
  */
-class CreateGateCodeFragment : Fragment() {
+class EditGateCodeFragment : Fragment() {
 
-    private lateinit var binding: FragmentCreateGateCodeBinding
+    private lateinit var binding: FragmentEditGateCodeBinding
     private lateinit var mainActivity: MainActivity
+    private var gateCode: GateCode? = null
     private lateinit var gateCodeViewModel: GateCodeViewModel
 
     override fun onCreateView(
@@ -41,7 +43,7 @@ class CreateGateCodeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = DataBindingUtil.inflate(
-            inflater, R.layout.fragment_create_gate_code, container, false)
+            inflater, R.layout.fragment_edit_gate_code, container, false)
 
         mainActivity = activity as MainActivity
 
@@ -54,6 +56,8 @@ class CreateGateCodeFragment : Fragment() {
 
         mainActivity.hideFab()
 
+        this.gateCode = gateCodeViewModel.getGateCode(1)
+        this.injectGateCodeIntoView(this.gateCode)
         binding.saveButton.setOnClickListener(this::saveButtonOnClickListener)
 
         return binding.root
@@ -61,7 +65,24 @@ class CreateGateCodeFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        mainActivity.supportActionBar?.title = "Add new Gate Code"
+        mainActivity.supportActionBar?.title = "Edit Gate Code"
+        mainActivity.supportActionBar?.subtitle = gateCode?.address
+    }
+
+    private fun injectGateCodeIntoView(gc: GateCode?) {
+        gc?.let {
+            binding.addressEditText.setText(it.address)
+
+            val codesContainer: LinearLayout = binding.createGateCodeFragmentLinearLayout
+            for (idx in 0..codesContainer.childCount) {
+                val et = codesContainer.getChildAt(idx)
+
+                if (et is EditText && it.codes.getOrNull(idx).isNullOrEmpty().not()) {
+                    et.setText(it.codes[idx])
+                }
+            }
+        }
+
     }
 
     private fun saveButtonOnClickListener(v: View) {
@@ -82,8 +103,14 @@ class CreateGateCodeFragment : Fragment() {
             return
         }
 
-        this.gateCodeViewModel.insertGateCode(address, codes.toTypedArray())
-        Toast.makeText(context, "New gate code added", Toast.LENGTH_SHORT).show()
+        this.gateCode?.let {
+            it.address = address
+            it.codes.clear()
+            it.codes.addAll(codes)
+        }
+
+        this.gateCodeViewModel.updateGateCode(gateCode)
+        Toast.makeText(context, "Updated gate code", Toast.LENGTH_SHORT).show()
         this.findNavController().popBackStack()
     }
 
