@@ -17,7 +17,7 @@ class GateCodeViewModel(
     application: Application
 ) : AndroidViewModel(application) {
 
-    private var gateCodes = database.getAllGateCodes()
+    val gateCodes = database.getAllGateCodes()
 
     /**
      * Converted persons to Spanned for displaying.
@@ -47,8 +47,12 @@ class GateCodeViewModel(
         }
     }
 
+    fun deleteGateCode(idx: Long): Int {
+        return database.deleteByGateCodeId(idx)
+    }
 
-    fun generateAndInsertRandomNewGateCode() {
+
+    fun insertNewRandomGateCodeRow() {
 
         val gateCode = GateCode(address= "${Fakeit.address().streetAddress()}")
         val randomValuesList = List(6) { Random.nextInt(1000, 9999) }

@@ -50,13 +50,14 @@ class EditGateCodeFragment : Fragment() {
         val application = requireNotNull(this.activity).application
         val dataSource = CourierLockerDatabase.getInstance(application).gateCodeDao
         val viewModelFactory = GateCodeViewModelFactory(dataSource, application)
+        val args = EditGateCodeFragmentArgs.fromBundle(arguments!!)
         this.gateCodeViewModel = ViewModelProviders.of(this, viewModelFactory).get(GateCodeViewModel::class.java)
 
         binding.gateCodeViewModel = this.gateCodeViewModel
 
         mainActivity.hideFab()
 
-        this.gateCode = gateCodeViewModel.getGateCode(1)
+        this.gateCode = gateCodeViewModel.getGateCode(args.gateCodeId)
         this.injectGateCodeIntoView(this.gateCode)
         binding.saveButton.setOnClickListener(this::saveButtonOnClickListener)
 
@@ -85,6 +86,7 @@ class EditGateCodeFragment : Fragment() {
 
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun saveButtonOnClickListener(v: View) {
         val codesContainer: LinearLayout = binding.createGateCodeFragmentLinearLayout
         val address: String = binding.addressEditText.text.toString()
@@ -111,7 +113,7 @@ class EditGateCodeFragment : Fragment() {
 
         this.gateCodeViewModel.updateGateCode(gateCode)
         Toast.makeText(context, "Updated gate code", Toast.LENGTH_SHORT).show()
-        this.findNavController().popBackStack()
+        this.findNavController().navigate(R.id.gateCodesFragment)
     }
 
 

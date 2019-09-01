@@ -24,5 +24,9 @@
     <fragment
             android:id="@+id/editGateCodeFragment"
             android:name="name.lmj0011.courierlocker.fragments.EditGateCodeFragment"
-            android:label="EditGateCodeFragment" />
+            android:label="EditGateCodeFragment" >
+        <argument
+                android:name="gateCodeId"
+                app:argType="integer" />
+    </fragment>
 </navigation>

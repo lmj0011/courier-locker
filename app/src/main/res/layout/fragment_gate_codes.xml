@@ -12,27 +12,30 @@
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/gateCodesListContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-        <ScrollView
-                android:layout_width="295dp"
+        <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/gateCodesList"
+                android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                android:background="#FFFFFF"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintBottom_toTopOf="@+id/generateGateCodesBtn"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0" />
+
+        <Button
+                android:id="@+id/generateGateCodesBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Generate 1"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.0">
-
-            <TextView
-                    android:id="@+id/gateCodesListTextView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@{gateCodeViewModel.personsString}"
-                    tools:text="TextView" />
-        </ScrollView>
+                android:onClick="@{() -> gateCodeViewModel.insertNewRandomGateCodeRow()}"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

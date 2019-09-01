@@ -1,6 +1,7 @@
 package name.lmj0011.courierlocker.fragments
 
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -62,8 +63,10 @@ class CreateGateCodeFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         mainActivity.supportActionBar?.title = "Add new Gate Code"
+        mainActivity.supportActionBar?.subtitle = null
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun saveButtonOnClickListener(v: View) {
         val codesContainer: LinearLayout = binding.createGateCodeFragmentLinearLayout
         val address: String = binding.addressEditText.text.toString()
@@ -84,7 +87,7 @@ class CreateGateCodeFragment : Fragment() {
 
         this.gateCodeViewModel.insertGateCode(address, codes.toTypedArray())
         Toast.makeText(context, "New gate code added", Toast.LENGTH_SHORT).show()
-        this.findNavController().popBackStack()
+        this.findNavController().navigate(R.id.gateCodesFragment)
     }
 
 

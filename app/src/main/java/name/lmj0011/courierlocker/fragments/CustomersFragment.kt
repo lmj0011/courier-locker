@@ -38,6 +38,7 @@ class CustomersFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         mainActivity.supportActionBar?.title = "Customers"
+        mainActivity.supportActionBar?.subtitle = null
     }
 
 
