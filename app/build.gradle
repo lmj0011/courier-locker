@@ -70,4 +70,8 @@ dependencies {
 
     // useful for testing with mock data
     implementation 'com.github.moove-it:fakeit:v0.7'
+
+    // Coroutines
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutine"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutine"
 }

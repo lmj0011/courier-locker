@@ -37,10 +37,9 @@ class GateCodesFragment : Fragment() {
     private val onSwipedCallback: (RecyclerView.ViewHolder, Int) -> Unit = { viewHolder, _ ->
         val gateCodeId = adapter.getItemId(viewHolder.adapterPosition)
 
-        if (gateCodeViewModel.deleteGateCode(gateCodeId) == 1) {
-            Toast.makeText(context, "Deleted a gate code entry", Toast.LENGTH_SHORT).show()
-            adapter.notifyDataSetChanged()
-        }
+        gateCodeViewModel.deleteGateCode(gateCodeId)
+        Toast.makeText(context, "Deleted a gate code entry", Toast.LENGTH_SHORT).show()
+        adapter.notifyDataSetChanged()
     }
 
 
