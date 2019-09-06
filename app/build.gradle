@@ -74,4 +74,8 @@ dependencies {
     // Coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutine"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutine"
+
+    // HTTP lib
+    implementation "com.github.kittinunf.fuel:fuel:$version_kittinunf_fuel"
+    implementation "com.github.kittinunf.fuel:fuel-json:$version_kittinunf_fuel"
 }

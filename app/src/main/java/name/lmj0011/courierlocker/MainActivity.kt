@@ -13,12 +13,17 @@ import androidx.navigation.ui.*
 import kotlinx.android.synthetic.main.app_bar_main.view.*
 import timber.log.Timber
 import name.lmj0011.courierlocker.databinding.ActivityMainBinding
+import name.lmj0011.courierlocker.helpers.LocationHelper
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
-    private lateinit var  binding: ActivityMainBinding
+    private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration : AppBarConfiguration
+
+    companion object {
+        const val MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 100
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,11 +44,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         binding.navView.setNavigationItemSelectedListener(this::onNavigationItemSelected)
         /////
 
+        LocationHelper.setFusedLocationClient(this)
+
         // hide the fab initially
         binding.drawerLayout.fab.hide()
 
     }
-
 
     override fun onStart() {
         super.onStart()
