@@ -15,36 +15,51 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-        <EditText
-                android:id="@+id/addressEditText"
+        <AutoCompleteTextView
+                android:id="@+id/addressAutoCompleteTextView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:hint="address"
-                android:inputType="textPostalAddress"
+                android:inputType="textPostalAddress|textNoSuggestions"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintEnd_toStartOf="@+id/insertMyLocationButton"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.25" />
+
+        <TextView
+                android:id="@+id/latitudeHiddenTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+                android:id="@+id/longitudeHiddenTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
         <LinearLayout
                 android:id="@+id/createGateCodeFragmentLinearLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/addressEditText"
-                app:layout_constraintVertical_bias="0.19999999">
+                app:layout_constraintTop_toBottomOf="@+id/addressAutoCompleteTextView">
 
             <EditText
                     android:id="@+id/gateCode1EditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ems="10"
-                    android:hint="#0000"
+                    android:hint="0000"
                     android:inputType="textShortMessage" />
 
             <EditText
@@ -52,7 +67,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ems="10"
-                    android:hint="#0000"
+                    android:hint="0000"
                     android:inputType="textShortMessage" />
 
             <EditText
@@ -60,7 +75,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ems="10"
-                    android:hint="#0000"
+                    android:hint="0000"
                     android:inputType="textShortMessage" />
 
             <EditText
@@ -69,7 +84,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="0dp"
                     android:ems="10"
-                    android:hint="#0000"
+                    android:hint="0000"
                     android:inputType="textShortMessage" />
 
             <EditText
@@ -78,7 +93,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="0dp"
                     android:ems="10"
-                    android:hint="#0000"
+                    android:hint="0000"
                     android:inputType="textShortMessage" />
 
             <EditText
@@ -87,7 +102,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="0dp"
                     android:ems="10"
-                    android:hint="#0000"
+                    android:hint="0000"
                     android:inputType="textShortMessage" />
         </LinearLayout>
 
@@ -99,6 +114,16 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/createGateCodeFragmentLinearLayout" />
+
+        <ImageView
+                android:id="@+id/insertMyLocationButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.25"
+                app:srcCompat="@drawable/ic_gps_fixed" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

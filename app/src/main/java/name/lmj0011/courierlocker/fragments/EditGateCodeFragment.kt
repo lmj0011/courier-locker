@@ -72,7 +72,7 @@ class EditGateCodeFragment : Fragment() {
 
     private fun injectGateCodeIntoView(gc: GateCode?) {
         gc?.let {
-            binding.addressEditText.setText(it.address)
+            binding.addressTextView.text = it.address
 
             val codesContainer: LinearLayout = binding.createGateCodeFragmentLinearLayout
             for (idx in 0..codesContainer.childCount) {
@@ -89,7 +89,7 @@ class EditGateCodeFragment : Fragment() {
     @Suppress("UNUSED_PARAMETER")
     private fun saveButtonOnClickListener(v: View) {
         val codesContainer: LinearLayout = binding.createGateCodeFragmentLinearLayout
-        val address: String = binding.addressEditText.text.toString()
+        val address: String = binding.addressTextView.text.toString()
         val codes: ArrayList<String> = arrayListOf()
 
         for (idx in 0..codesContainer.childCount) {

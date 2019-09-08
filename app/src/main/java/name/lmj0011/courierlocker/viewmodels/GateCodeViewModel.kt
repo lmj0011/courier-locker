@@ -31,11 +31,13 @@ class GateCodeViewModel(
     }
 
 
-    fun insertGateCode(address: String, codes: Array<String>) {
+    fun insertGateCode(address: String, codes: Array<String>, lat: Double, lng: Double) {
         uiScope.launch {
             val gateCode = GateCode().apply {
                 this.address = address
                 this.codes.addAll(codes)
+                this.latitude = lat
+                this.longitude = lng
             }
 
             withContext(Dispatchers.IO){

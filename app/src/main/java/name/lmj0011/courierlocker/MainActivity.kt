@@ -23,6 +23,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     companion object {
         const val MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 100
+
+        // for AutoCompleteTextView handler
+        const val TRIGGER_AUTO_COMPLETE = 101
+        const val AUTO_COMPLETE_DELAY = 500L
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,6 +68,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onPause() {
         super.onPause()
         Timber.i("onPause Called")
+        LocationHelper.stopLocationUpdates()
     }
 
     override fun onStop() {

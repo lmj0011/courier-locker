@@ -15,6 +15,12 @@ data class GateCode(
     @ColumnInfo(name = "address")
     var address: String = "",
 
+    @ColumnInfo(name = "latitude")
+    var latitude: Double = 0.toDouble(),
+
+    @ColumnInfo(name = "longitude")
+    var longitude: Double = 0.toDouble(),
+
     @ColumnInfo(name = "codes")
     var codes: MutableList<String> = mutableListOf()
 )

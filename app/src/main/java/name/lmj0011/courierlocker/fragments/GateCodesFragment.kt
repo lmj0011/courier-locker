@@ -45,7 +45,6 @@ class GateCodesFragment : Fragment() {
     private lateinit var viewModelFactory: GateCodeViewModelFactory
     private lateinit var adapter: GateCodeAdapter
     private lateinit var gateCodeViewModel: GateCodeViewModel
-    private lateinit var locationCallback: LocationCallback
 
     private val onSwipedCallback: (RecyclerView.ViewHolder, Int) -> Unit = { viewHolder, _ ->
         val gateCodeId = adapter.getItemId(viewHolder.adapterPosition)
@@ -99,8 +98,6 @@ class GateCodesFragment : Fragment() {
             binding.generateGateCodesBtn.visibility = View.GONE
         }
 
-        locationCallback = this.getLocationCallback()
-
         val permissionVal = ContextCompat.checkSelfPermission(mainActivity, Manifest.permission.ACCESS_FINE_LOCATION)
         when{
             permissionVal != PackageManager.PERMISSION_GRANTED -> {
@@ -109,7 +106,7 @@ class GateCodesFragment : Fragment() {
                     MainActivity.MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION
                 )
             }
-            else -> {/* should not make it to here */}
+            else -> {/* nothing */}
         }
 
 
@@ -126,16 +123,10 @@ class GateCodesFragment : Fragment() {
         when(requestCode) {
             MainActivity.MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == 0) {
-                    LocationHelper.startLocationUpdates(locationCallback)
+                    LocationHelper.startLocationUpdates()
                 }
             }
         }
-    }
-
-
-    override fun onStop() {
-        super.onStop()
-        LocationHelper.stopLocationUpdates(locationCallback)
     }
 
     override fun onResume() {
@@ -145,8 +136,8 @@ class GateCodesFragment : Fragment() {
         mainActivity.supportActionBar?.subtitle = null
 
         when(ContextCompat.checkSelfPermission(mainActivity, Manifest.permission.ACCESS_FINE_LOCATION)){
-            PackageManager.PERMISSION_GRANTED -> LocationHelper.startLocationUpdates(locationCallback)
-            else -> LocationHelper.stopLocationUpdates(locationCallback)
+            PackageManager.PERMISSION_GRANTED -> LocationHelper.startLocationUpdates()
+            else -> {/* nothing */}
         }
 
 
@@ -157,56 +148,5 @@ class GateCodesFragment : Fragment() {
         this.findNavController().navigate(GateCodesFragmentDirections.actionGateCodesFragmentToCreateGateCodeFragment())
     }
 
-
-    private fun getLocationCallback(): LocationCallback
-    {
-        return object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult?) {
-                locationResult ?: return
-
-                var addresses: List<Address> = emptyList()
-
-                if (locationResult.locations.isNotEmpty()) {
-                    // get latest location
-                    val location = locationResult.lastLocation
-
-                    // TODO profile and determine whether to move this logic into a Worker or Coroutine
-                    val geocoder = Geocoder(mainActivity, Locale.getDefault())
-
-//                    val geolocation = GeoLocation.fromDegrees(location.latitude, location.longitude)
-//                    val boundingBox = geolocation.boundingCoordinates(10.toDouble(), 3958.8) // numbers are in miles
-
-                    try {
-                        addresses = geocoder.getFromLocation(location.latitude,location.longitude,1)
-//                        addresses = geocoder.getFromLocationName(
-//                            "204 Royal Pines",
-//                            1,
-//                            boundingBox[0].latitudeInDegrees,
-//                            boundingBox[0].longitudeInDegrees,
-//                            boundingBox[1].latitudeInDegrees,
-//                            boundingBox[1].longitudeInDegrees
-//                        )
-                    } catch (ioException: IOException) {
-                        // Catch network or other I/O problems.
-                        Timber.e(ioException.message)
-                    } catch (illegalArgumentException: IllegalArgumentException) {
-                        // Catch invalid latitude or longitude values.
-                        Timber.e(illegalArgumentException.message)
-                    }
-
-                    // Handle case where no address was found.
-                    if (addresses.isEmpty()) {
-                        Timber.i("lat:${location.latitude}, long: ${location.longitude}, address: n/a")
-                    } else {
-                        val address = addresses[0]
-                        Timber.i("lat:${location.latitude}, long: ${location.longitude}, address: ${address.getAddressLine(0)}")
-                    }
-                }
-
-
-            }
-        }
-
-    }
 
 }
