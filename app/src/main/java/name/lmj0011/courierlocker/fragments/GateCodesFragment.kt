@@ -3,8 +3,6 @@ package name.lmj0011.courierlocker.fragments
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.location.Address
-import android.location.Geocoder
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
@@ -18,7 +16,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.gms.location.*
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.GateCodeAdapter
@@ -26,12 +23,9 @@ import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.databinding.FragmentGateCodesBinding
 import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
 import name.lmj0011.courierlocker.factories.GateCodeViewModelFactory
-import name.lmj0011.courierlocker.helpers.GeoLocation
 import name.lmj0011.courierlocker.helpers.ItemTouchHelperClass
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import timber.log.Timber
-import java.io.IOException
-import java.util.*
 
 
 /**
@@ -77,7 +71,7 @@ class GateCodesFragment : Fragment() {
         // the Adapter when there is new data.
         gateCodeViewModel.gateCodes.observe(viewLifecycleOwner, Observer {
             it?.let {
-                adapter.submitList(it)
+                adapter.submitList(adapter.filterByClosestGateCodeLocation(it))
             }
         })
 

@@ -22,7 +22,7 @@ interface GateCodeDao {
     fun clear()
 
     @Query("SELECT * FROM gate_codes_table ORDER BY id DESC")
-    fun getAllGateCodes(): LiveData<List<GateCode>>
+    fun getAllGateCodes(): LiveData<MutableList<GateCode>>
 
     @Query("DELETE from gate_codes_table WHERE id = :key")
     fun deleteByGateCodeId(key: Long): Int

@@ -7,13 +7,13 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import name.lmj0011.courierlocker.database.GateCode
 import name.lmj0011.courierlocker.databinding.ListItemGateCodeBinding
+import name.lmj0011.courierlocker.helpers.LocationHelper
 
-class GateCodeAdapter(val clickListener: GateCodeListener): ListAdapter<GateCode, GateCodeAdapter.ViewHolder>(GateCodeDiffCallback()) {
+class GateCodeAdapter(private val clickListener: GateCodeListener): ListAdapter<GateCode, GateCodeAdapter.ViewHolder>(GateCodeDiffCallback()) {
     override fun getItemId(position: Int): Long {
         // return the Item's database row id
         return super.getItem(position).id
     }
-
 
     class ViewHolder private constructor(val binding: ListItemGateCodeBinding) : RecyclerView.ViewHolder(binding.root){
 
@@ -70,5 +70,16 @@ class GateCodeAdapter(val clickListener: GateCodeListener): ListAdapter<GateCode
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder.from(parent)
+    }
+
+    fun filterByClosestGateCodeLocation(list: MutableList<GateCode>): MutableList<GateCode> {
+        return list.sortedBy {
+            LocationHelper.calculateApproxDistanceBetweenMapPoints(
+                LocationHelper.lastLatitude,
+                LocationHelper.lastLongitude,
+                it.latitude,
+                it.longitude
+            )
+        }.toMutableList()
     }
 }

@@ -33,6 +33,7 @@ import name.lmj0011.courierlocker.helpers.GeoLocation
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
 import timber.log.Timber
+import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -79,27 +80,28 @@ class CreateGateCodeFragment : Fragment() {
 
         handler = Handler(Handler.Callback {
             if (it.what == MainActivity.TRIGGER_AUTO_COMPLETE) {
-                val location = LocationHelper.getLastKnownLocation()
+                val addressStr = binding.addressAutoCompleteTextView.text.toString()
 
+                if (addressStr.isNullOrEmpty().not()){
+                    val geolocation = GeoLocation.fromDegrees(LocationHelper.lastLatitude, LocationHelper.lastLongitude)
+                    val boundingBox = geolocation.boundingCoordinates(10.toDouble(), 3958.8) // numbers are in miles
 
-                location.addOnSuccessListener { l: Location ->
-                    val str = binding.addressAutoCompleteTextView.text.toString()
-
-                    if (str.isNullOrEmpty().not()){
-                        val geolocation = GeoLocation.fromDegrees(l.latitude, l.longitude)
-                        val boundingBox = geolocation.boundingCoordinates(10.toDouble(), 3958.8) // numbers are in miles
+                    try {
                         val addresses = LocationHelper.getGeocoder().getFromLocationName(
-                            binding.addressAutoCompleteTextView.text.toString(),
+                            addressStr,
                             3,
                             boundingBox[0].latitudeInDegrees,
                             boundingBox[0].longitudeInDegrees,
                             boundingBox[1].latitudeInDegrees,
                             boundingBox[1].longitudeInDegrees
                         )
-
                         adapter.setData(addresses)
+                    } catch (e: IOException) {
+                        when{
+                            e.message == "grpc failed" -> { }
+                            else -> throw e
+                        }
                     }
-
                 }
             }
 
@@ -146,7 +148,6 @@ class CreateGateCodeFragment : Fragment() {
         // Set a focus change listener for auto complete text view
         binding.addressAutoCompleteTextView.onFocusChangeListener = View.OnFocusChangeListener { view, b ->
             if(b){
-                // TODO Display the suggestion dropdown on focus AND only if we have suggestions
                 binding.addressAutoCompleteTextView.showDropDown()
             }
         }
@@ -155,23 +156,17 @@ class CreateGateCodeFragment : Fragment() {
 
         /// setting current location's address into the address textview
         binding.insertMyLocationButton.setOnClickListener {
-            val location = LocationHelper.getLastKnownLocation()
+            val address = LocationHelper.getGeocoder().getFromLocation(LocationHelper.lastLatitude, LocationHelper.lastLongitude, 1)
 
-
-            location.addOnSuccessListener { l: Location ->
-                val address = LocationHelper.getGeocoder().getFromLocation(l.latitude, l.longitude, 1)
-
-                when{
-                    address.size > 0 -> {
-                        binding.addressAutoCompleteTextView.setText(address[0].getAddressLine(0))
-                        binding.latitudeHiddenTextView.text = address[0].latitude.toString()
-                        binding.longitudeHiddenTextView.text = address[0].longitude.toString()
-                    }
-                    else -> {
-                        Toast.makeText(mainActivity, "Unable to resolve an Address from current location", Toast.LENGTH_LONG)
-                    }
+            when{
+                address.size > 0 -> {
+                    binding.addressAutoCompleteTextView.setText(address[0].getAddressLine(0))
+                    binding.latitudeHiddenTextView.text = address[0].latitude.toString()
+                    binding.longitudeHiddenTextView.text = address[0].longitude.toString()
                 }
-
+                else -> {
+                    Toast.makeText(mainActivity, "Unable to resolve an Address from current location", Toast.LENGTH_LONG)
+                }
             }
         }
         //////////////////
