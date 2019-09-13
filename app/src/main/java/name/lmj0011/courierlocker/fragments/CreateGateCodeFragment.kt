@@ -1,40 +1,29 @@
 package name.lmj0011.courierlocker.fragments
 
 
-import android.content.Context
 import android.location.Address
-import android.location.Geocoder
-import android.location.Location
 import android.os.Bundle
 import android.os.Handler
 import android.text.Editable
-import android.text.TextUtils
 import android.text.TextWatcher
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
-import kotlinx.android.synthetic.main.app_bar_main.*
-import kotlinx.android.synthetic.main.fragment_create_gate_code.view.*
 import name.lmj0011.courierlocker.MainActivity
-
 import name.lmj0011.courierlocker.databinding.FragmentCreateGateCodeBinding
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.AddressAutoSuggestAdapter
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
-import name.lmj0011.courierlocker.database.GateCode
 import name.lmj0011.courierlocker.factories.GateCodeViewModelFactory
 import name.lmj0011.courierlocker.helpers.GeoLocation
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
-import timber.log.Timber
 import java.io.IOException
-import java.util.*
 import kotlin.collections.ArrayList
 
 
@@ -83,7 +72,7 @@ class CreateGateCodeFragment : Fragment() {
                 val addressStr = binding.addressAutoCompleteTextView.text.toString()
 
                 if (addressStr.isNullOrEmpty().not()){
-                    val geolocation = GeoLocation.fromDegrees(LocationHelper.lastLatitude, LocationHelper.lastLongitude)
+                    val geolocation = GeoLocation.fromDegrees(LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!)
                     val boundingBox = geolocation.boundingCoordinates(10.toDouble(), 3958.8) // numbers are in miles
 
                     try {
@@ -156,7 +145,7 @@ class CreateGateCodeFragment : Fragment() {
 
         /// setting current location's address into the address textview
         binding.insertMyLocationButton.setOnClickListener {
-            val address = LocationHelper.getGeocoder().getFromLocation(LocationHelper.lastLatitude, LocationHelper.lastLongitude, 1)
+            val address = LocationHelper.getGeocoder().getFromLocation(LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
 
             when{
                 address.size > 0 -> {

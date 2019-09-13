@@ -2,6 +2,7 @@ package name.lmj0011.courierlocker.fragments
 
 
 import android.Manifest
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.*
@@ -13,12 +14,13 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
-import name.lmj0011.courierlocker.adapters.GateCodeAdapter
+import name.lmj0011.courierlocker.adapters.GateCodeListAdapter
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.databinding.FragmentGateCodesBinding
 import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
@@ -37,15 +39,28 @@ class GateCodesFragment : Fragment() {
     private lateinit var binding: FragmentGateCodesBinding
     private lateinit var mainActivity: MainActivity
     private lateinit var viewModelFactory: GateCodeViewModelFactory
-    private lateinit var adapter: GateCodeAdapter
+    private lateinit var listAdapter: GateCodeListAdapter
     private lateinit var gateCodeViewModel: GateCodeViewModel
+    private lateinit var sharedPreferences: SharedPreferences
 
+    /**
+     * A Callback for when swiping a GateCodeList item; only 1 swipe direction allowed for now
+     */
     private val onSwipedCallback: (RecyclerView.ViewHolder, Int) -> Unit = { viewHolder, _ ->
-        val gateCodeId = adapter.getItemId(viewHolder.adapterPosition)
+        val gateCodeId = listAdapter.getItemId(viewHolder.adapterPosition)
 
         gateCodeViewModel.deleteGateCode(gateCodeId)
         Toast.makeText(context, "Deleted a gate code entry", Toast.LENGTH_SHORT).show()
-        adapter.notifyDataSetChanged()
+        listAdapter.notifyDataSetChanged()
+    }
+
+    /**
+     * This Observer will cause the recyclerView to refresh itself periodically
+     */
+    private val latitudeObserver = Observer<Double> {
+        gateCodeViewModel.gateCodes.value?.firstOrNull()?.let {
+            gateCodeViewModel.updateGateCode(it)
+        }
     }
 
 
@@ -58,22 +73,29 @@ class GateCodesFragment : Fragment() {
 
         mainActivity = activity as MainActivity
 
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity)
         val application = requireNotNull(this.activity).application
         val dataSource = CourierLockerDatabase.getInstance(application).gateCodeDao
         viewModelFactory = GateCodeViewModelFactory(dataSource, application)
         gateCodeViewModel = ViewModelProviders.of(this, viewModelFactory).get(GateCodeViewModel::class.java)
 
-        adapter = GateCodeAdapter( GateCodeAdapter.GateCodeListener { gateCodeId ->
+        listAdapter = GateCodeListAdapter( GateCodeListAdapter.GateCodeListener { gateCodeId ->
             this.findNavController().navigate(GateCodesFragmentDirections.actionGateCodesFragmentToEditGateCodeFragment(gateCodeId.toInt()))
         })
 
-        // Create an observer on gateCodeViewModel.gateCodes that tells
-        // the Adapter when there is new data.
+
         gateCodeViewModel.gateCodes.observe(viewLifecycleOwner, Observer {
             it?.let {
-                adapter.submitList(adapter.filterByClosestGateCodeLocation(it))
+                if (binding.liveLocationUpdatingSwitch.isChecked) {
+                    listAdapter.submitList(listAdapter.filterByClosestGateCodeLocation(it))
+                    binding.gateCodesList.smoothScrollToPosition(0)
+                } else {
+                    listAdapter.submitList(it)
+                }
             }
         })
+
+        LocationHelper.lastLatitude.observe(viewLifecycleOwner, latitudeObserver)
 
         val itemTouchHelperCallback = ItemTouchHelperClass(mainActivity, this.onSwipedCallback).swipeLeftToDeleteCallback
 
@@ -82,11 +104,18 @@ class GateCodesFragment : Fragment() {
 
         binding.gateCodesList.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
 
-        binding.gateCodesList.adapter = adapter
+        binding.gateCodesList.adapter = listAdapter
 
         binding.gateCodeViewModel = gateCodeViewModel
 
         binding.lifecycleOwner = this
+
+        binding.liveLocationUpdatingSwitch.setOnCheckedChangeListener { _, isChecked ->
+            sharedPreferences.edit().apply {
+                putBoolean("gateCodesLocationUpdating", isChecked)
+                commit()
+            }
+        }
 
         if(!resources.getBoolean(R.bool.DEBUG_MODE)) {
             binding.generateGateCodesBtn.visibility = View.GONE
@@ -131,10 +160,12 @@ class GateCodesFragment : Fragment() {
 
         when(ContextCompat.checkSelfPermission(mainActivity, Manifest.permission.ACCESS_FINE_LOCATION)){
             PackageManager.PERMISSION_GRANTED -> LocationHelper.startLocationUpdates()
-            else -> {/* nothing */}
+            else -> {
+                Toast.makeText(mainActivity,"Location permissions are not enabled.", Toast.LENGTH_SHORT).show()
+            }
         }
 
-
+        this.applyPreferences()
     }
 
 
@@ -142,5 +173,8 @@ class GateCodesFragment : Fragment() {
         this.findNavController().navigate(GateCodesFragmentDirections.actionGateCodesFragmentToCreateGateCodeFragment())
     }
 
+    private fun applyPreferences() {
+        binding.liveLocationUpdatingSwitch.isChecked = sharedPreferences.getBoolean("gateCodesLocationUpdating", false)
+    }
 
 }

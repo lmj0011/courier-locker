@@ -1,13 +1,9 @@
 package name.lmj0011.courierlocker.helpers
 
 import android.content.Context
-import android.location.Address
 import android.location.Geocoder
-import android.location.Location
+import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.location.*
-import com.google.android.gms.tasks.Task
-import timber.log.Timber
-import java.io.IOException
 import java.lang.Math.toRadians
 import java.util.*
 import kotlin.math.*
@@ -19,10 +15,10 @@ object LocationHelper {
     private val locationRequest: LocationRequest = LocationRequest()
     private const val AVERAGE_RADIUS_OF_EARTH_KM = 6371.0 // km
 
-    var lastLatitude: Double = 0.0
+    var lastLatitude = MutableLiveData<Double>().apply { value = 0.0 }
         private set
 
-    var lastLongitude: Double = 0.0
+    var lastLongitude = MutableLiveData<Double>().apply { value = 0.0 }
         private set
 
     init {
@@ -90,8 +86,8 @@ object LocationHelper {
 
             if (locationResult.locations.isNotEmpty()) {
                 // get latest location info
-                lastLatitude  = locationResult.lastLocation.latitude
-                lastLongitude = locationResult.lastLocation.longitude
+                lastLatitude.value  = locationResult.lastLocation.latitude
+                lastLongitude.value = locationResult.lastLocation.longitude
             }
 
         }

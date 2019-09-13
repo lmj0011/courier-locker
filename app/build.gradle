@@ -11,8 +11,8 @@ android {
         applicationId "name.lmj0011.courierlocker"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        versionCode 4
+        versionName "1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
 
@@ -25,15 +25,36 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             resValue("bool", "DEBUG_MODE", "false")
         }
         debug {
+            minifyEnabled false
             resValue("bool", "DEBUG_MODE", "true")
         }
     }
-
+    flavorDimensions "default"
+    productFlavors {
+        dev { // active development/testing
+            def devVersionCode = defaultConfig.versionCode + 2
+            applicationIdSuffix ".dev"
+            versionNameSuffix ".0.0-dev+${devVersionCode}"
+            versionCode devVersionCode
+        }
+        beta { // public testing
+            def betaVersionCode = defaultConfig.versionCode + 1
+            applicationIdSuffix ".beta"
+            versionNameSuffix ".0.0-beta+${betaVersionCode}"
+            versionCode betaVersionCode
+        }
+        prod { // official release
+            def prodVersionCode = defaultConfig.versionCode
+            applicationIdSuffix ".prod"
+            versionNameSuffix ".0.0+${prodVersionCode}"
+            versionCode prodVersionCode
+        }
+    }
     dataBinding {
         enabled = true
     }
@@ -79,4 +100,7 @@ dependencies {
     // HTTP lib
     implementation "com.github.kittinunf.fuel:fuel:$version_kittinunf_fuel"
     implementation "com.github.kittinunf.fuel:fuel-json:$version_kittinunf_fuel"
+
+    // androidx.preference
+    implementation "androidx.preference:preference:1.1.0-alpha04"
 }

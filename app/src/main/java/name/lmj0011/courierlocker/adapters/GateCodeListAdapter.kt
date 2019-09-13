@@ -9,7 +9,7 @@ import name.lmj0011.courierlocker.database.GateCode
 import name.lmj0011.courierlocker.databinding.ListItemGateCodeBinding
 import name.lmj0011.courierlocker.helpers.LocationHelper
 
-class GateCodeAdapter(private val clickListener: GateCodeListener): ListAdapter<GateCode, GateCodeAdapter.ViewHolder>(GateCodeDiffCallback()) {
+class GateCodeListAdapter(private val clickListener: GateCodeListener): ListAdapter<GateCode, GateCodeListAdapter.ViewHolder>(GateCodeDiffCallback()) {
     override fun getItemId(position: Int): Long {
         // return the Item's database row id
         return super.getItem(position).id
@@ -21,12 +21,17 @@ class GateCodeAdapter(private val clickListener: GateCodeListener): ListAdapter<
             binding.gateCode = gc
             binding.clickListener = clickListener
             binding.addressString.text = gc.address
+            binding.gateCode1.text = ""
+            binding.otherGateCodes.text = ""
 
             when{
                 gc.codes.size > 1 && gc.codes.drop(1).isNotEmpty() -> {
                     binding.gateCode1.text = gc.codes[0]
                     binding.otherGateCodes.text = gc.codes.drop(1).reduce { acc, it ->
-                        "$acc $it"
+                        when{
+                            it.isNullOrBlank() -> "$acc"
+                            else -> "$acc, $it"
+                        }
                     }
                 }
                 gc.codes.size > 0 -> {
@@ -75,8 +80,8 @@ class GateCodeAdapter(private val clickListener: GateCodeListener): ListAdapter<
     fun filterByClosestGateCodeLocation(list: MutableList<GateCode>): MutableList<GateCode> {
         return list.sortedBy {
             LocationHelper.calculateApproxDistanceBetweenMapPoints(
-                LocationHelper.lastLatitude,
-                LocationHelper.lastLongitude,
+                LocationHelper.lastLatitude.value!!,
+                LocationHelper.lastLongitude.value!!,
                 it.latitude,
                 it.longitude
             )
