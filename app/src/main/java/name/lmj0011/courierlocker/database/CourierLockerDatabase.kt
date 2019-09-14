@@ -32,7 +32,6 @@ abstract class CourierLockerDatabase : RoomDatabase() {
                         // migration with Room in this blog post:
                         // https://medium.com/androiddevelopers/understanding-migrations-with-room-f01e04b07929
                         .fallbackToDestructiveMigration()
-                        .allowMainThreadQueries() // TODO - comment this line out later
                         .build()
                 }
 

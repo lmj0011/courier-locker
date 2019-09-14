@@ -4,27 +4,23 @@ package name.lmj0011.courierlocker.fragments
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
-import kotlinx.android.synthetic.main.app_bar_main.*
-import kotlinx.android.synthetic.main.fragment_create_gate_code.view.*
 import name.lmj0011.courierlocker.MainActivity
 
-import name.lmj0011.courierlocker.databinding.FragmentCreateGateCodeBinding
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.database.GateCode
 import name.lmj0011.courierlocker.databinding.FragmentEditGateCodeBinding
 import name.lmj0011.courierlocker.factories.GateCodeViewModelFactory
 import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
-import timber.log.Timber
 
 
 /**
@@ -57,8 +53,16 @@ class EditGateCodeFragment : Fragment() {
 
         mainActivity.hideFab()
 
-        this.gateCode = gateCodeViewModel.getGateCode(args.gateCodeId)
-        this.injectGateCodeIntoView(this.gateCode)
+        gateCodeViewModel.setGateCode(args.gateCodeId)
+
+        gateCodeViewModel.gateCode.observe(viewLifecycleOwner, Observer {
+            this.gateCode  = it
+            mainActivity.supportActionBar?.title = "Edit Gate Code"
+            mainActivity.supportActionBar?.subtitle = gateCode?.address
+
+            this.injectGateCodeIntoView(it)
+        })
+
         binding.saveButton.setOnClickListener(this::saveButtonOnClickListener)
 
         return binding.root
@@ -66,8 +70,6 @@ class EditGateCodeFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        mainActivity.supportActionBar?.title = "Edit Gate Code"
-        mainActivity.supportActionBar?.subtitle = gateCode?.address
     }
 
     private fun injectGateCodeIntoView(gc: GateCode?) {

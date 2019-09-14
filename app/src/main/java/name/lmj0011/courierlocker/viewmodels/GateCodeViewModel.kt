@@ -2,6 +2,7 @@ package name.lmj0011.courierlocker.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
 import com.mooveit.library.Fakeit
 import name.lmj0011.courierlocker.database.GateCode
 import name.lmj0011.courierlocker.database.GateCodeDao
@@ -20,14 +21,24 @@ class GateCodeViewModel(
 
     val gateCodes = database.getAllGateCodes()
 
+    val gateCode = MutableLiveData<GateCode?>()
+
+
     override fun onCleared() {
         super.onCleared()
         viewModelJob.cancel()
     }
 
 
-    fun getGateCode(idx: Int): GateCode? {
-        return database.get(idx.toLong())
+    fun setGateCode(idx: Int) {
+        uiScope.launch {
+
+            val gc = withContext(Dispatchers.IO){
+                this@GateCodeViewModel.database.get(idx.toLong())
+            }
+
+            gateCode.postValue(gc)
+        }
     }
 
 
@@ -41,7 +52,7 @@ class GateCodeViewModel(
             }
 
             withContext(Dispatchers.IO){
-                database.insert(gateCode)
+                this@GateCodeViewModel.database.insert(gateCode)
             }
         }
 
