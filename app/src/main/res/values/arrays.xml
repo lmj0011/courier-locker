@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="gigs_array">
+        <item>Doordash</item>
+        <item>Grubhub</item>
+        <item>Postmates</item>
+        <item>UberEats</item>
+        <item>Lyft</item>
+        <item>Uber</item>
+        <item>to Pickup</item>
+        <item>Other</item>
+    </string-array>
+</resources>

@@ -102,7 +102,7 @@ class GateCodesFragment : Fragment() {
         val itemTouchHelper = ItemTouchHelper(itemTouchHelperCallback)
         itemTouchHelper.attachToRecyclerView(binding.gateCodesList)
 
-        binding.gateCodesList.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+        binding.gateCodesList.addItemDecoration(DividerItemDecoration(mainActivity, DividerItemDecoration.VERTICAL))
 
         binding.gateCodesList.adapter = listAdapter
 

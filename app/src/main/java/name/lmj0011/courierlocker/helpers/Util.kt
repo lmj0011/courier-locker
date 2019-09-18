@@ -1,5 +1,6 @@
 package name.lmj0011.courierlocker.helpers
 
+import android.annotation.TargetApi
 import android.os.Build
 import android.text.Html
 import android.text.Spanned
@@ -44,4 +45,18 @@ fun formatGateCodes(gateCodes: List<GateCode>): Spanned {
     } else {
         HtmlCompat.fromHtml(sb.toString(), HtmlCompat.FROM_HTML_MODE_LEGACY)
     }
+}
+
+
+/**
+ * return today's date in the format YYYY-MM-DD
+ */
+@TargetApi(26)
+fun todaysDate(): String {
+    val now = java.time.ZonedDateTime.now()
+    val month = now.month.value
+    val dayOfMonth = now.dayOfMonth
+    val year = now.year.toString()
+
+    return "${year}-${month}-${dayOfMonth}"
 }

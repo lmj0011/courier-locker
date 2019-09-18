@@ -67,35 +67,7 @@ class CreateGateCodeFragment : Fragment() {
             android.R.layout.simple_dropdown_item_1line
         )
 
-        handler = Handler(Handler.Callback {
-            if (it.what == MainActivity.TRIGGER_AUTO_COMPLETE) {
-                val addressStr = binding.addressAutoCompleteTextView.text.toString()
-
-                if (addressStr.isNullOrEmpty().not()){
-                    val geolocation = GeoLocation.fromDegrees(LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!)
-                    val boundingBox = geolocation.boundingCoordinates(10.toDouble(), 3958.8) // numbers are in miles
-
-                    try {
-                        val addresses = LocationHelper.getGeocoder().getFromLocationName(
-                            addressStr,
-                            3,
-                            boundingBox[0].latitudeInDegrees,
-                            boundingBox[0].longitudeInDegrees,
-                            boundingBox[1].latitudeInDegrees,
-                            boundingBox[1].longitudeInDegrees
-                        )
-                        adapter.setData(addresses)
-                    } catch (e: IOException) {
-                        when{
-                            e.message == "grpc failed" -> { }
-                            else -> throw e
-                        }
-                    }
-                }
-            }
-
-            return@Callback false
-        })
+        handler = LocationHelper.getNewAddressAutoCompleteHandler(adapter)
 
         // Set the AutoCompleteTextView adapter
         binding.addressAutoCompleteTextView.setAdapter(adapter)
@@ -126,7 +98,12 @@ class CreateGateCodeFragment : Fragment() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 handler.removeMessages(MainActivity.TRIGGER_AUTO_COMPLETE)
-                handler.sendEmptyMessageDelayed(MainActivity.TRIGGER_AUTO_COMPLETE, MainActivity.AUTO_COMPLETE_DELAY)
+
+                val bundle = Bundle()
+                bundle.putString("address", binding.addressAutoCompleteTextView.text.toString())
+                val msg = handler.obtainMessage(MainActivity.TRIGGER_AUTO_COMPLETE)
+                msg.data = bundle
+                handler.sendMessageDelayed(msg, MainActivity.AUTO_COMPLETE_DELAY)
             }
         })
 

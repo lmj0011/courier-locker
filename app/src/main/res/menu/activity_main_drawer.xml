@@ -12,6 +12,10 @@
                 android:id="@+id/nav_customers"
                 android:icon="@drawable/ic_menu_customer"
                 android:title="@string/menu_customers"/>
+        <item
+                android:id="@+id/nav_trips"
+                android:icon="@drawable/ic_menu_trips"
+                android:title="Trips"/>
     </group>
 
     <item android:title="">

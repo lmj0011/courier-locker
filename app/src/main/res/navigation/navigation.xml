@@ -29,4 +29,17 @@
                 android:name="gateCodeId"
                 app:argType="integer" />
     </fragment>
+    <fragment
+            android:id="@+id/tripsFragment"
+            android:name="name.lmj0011.courierlocker.fragments.TripsFragment"
+            android:label="TripsFragment" >
+        <action
+                android:id="@+id/action_tripsFragment_to_createTripFragment"
+                app:destination="@id/createTripFragment"
+                app:popUpTo="@+id/tripsFragment" />
+    </fragment>
+    <fragment
+            android:id="@+id/createTripFragment"
+            android:name="name.lmj0011.courierlocker.fragments.CreateTripFragment"
+            android:label="CreateTripFragment" />
 </navigation>

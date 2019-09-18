@@ -103,4 +103,7 @@ dependencies {
 
     // androidx.preference
     implementation "androidx.preference:preference:1.1.0-alpha04"
+
+    // An adaptation of the JSR-310 backport for Android.
+    implementation 'com.jakewharton.threetenabp:threetenabp:1.2.1'
 }

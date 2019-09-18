@@ -2,8 +2,11 @@ package name.lmj0011.courierlocker.helpers
 
 import android.content.Context
 import android.location.Geocoder
+import android.os.Handler
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.location.*
+import name.lmj0011.courierlocker.adapters.AddressAutoSuggestAdapter
+import java.io.IOException
 import java.lang.Math.toRadians
 import java.util.*
 import kotlin.math.*
@@ -25,6 +28,40 @@ object LocationHelper {
         locationRequest.interval = 2000 // milliseconds
         locationRequest.fastestInterval = 2000
         locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+    }
+
+    fun getNewAddressAutoCompleteHandler(adapter: AddressAutoSuggestAdapter): Handler {
+        return Handler(Handler.Callback {
+            val addressStr = it.data.getString("address")
+
+            if (addressStr.isNullOrEmpty().not()){
+                val geolocation = GeoLocation.fromDegrees(LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!)
+                val boundingBox = geolocation.boundingCoordinates(25.toDouble(), 3958.8) // numbers are in miles
+
+                try {
+                    val addresses = this@LocationHelper.getGeocoder().getFromLocationName(
+                        addressStr,
+                        3,
+                        boundingBox[0].latitudeInDegrees,
+                        boundingBox[0].longitudeInDegrees,
+                        boundingBox[1].latitudeInDegrees,
+                        boundingBox[1].longitudeInDegrees
+                    )
+
+                    adapter.setData(addresses)
+                    adapter.notifyDataSetChanged()
+
+                } catch (e: IOException) {
+                    when{
+                        e.message == "grpc failed" -> { }
+                        else -> throw e
+                    }
+                }
+            }
+
+
+            return@Callback false
+        })
     }
 
     /*

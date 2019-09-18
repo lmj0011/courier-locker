@@ -27,6 +27,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         // for AutoCompleteTextView handler
         const val TRIGGER_AUTO_COMPLETE = 101
+        const val TRIP_PICKUP_AUTO_COMPLETE = 102
+        const val TRIP_DROP_OFF_AUTO_COMPLETE = 103
         const val AUTO_COMPLETE_DELAY = 500L
     }
 
@@ -39,7 +41,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setContentView(binding.root)
 
         // AppBar Navigation configuration
-        val topLevelDestinations = setOf(R.id.gateCodesFragment, R.id.customersFragment)
+        val topLevelDestinations = setOf(R.id.gateCodesFragment, R.id.customersFragment, R.id.tripsFragment)
         appBarConfiguration = AppBarConfiguration.Builder(topLevelDestinations)
             .setDrawerLayout(binding.drawerLayout)
             .build()
@@ -95,6 +97,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
             binding.drawerLayout.closeDrawer(GravityCompat.START)
         } else {
+            Timber.i("label: ${navController.currentDestination?.label}")
+
             when(navController.currentDestination?.label) {
                 "GateCodesFragment" -> {
                     navController.popBackStack(R.id.gateCodesFragment, false)
@@ -103,6 +107,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 "fragment_customers" -> {
                     navController.popBackStack(R.id.gateCodesFragment, false)
                     finish()
+                }
+                "TripsFragment" -> {
+                    navController.popBackStack(R.id.gateCodesFragment, false)
                 }
             }
 
@@ -138,6 +145,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             R.id.nav_customers -> {
                 navController.navigate(R.id.customersFragment)
+            }
+            R.id.nav_trips -> {
+                navController.navigate(R.id.tripsFragment)
             }
             R.id.nav_settings -> {
                 val intent = Intent(this, SettingsActivity::class.java)
