@@ -6,6 +6,7 @@ import android.text.Html
 import android.text.Spanned
 import androidx.core.text.HtmlCompat
 import name.lmj0011.courierlocker.database.GateCode
+import name.lmj0011.courierlocker.database.Trip
 
 
 /**
@@ -49,14 +50,23 @@ fun formatGateCodes(gateCodes: List<GateCode>): Spanned {
 
 
 /**
- * return today's date in the format YYYY-MM-DD
+ * set a Trip.timestamp
  */
 @TargetApi(26)
-fun todaysDate(): String {
-    val now = java.time.ZonedDateTime.now()
+fun setTripTimestamp(trip: Trip) {
+    val iso8061Date = java.time.ZonedDateTime.now().toOffsetDateTime().toString()
+    trip.timestamp = iso8061Date
+}
+
+/**
+ * return today's date in the format MM/DD/YY
+ */
+@TargetApi(26)
+fun getTripDate(trip: Trip): String {
+    val now = java.time.ZonedDateTime.parse(trip.timestamp)
     val month = now.month.value
     val dayOfMonth = now.dayOfMonth
-    val year = now.year.toString()
+    val year = now.year.toString().substring(2)
 
-    return "${year}-${month}-${dayOfMonth}"
+    return "${month}/${dayOfMonth}/${year}"
 }

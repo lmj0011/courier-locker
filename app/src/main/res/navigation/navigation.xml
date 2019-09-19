@@ -37,9 +37,21 @@
                 android:id="@+id/action_tripsFragment_to_createTripFragment"
                 app:destination="@id/createTripFragment"
                 app:popUpTo="@+id/tripsFragment" />
+        <action
+                android:id="@+id/action_tripsFragment_to_editTripFragment"
+                app:destination="@id/editTripFragment"
+                app:popUpTo="@+id/tripsFragment" />
     </fragment>
     <fragment
             android:id="@+id/createTripFragment"
             android:name="name.lmj0011.courierlocker.fragments.CreateTripFragment"
             android:label="CreateTripFragment" />
+    <fragment
+            android:id="@+id/editTripFragment"
+            android:name="name.lmj0011.courierlocker.fragments.EditTripFragment"
+            android:label="EditTripFragment" >
+        <argument
+                android:name="tripId"
+                app:argType="integer" />
+    </fragment>
 </navigation>

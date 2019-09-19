@@ -7,9 +7,7 @@ import com.mooveit.library.Fakeit
 import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.database.Trip
 import name.lmj0011.courierlocker.database.TripDao
-import name.lmj0011.courierlocker.helpers.todaysDate
-import timber.log.Timber
-import java.util.*
+import name.lmj0011.courierlocker.helpers.setTripTimestamp
 
 
 class TripViewModel(
@@ -43,7 +41,6 @@ class TripViewModel(
     }
 
     fun insertTrip(
-        date: String,
         pickupAddress: String,
         pickupAddressLatitude: Double,
         pickupAddressLongitude: Double,
@@ -57,7 +54,7 @@ class TripViewModel(
     ) {
         uiScope.launch {
             val trip = Trip().apply {
-                this.date = date
+                setTripTimestamp(this)
                 this.pickupAddress = pickupAddress
                 this.pickupAddressLatitude = pickupAddressLatitude
                 this.pickupAddressLongitude = pickupAddressLongitude
@@ -76,14 +73,34 @@ class TripViewModel(
 
     }
 
+    fun updateTrip(trip: Trip?) {
+        uiScope.launch {
+            withContext(Dispatchers.IO){
+                trip?.let {
+                    this@TripViewModel.database.update(trip)
+                }
+            }
+        }
+
+    }
+
+    fun deleteTrip(idx: Long) {
+        uiScope.launch {
+            withContext(Dispatchers.IO){
+                this@TripViewModel.database.deleteByTripId(idx)
+            }
+        }
+    }
+
 
     fun insertNewRandomTripRow() {
         uiScope.launch {
             val trip = Trip(
-                date = todaysDate(),
                 pickupAddress= "${Fakeit.address().streetAddress()}",
                 dropOffAddress= "${Fakeit.address().streetAddress()}"
-            )
+            ).apply {
+                setTripTimestamp(this)
+            }
 
             withContext(Dispatchers.IO){
                 this@TripViewModel.database.insert(trip)

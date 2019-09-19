@@ -53,8 +53,6 @@ class EditGateCodeFragment : Fragment() {
 
         mainActivity.hideFab()
 
-        gateCodeViewModel.setGateCode(args.gateCodeId)
-
         gateCodeViewModel.gateCode.observe(viewLifecycleOwner, Observer {
             this.gateCode  = it
             mainActivity.supportActionBar?.title = "Edit Gate Code"
@@ -62,6 +60,8 @@ class EditGateCodeFragment : Fragment() {
 
             this.injectGateCodeIntoView(it)
         })
+
+        gateCodeViewModel.setGateCode(args.gateCodeId)
 
         binding.saveButton.setOnClickListener(this::saveButtonOnClickListener)
 

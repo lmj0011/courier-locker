@@ -37,7 +37,7 @@ class GateCodeViewModel(
                 this@GateCodeViewModel.database.get(idx.toLong())
             }
 
-            gateCode.postValue(gc)
+            this@GateCodeViewModel.gateCode.postValue(gc)
         }
     }
 

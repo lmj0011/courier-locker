@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import name.lmj0011.courierlocker.database.Trip
 import name.lmj0011.courierlocker.databinding.ListItemTripBinding
+import name.lmj0011.courierlocker.helpers.getTripDate
 
 class TripListAdapter(private val clickListener: TripListener): ListAdapter<Trip, TripListAdapter.ViewHolder>(TripDiffCallback()) {
     override fun getItemId(position: Int): Long {
@@ -20,7 +21,7 @@ class TripListAdapter(private val clickListener: TripListener): ListAdapter<Trip
         fun bind(clickListener: TripListener, trip: Trip) {
             binding.trip = trip
             binding.clickListener = clickListener
-            binding.tripDateTextView.text = HtmlCompat.fromHtml("<b>${trip.date}</b>", HtmlCompat.FROM_HTML_MODE_LEGACY)
+            binding.tripDateTextView.text = HtmlCompat.fromHtml("<b>${getTripDate(trip)}</b>", HtmlCompat.FROM_HTML_MODE_LEGACY)
             binding.tripPickupAddressTextView.text = HtmlCompat.fromHtml("<b>pickup:</b> ${trip.pickupAddress}", HtmlCompat.FROM_HTML_MODE_LEGACY)
             binding.tripDropoffAddressTextView.text = HtmlCompat.fromHtml("<b>drop-off:</b> ${trip.dropOffAddress}", HtmlCompat.FROM_HTML_MODE_LEGACY)
             binding.tripMilesTextView.text = HtmlCompat.fromHtml("<b>distance:</b> $${trip.distance}", HtmlCompat.FROM_HTML_MODE_LEGACY)

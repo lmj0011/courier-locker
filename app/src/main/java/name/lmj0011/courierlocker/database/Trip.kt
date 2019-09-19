@@ -13,9 +13,8 @@ data class Trip(
     @ColumnInfo(name = "id")
     var id: Long = 0L,
 
-//    TODO - save date in ISO 8601 format
-    @ColumnInfo(name = "date")
-    var date: String = java.time.ZonedDateTime.now().toOffsetDateTime().toString(),
+    @ColumnInfo(name = "timestamp")
+    var timestamp: String = "",
 
     @ColumnInfo(name = "pickupAddress")
     var pickupAddress: String = "",

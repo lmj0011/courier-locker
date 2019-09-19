@@ -13,7 +13,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/createTripFragmentConstraintLayout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:focusableInTouchMode="true">
 
         <AutoCompleteTextView
                 android:id="@+id/pickupAddressAutoCompleteTextView"
@@ -66,7 +67,7 @@
                 android:text="Save"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/deleteBtn"
                 app:layout_constraintTop_toBottomOf="@+id/dropOffAddressAutoCompleteTextView" />
 
         <Spinner
@@ -87,6 +88,27 @@
                 android:hint="$0.00"
                 android:inputType="text|numberDecimal"
                 app:layout_constraintEnd_toStartOf="@+id/gigSpinner"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/dropOffAddressAutoCompleteTextView" />
+
+        <TextView
+                android:id="@+id/tripDateTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TextView"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias=".15" />
+
+        <Button
+                android:id="@+id/deleteBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Delete"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/saveButton"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/dropOffAddressAutoCompleteTextView" />
 

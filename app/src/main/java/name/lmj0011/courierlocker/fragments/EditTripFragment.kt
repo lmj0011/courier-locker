@@ -11,27 +11,32 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.AddressAutoSuggestAdapter
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
-import name.lmj0011.courierlocker.databinding.FragmentCreateTripBinding
+import name.lmj0011.courierlocker.database.Trip
+import name.lmj0011.courierlocker.databinding.FragmentEditTripBinding
 import name.lmj0011.courierlocker.factories.TripViewModelFactory
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.viewmodels.TripViewModel
+import name.lmj0011.courierlocker.helpers.getTripDate
+import timber.log.Timber
 
 /**
  * A simple [Fragment] subclass.
  *
  */
-class CreateTripFragment : Fragment() {
-    private lateinit var binding: FragmentCreateTripBinding
+class EditTripFragment : Fragment() {
+    private lateinit var binding: FragmentEditTripBinding
     private lateinit var mainActivity: MainActivity
     private lateinit var tripViewModel: TripViewModel
     private lateinit var handler1: Handler
     private lateinit var handler2: Handler
+    private var trip: Trip? = null
 
     private var pickupAddressLatitude: Double = 0.toDouble()
     private var pickupAddressLongitude: Double = 0.toDouble()
@@ -43,16 +48,26 @@ class CreateTripFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = DataBindingUtil.inflate(
-            inflater, R.layout.fragment_create_trip, container, false)
+            inflater, R.layout.fragment_edit_trip, container, false)
 
         mainActivity = activity as MainActivity
 
         val application = requireNotNull(this.activity).application
         val dataSource = CourierLockerDatabase.getInstance(application).tripDao
         val viewModelFactory = TripViewModelFactory(dataSource, application)
+        val args = EditTripFragmentArgs.fromBundle(arguments!!)
         this.tripViewModel = ViewModelProviders.of(this, viewModelFactory).get(TripViewModel::class.java)
 
         binding.tripViewModel = this.tripViewModel
+
+        this.tripViewModel.trip.observe(viewLifecycleOwner, Observer {
+            this.trip  = it
+            mainActivity.supportActionBar?.title = "Edit Trip"
+
+            this.injectGateCodeIntoView(it)
+        })
+
+        this.tripViewModel.setTrip(args.tripId)
 
         ArrayAdapter.createFromResource(
             mainActivity,
@@ -64,6 +79,12 @@ class CreateTripFragment : Fragment() {
         }
 
         binding.saveButton.setOnClickListener(this::saveButtonOnClickListener)
+
+        binding.deleteBtn.setOnClickListener {
+            this.tripViewModel.deleteTrip(this.trip!!.id)
+            Toast.makeText(context, "deleted Trip", Toast.LENGTH_SHORT).show()
+            this.findNavController().navigate(R.id.tripsFragment)
+        }
 
         /// Auto Complete Text View Adapter setup
 
@@ -98,8 +119,8 @@ class CreateTripFragment : Fragment() {
 
             address?.let {
                 binding.pickupAddressAutoCompleteTextView.setText(it.getAddressLine(0))
-                this@CreateTripFragment.pickupAddressLatitude = it.latitude
-                this@CreateTripFragment.pickupAddressLongitude = it.longitude
+                this@EditTripFragment.pickupAddressLatitude = it.latitude
+                this@EditTripFragment.pickupAddressLongitude = it.longitude
             }
 
         }
@@ -110,8 +131,8 @@ class CreateTripFragment : Fragment() {
 
             address?.let {
                 binding.dropOffAddressAutoCompleteTextView.setText(it.getAddressLine(0))
-                this@CreateTripFragment.dropOffAddressLatitude = it.latitude
-                this@CreateTripFragment.dropOffAddressLongitude = it.longitude
+                this@EditTripFragment.dropOffAddressLatitude = it.latitude
+                this@EditTripFragment.dropOffAddressLongitude = it.longitude
             }
 
         }
@@ -159,8 +180,8 @@ class CreateTripFragment : Fragment() {
             when{
                 address.size > 0 -> {
                     binding.pickupAddressAutoCompleteTextView.setText(address[0].getAddressLine(0))
-                    this@CreateTripFragment.pickupAddressLatitude = address[0].latitude
-                    this@CreateTripFragment.pickupAddressLongitude = address[0].longitude
+                    this@EditTripFragment.pickupAddressLatitude = address[0].latitude
+                    this@EditTripFragment.pickupAddressLongitude = address[0].longitude
                 }
                 else -> {
                     Toast.makeText(mainActivity, "Unable to resolve an Address from current location", Toast.LENGTH_LONG)
@@ -174,8 +195,8 @@ class CreateTripFragment : Fragment() {
             when{
                 address.size > 0 -> {
                     binding.dropOffAddressAutoCompleteTextView.setText(address[0].getAddressLine(0))
-                    this@CreateTripFragment.dropOffAddressLatitude = address[0].latitude
-                    this@CreateTripFragment.dropOffAddressLongitude = address[0].longitude
+                    this@EditTripFragment.dropOffAddressLatitude = address[0].latitude
+                    this@EditTripFragment.dropOffAddressLongitude = address[0].longitude
                 }
                 else -> {
                     Toast.makeText(mainActivity, "Unable to resolve an Address from current location", Toast.LENGTH_LONG)
@@ -196,6 +217,30 @@ class CreateTripFragment : Fragment() {
         mainActivity.supportActionBar?.subtitle = null
     }
 
+    private fun injectGateCodeIntoView(trip: Trip?) {
+        trip?.let {
+
+            binding.tripDateTextView.text = getTripDate(it)
+
+            binding.pickupAddressAutoCompleteTextView.setText(it.pickupAddress)
+            this@EditTripFragment.pickupAddressLatitude = it.pickupAddressLatitude
+            this@EditTripFragment.pickupAddressLongitude = it.pickupAddressLongitude
+
+            binding.dropOffAddressAutoCompleteTextView.setText(it.dropOffAddress)
+            this@EditTripFragment.dropOffAddressLatitude = it.dropOffAddressLatitude
+            this@EditTripFragment.dropOffAddressLongitude = it.dropOffAddressLongitude
+
+            binding.payAmountEditText.setText(it.payAmount)
+
+
+            binding.gigSpinner.setSelection(
+                resources.getStringArray(R.array.gigs_array).indexOf(it.gigName)
+            )
+
+        }
+
+    }
+
     @Suppress("UNUSED_PARAMETER")
     private fun saveButtonOnClickListener(v: View) {
         val pickupAddress = binding.pickupAddressAutoCompleteTextView.text.toString()
@@ -211,19 +256,19 @@ class CreateTripFragment : Fragment() {
             else -> {}
         }
 
-        this.tripViewModel.insertTrip(
-            pickupAddress,
-            this@CreateTripFragment.pickupAddressLatitude,
-            this@CreateTripFragment.pickupAddressLongitude,
-            dropOffAddress,
-            this@CreateTripFragment.dropOffAddressLatitude,
-            this@CreateTripFragment.dropOffAddressLongitude,
-            "-1".toDouble(),
-            payAmount,
-            gig
-        )
+        this.trip?.let {
+            it.pickupAddress = pickupAddress
+            it.pickupAddressLatitude = this@EditTripFragment.pickupAddressLatitude
+            it.pickupAddressLongitude = this@EditTripFragment.pickupAddressLongitude
+            it.dropOffAddress = dropOffAddress
+            it.dropOffAddressLatitude = this@EditTripFragment.dropOffAddressLatitude
+            it.dropOffAddressLongitude = this@EditTripFragment.dropOffAddressLongitude
+            it.payAmount = payAmount
+            it.gigName = gig
+        }
 
-        Toast.makeText(context, "New Trip added", Toast.LENGTH_SHORT).show()
+        this.tripViewModel.updateTrip(this.trip)
+        Toast.makeText(context, "updated Trip", Toast.LENGTH_SHORT).show()
         this.findNavController().navigate(R.id.tripsFragment)
     }
 }
