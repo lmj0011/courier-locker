@@ -7,7 +7,14 @@ import android.text.Spanned
 import androidx.core.text.HtmlCompat
 import name.lmj0011.courierlocker.database.GateCode
 import name.lmj0011.courierlocker.database.Trip
+import java.math.RoundingMode
+import java.text.NumberFormat
 
+class Util {
+    companion object {
+        val numberFormatInstance: NumberFormat = NumberFormat.getCurrencyInstance()
+    }
+}
 
 /**
  * Takes a list of GateCodes and converts and formats it into one string for display.
@@ -69,4 +76,31 @@ fun getTripDate(trip: Trip): String {
     val year = now.year.toString().substring(2)
 
     return "${month}/${dayOfMonth}/${year}"
+}
+
+fun getCsvFromTripList(trips: List<Trip>?): String {
+    /**
+     * TODO use a StringBuilder to create a .csv formatted string of all Trips in the DB
+     */
+    if (trips == null) return ""
+
+    val sb = StringBuilder()
+
+    sb.appendln("Date,Distance,Job,Origin,Destination,Notes")
+    for (trip in trips) {
+       sb.appendln("${getTripDate(trip)},${metersToMiles(trip.distance)},${trip.gigName},\"${trip.pickupAddress}\",\"${trip.dropOffAddress}\",\"\"")
+    }
+    return sb.toString()
+}
+
+fun metersToMiles(meters: Double?): Double {
+    if(meters == null) return 0.0
+    val value = meters / 1609.344
+    return value.toBigDecimal().setScale(1, RoundingMode.UP).toDouble()
+}
+
+fun metersToKilometers(meters: Double?): Double {
+    if(meters == null) return 0.0
+    val value = meters / 1000.0
+    return value.toBigDecimal().setScale(1, RoundingMode.UP).toDouble()
 }

@@ -2,7 +2,7 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
             xmlns:tools="http://schemas.android.com/tools" android:id="@+id/navigation"
-            app:startDestination="@id/gateCodesFragment">
+            app:startDestination="@id/tripsFragment">
     <fragment android:id="@+id/gateCodesFragment" android:name="name.lmj0011.courierlocker.fragments.GateCodesFragment"
               android:label="GateCodesFragment">
         <action

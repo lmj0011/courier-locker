@@ -5,12 +5,11 @@ import android.os.Bundle
 import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.*
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import name.lmj0011.courierlocker.MainActivity
@@ -184,6 +183,14 @@ class CreateTripFragment : Fragment() {
         }
         //////////////////
 
+        tripViewModel.payAmountValidated.observe(viewLifecycleOwner, Observer {
+            it?.let {
+                if(!it){
+                    Toast.makeText(mainActivity, "Enter a money amount like: 14.56", Toast.LENGTH_SHORT).show()
+                }
+            }
+        })
+
         mainActivity.hideFab()
 
 
@@ -195,6 +202,7 @@ class CreateTripFragment : Fragment() {
         mainActivity.supportActionBar?.title = "Add new Trip"
         mainActivity.supportActionBar?.subtitle = null
     }
+
 
     @Suppress("UNUSED_PARAMETER")
     private fun saveButtonOnClickListener(v: View) {
@@ -211,6 +219,8 @@ class CreateTripFragment : Fragment() {
             else -> {}
         }
 
+        if(!this.tripViewModel.validatePayAmount(payAmount)) return
+
         this.tripViewModel.insertTrip(
             pickupAddress,
             this@CreateTripFragment.pickupAddressLatitude,
@@ -218,12 +228,11 @@ class CreateTripFragment : Fragment() {
             dropOffAddress,
             this@CreateTripFragment.dropOffAddressLatitude,
             this@CreateTripFragment.dropOffAddressLongitude,
-            "-1".toDouble(),
             payAmount,
             gig
         )
 
-        Toast.makeText(context, "New Trip added", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "New Trip added, refresh to see changes", Toast.LENGTH_SHORT).show()
         this.findNavController().navigate(R.id.tripsFragment)
     }
 }

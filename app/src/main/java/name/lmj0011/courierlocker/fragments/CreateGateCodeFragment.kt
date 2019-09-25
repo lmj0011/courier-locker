@@ -20,10 +20,8 @@ import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.AddressAutoSuggestAdapter
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.factories.GateCodeViewModelFactory
-import name.lmj0011.courierlocker.helpers.GeoLocation
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
-import java.io.IOException
 import kotlin.collections.ArrayList
 
 
@@ -37,6 +35,9 @@ class CreateGateCodeFragment : Fragment() {
     private lateinit var mainActivity: MainActivity
     private lateinit var gateCodeViewModel: GateCodeViewModel
     private lateinit var handler: Handler
+
+    private var gateCodeAddressLatitude: Double = 0.toDouble()
+    private var gateCodeAddressLongitude: Double = 0.toDouble()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -83,8 +84,8 @@ class CreateGateCodeFragment : Fragment() {
 
             address?.let {
                 binding.addressAutoCompleteTextView.setText(it.getAddressLine(0))
-                binding.latitudeHiddenTextView.text = it.latitude.toString()
-                binding.longitudeHiddenTextView.text = it.longitude.toString()
+                this@CreateGateCodeFragment.gateCodeAddressLatitude = it.latitude
+                this@CreateGateCodeFragment.gateCodeAddressLongitude = it.longitude
             }
 
         }
@@ -127,8 +128,8 @@ class CreateGateCodeFragment : Fragment() {
             when{
                 address.size > 0 -> {
                     binding.addressAutoCompleteTextView.setText(address[0].getAddressLine(0))
-                    binding.latitudeHiddenTextView.text = address[0].latitude.toString()
-                    binding.longitudeHiddenTextView.text = address[0].longitude.toString()
+                    this@CreateGateCodeFragment.gateCodeAddressLatitude = address[0].latitude
+                    this@CreateGateCodeFragment.gateCodeAddressLongitude = address[0].longitude
                 }
                 else -> {
                     Toast.makeText(mainActivity, "Unable to resolve an Address from current location", Toast.LENGTH_LONG)
@@ -156,8 +157,8 @@ class CreateGateCodeFragment : Fragment() {
         val codesContainer: LinearLayout = binding.createGateCodeFragmentLinearLayout
         val address: String = binding.addressAutoCompleteTextView.text.toString()
         val codes: ArrayList<String> = arrayListOf()
-        val lat = binding.latitudeHiddenTextView.text.toString().toDouble()
-        val lng = binding.longitudeHiddenTextView.text.toString().toDouble()
+        val lat = this@CreateGateCodeFragment.gateCodeAddressLatitude
+        val lng = this@CreateGateCodeFragment.gateCodeAddressLongitude
 
         for (idx in 0..codesContainer.childCount) {
             val et = codesContainer.getChildAt(idx)

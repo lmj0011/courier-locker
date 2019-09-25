@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -21,6 +22,7 @@ import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.database.Trip
 import name.lmj0011.courierlocker.databinding.FragmentEditTripBinding
 import name.lmj0011.courierlocker.factories.TripViewModelFactory
+import name.lmj0011.courierlocker.fragments.dialogs.DeleteTripDialogFragment
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.viewmodels.TripViewModel
 import name.lmj0011.courierlocker.helpers.getTripDate
@@ -30,7 +32,7 @@ import timber.log.Timber
  * A simple [Fragment] subclass.
  *
  */
-class EditTripFragment : Fragment() {
+class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListener {
     private lateinit var binding: FragmentEditTripBinding
     private lateinit var mainActivity: MainActivity
     private lateinit var tripViewModel: TripViewModel
@@ -81,9 +83,9 @@ class EditTripFragment : Fragment() {
         binding.saveButton.setOnClickListener(this::saveButtonOnClickListener)
 
         binding.deleteBtn.setOnClickListener {
-            this.tripViewModel.deleteTrip(this.trip!!.id)
-            Toast.makeText(context, "deleted Trip", Toast.LENGTH_SHORT).show()
-            this.findNavController().navigate(R.id.tripsFragment)
+            val dialog = DeleteTripDialogFragment()
+            dialog.show(childFragmentManager, "DeleteTripDialogFragment")
+
         }
 
         /// Auto Complete Text View Adapter setup
@@ -205,6 +207,14 @@ class EditTripFragment : Fragment() {
         }
         //////////////////
 
+        tripViewModel.payAmountValidated.observe(viewLifecycleOwner, Observer {
+            it?.let {
+                if(!it){
+                    Toast.makeText(mainActivity, "Enter a money amount like: 14.56", Toast.LENGTH_SHORT).show()
+                }
+            }
+        })
+
         mainActivity.hideFab()
 
 
@@ -215,6 +225,17 @@ class EditTripFragment : Fragment() {
         super.onResume()
         mainActivity.supportActionBar?.title = "Add new Trip"
         mainActivity.supportActionBar?.subtitle = null
+    }
+
+    override fun onDialogPositiveClick(dialog: DialogFragment) {
+        // User touched the dialog's positive button
+        tripViewModel.deleteTrip(this.trip!!.id)
+        Toast.makeText(context, "deleted Trip", Toast.LENGTH_SHORT).show()
+        this.findNavController().navigate(R.id.tripsFragment)
+    }
+
+    override fun onDialogNegativeClick(dialog: DialogFragment) {
+        // User touched the dialog's negative button
     }
 
     private fun injectGateCodeIntoView(trip: Trip?) {
@@ -230,8 +251,9 @@ class EditTripFragment : Fragment() {
             this@EditTripFragment.dropOffAddressLatitude = it.dropOffAddressLatitude
             this@EditTripFragment.dropOffAddressLongitude = it.dropOffAddressLongitude
 
-            binding.payAmountEditText.setText(it.payAmount)
-
+            if (it.payAmount != "0") {
+                binding.payAmountEditText.setText(it.payAmount)
+            }
 
             binding.gigSpinner.setSelection(
                 resources.getStringArray(R.array.gigs_array).indexOf(it.gigName)
@@ -256,6 +278,8 @@ class EditTripFragment : Fragment() {
             else -> {}
         }
 
+        if(!this.tripViewModel.validatePayAmount(payAmount)) return
+
         this.trip?.let {
             it.pickupAddress = pickupAddress
             it.pickupAddressLatitude = this@EditTripFragment.pickupAddressLatitude
@@ -267,8 +291,8 @@ class EditTripFragment : Fragment() {
             it.gigName = gig
         }
 
-        this.tripViewModel.updateTrip(this.trip)
-        Toast.makeText(context, "updated Trip", Toast.LENGTH_SHORT).show()
+        this.tripViewModel.updateTrip(trip)
+        Toast.makeText(context, "updated Trip, refresh to see changes", Toast.LENGTH_SHORT).show()
         this.findNavController().navigate(R.id.tripsFragment)
     }
 }

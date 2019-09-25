@@ -3,7 +3,12 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:showIn="navigation_view">
 
-    <group android:checkableBehavior="single">
+    <group  android:id="@+id/nav_main_group1"
+            android:checkableBehavior="single">
+        <item
+                android:id="@+id/nav_trips"
+                android:icon="@drawable/ic_menu_trips"
+                android:title="Trips"/>
         <item
                 android:id="@+id/nav_gate_codes"
                 android:icon="@drawable/ic_menu_dialpad"
@@ -12,19 +17,15 @@
                 android:id="@+id/nav_customers"
                 android:icon="@drawable/ic_menu_customer"
                 android:title="@string/menu_customers"/>
-        <item
-                android:id="@+id/nav_trips"
-                android:icon="@drawable/ic_menu_trips"
-                android:title="Trips"/>
+
     </group>
 
-    <item android:title="">
-        <menu>
-            <item
-                    android:id="@+id/nav_settings"
-                    android:icon="@drawable/ic_menu_settings"
-                    android:title="@string/menu_settings"/>
-        </menu>
-    </item>
+    <group  android:id="@+id/nav_main_group2"
+            android:checkableBehavior="single">
+        <item
+                android:id="@+id/nav_settings"
+                android:icon="@drawable/ic_menu_settings"
+                android:title="@string/menu_settings"/>
+    </group>
 
 </menu>

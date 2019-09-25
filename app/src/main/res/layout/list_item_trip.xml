@@ -45,15 +45,13 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tripPickupAddressTextView" />
 
-        <!-- TODO - leaving this TextView "GONE" until we a comms with Google Directions API is established-->
         <TextView
-                android:id="@+id/tripMilesTextView"
+                android:id="@+id/tripDistanceTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:text="miles"
-                android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tripDropoffAddressTextView" />
 
@@ -64,7 +62,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:text="pay"
-                app:layout_constraintStart_toEndOf="@+id/tripMilesTextView"
+                app:layout_constraintStart_toEndOf="@+id/tripDistanceTextView"
                 app:layout_constraintTop_toBottomOf="@+id/tripDropoffAddressTextView" />
 
         <TextView

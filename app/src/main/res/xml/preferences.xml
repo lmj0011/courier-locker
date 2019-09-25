@@ -12,4 +12,14 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+            app:key="advancedCategory"
+            app:title="Advanced">
+
+        <EditTextPreference
+                app:key="advancedDirectionsApiKey"
+                app:title="Add Google Directions API Key to display and begin calculating trip distance"/>
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

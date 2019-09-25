@@ -74,18 +74,18 @@
                 android:id="@+id/gigSpinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/payAmountEditText"
                 app:layout_constraintTop_toBottomOf="@+id/dropOffAddressAutoCompleteTextView" />
 
         <EditText
                 android:id="@+id/payAmountEditText"
-                android:layout_width="109dp"
-                android:layout_height="40dp"
-                android:layout_marginTop="8dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 android:ems="10"
-                android:hint="$0.00"
+                android:hint="$3.00"
                 android:inputType="text|numberDecimal"
                 app:layout_constraintEnd_toStartOf="@+id/gigSpinner"
                 app:layout_constraintStart_toStartOf="parent"

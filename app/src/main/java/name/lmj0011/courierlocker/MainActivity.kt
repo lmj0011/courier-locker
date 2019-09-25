@@ -1,12 +1,16 @@
 package name.lmj0011.courierlocker
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.core.view.GravityCompat
 import android.view.MenuItem
 import com.google.android.material.navigation.NavigationView
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
+import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
@@ -29,6 +33,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         const val TRIGGER_AUTO_COMPLETE = 101
         const val TRIP_PICKUP_AUTO_COMPLETE = 102
         const val TRIP_DROP_OFF_AUTO_COMPLETE = 103
+        const val TRIPS_WRITE_REQUEST_CODE = 104
         const val AUTO_COMPLETE_DELAY = 500L
     }
 
@@ -41,7 +46,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setContentView(binding.root)
 
         // AppBar Navigation configuration
-        val topLevelDestinations = setOf(R.id.gateCodesFragment, R.id.customersFragment, R.id.tripsFragment)
+        val topLevelDestinations = setOf(R.id.tripsFragment, R.id.gateCodesFragment, R.id.customersFragment)
         appBarConfiguration = AppBarConfiguration.Builder(topLevelDestinations)
             .setDrawerLayout(binding.drawerLayout)
             .build()
@@ -66,6 +71,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onResume() {
         super.onResume()
         Timber.i("onResume Called")
+
+        when(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)){
+            PackageManager.PERMISSION_GRANTED -> LocationHelper.startLocationUpdates()
+            else -> {
+                Toast.makeText(this,"Location permissions are not enabled.", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     override fun onPause() {
@@ -100,6 +112,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             Timber.i("label: ${navController.currentDestination?.label}")
 
             when(navController.currentDestination?.label) {
+                "TripsFragment" -> {
+                    navController.popBackStack(R.id.gateCodesFragment, false)
+                }
                 "GateCodesFragment" -> {
                     navController.popBackStack(R.id.gateCodesFragment, false)
                     finish()
@@ -108,9 +123,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     navController.popBackStack(R.id.gateCodesFragment, false)
                     finish()
                 }
-                "TripsFragment" -> {
-                    navController.popBackStack(R.id.gateCodesFragment, false)
-                }
+
             }
 
             super.onBackPressed()

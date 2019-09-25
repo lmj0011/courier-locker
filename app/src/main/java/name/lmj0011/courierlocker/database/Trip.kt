@@ -20,26 +20,26 @@ data class Trip(
     var pickupAddress: String = "",
 
     @ColumnInfo(name = "pickupAddressLatitude")
-    var pickupAddressLatitude: Double = 0.toDouble(),
+    var pickupAddressLatitude: Double = 0.0,
 
     @ColumnInfo(name = "pickupAddressLongitude")
-    var pickupAddressLongitude: Double = 0.toDouble(),
+    var pickupAddressLongitude: Double = 0.0,
 
     @Nullable
     @ColumnInfo(name = "dropOffAddress")
     var dropOffAddress: String = "",
 
     @ColumnInfo(name = "dropOffAddressLatitude")
-    var dropOffAddressLatitude: Double = 0.toDouble(),
+    var dropOffAddressLatitude: Double = 0.0,
 
     @ColumnInfo(name = "dropOffAddressLongitude")
-    var dropOffAddressLongitude: Double = 0.toDouble(),
+    var dropOffAddressLongitude: Double = 0.0,
 
     @ColumnInfo(name = "distance")
-    var distance: Double = 0.toDouble(),
+    var distance: Double = 0.0,
 
     @ColumnInfo(name = "payAmount")
-    var payAmount: String = "",
+    var payAmount: String = "0",
 
     @ColumnInfo(name = "gigName")
     var gigName: String = ""

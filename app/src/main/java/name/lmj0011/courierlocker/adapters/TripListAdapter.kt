@@ -1,14 +1,19 @@
 package name.lmj0011.courierlocker.adapters
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.text.HtmlCompat
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import name.lmj0011.courierlocker.database.Trip
 import name.lmj0011.courierlocker.databinding.ListItemTripBinding
+import name.lmj0011.courierlocker.helpers.Util
 import name.lmj0011.courierlocker.helpers.getTripDate
+import name.lmj0011.courierlocker.helpers.metersToMiles
 
 class TripListAdapter(private val clickListener: TripListener): ListAdapter<Trip, TripListAdapter.ViewHolder>(TripDiffCallback()) {
     override fun getItemId(position: Int): Long {
@@ -16,7 +21,9 @@ class TripListAdapter(private val clickListener: TripListener): ListAdapter<Trip
         return super.getItem(position).id
     }
 
-    class ViewHolder private constructor(val binding: ListItemTripBinding) : RecyclerView.ViewHolder(binding.root){
+    class ViewHolder private constructor(val binding: ListItemTripBinding, val context: Context) : RecyclerView.ViewHolder(binding.root){
+
+        private val googleApiKey = PreferenceManager.getDefaultSharedPreferences(context).getString("advancedDirectionsApiKey", "")!!
 
         fun bind(clickListener: TripListener, trip: Trip) {
             binding.trip = trip
@@ -24,9 +31,24 @@ class TripListAdapter(private val clickListener: TripListener): ListAdapter<Trip
             binding.tripDateTextView.text = HtmlCompat.fromHtml("<b>${getTripDate(trip)}</b>", HtmlCompat.FROM_HTML_MODE_LEGACY)
             binding.tripPickupAddressTextView.text = HtmlCompat.fromHtml("<b>pickup:</b> ${trip.pickupAddress}", HtmlCompat.FROM_HTML_MODE_LEGACY)
             binding.tripDropoffAddressTextView.text = HtmlCompat.fromHtml("<b>drop-off:</b> ${trip.dropOffAddress}", HtmlCompat.FROM_HTML_MODE_LEGACY)
-            binding.tripMilesTextView.text = HtmlCompat.fromHtml("<b>distance:</b> $${trip.distance}", HtmlCompat.FROM_HTML_MODE_LEGACY)
-            binding.tripPayTextView.text = HtmlCompat.fromHtml("<b>pay:</b> $${trip.payAmount}", HtmlCompat.FROM_HTML_MODE_LEGACY)
-            binding.tripGigTextView.text = HtmlCompat.fromHtml("<b>gig:</b> ${trip.gigName}", HtmlCompat.FROM_HTML_MODE_LEGACY)
+
+            if(googleApiKey.isNullOrBlank() || trip.distance == 0.0) {
+                binding.tripDistanceTextView.visibility = TextView.GONE
+            } else {
+                binding.tripDistanceTextView.text = HtmlCompat.fromHtml("<b>distance:</b> ${metersToMiles(trip.distance)} mi", HtmlCompat.FROM_HTML_MODE_LEGACY)
+            }
+
+            if (trip.payAmount.isNullOrBlank() || trip.payAmount == "0") {
+                binding.tripPayTextView.visibility = TextView.GONE
+            } else {
+                binding.tripPayTextView.text = HtmlCompat.fromHtml("<b>pay:</b> ${Util.numberFormatInstance.format(trip.payAmount.toDouble())} ", HtmlCompat.FROM_HTML_MODE_LEGACY)
+            }
+
+            if (trip.gigName.isNullOrBlank()) {
+                binding.tripGigTextView.visibility = TextView.GONE
+            } else {
+                binding.tripGigTextView.text = HtmlCompat.fromHtml("<b>gig:</b> ${trip.gigName}", HtmlCompat.FROM_HTML_MODE_LEGACY)
+            }
 
             binding.executePendingBindings()
         }
@@ -36,7 +58,7 @@ class TripListAdapter(private val clickListener: TripListener): ListAdapter<Trip
                 val layoutInflater = LayoutInflater.from(parent.context)
                 val binding = ListItemTripBinding.inflate(layoutInflater, parent, false)
 
-                return ViewHolder(binding)
+                return ViewHolder(binding, parent.context)
             }
         }
     }

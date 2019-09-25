@@ -27,7 +27,6 @@ import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
 import name.lmj0011.courierlocker.factories.GateCodeViewModelFactory
 import name.lmj0011.courierlocker.helpers.ItemTouchHelperClass
 import name.lmj0011.courierlocker.helpers.LocationHelper
-import timber.log.Timber
 
 
 /**
@@ -58,7 +57,7 @@ class GateCodesFragment : Fragment() {
      * This Observer will cause the recyclerView to refresh itself periodically
      */
     private val latitudeObserver = Observer<Double> {
-        gateCodeViewModel.gateCodes.value?.firstOrNull()?.let {
+        gateCodeViewModel.gateCodes.value?.lastOrNull()?.let {
             gateCodeViewModel.updateGateCode(it)
         }
     }
@@ -157,13 +156,6 @@ class GateCodesFragment : Fragment() {
         mainActivity.showFabAndSetListener(this::fabOnClickListenerCallback, R.drawable.ic_fab_add)
         mainActivity.supportActionBar?.title = "Gate Codes"
         mainActivity.supportActionBar?.subtitle = null
-
-        when(ContextCompat.checkSelfPermission(mainActivity, Manifest.permission.ACCESS_FINE_LOCATION)){
-            PackageManager.PERMISSION_GRANTED -> LocationHelper.startLocationUpdates()
-            else -> {
-                Toast.makeText(mainActivity,"Location permissions are not enabled.", Toast.LENGTH_SHORT).show()
-            }
-        }
 
         this.applyPreferences()
     }
