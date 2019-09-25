@@ -21,7 +21,7 @@ abstract class CourierLockerDatabase : RoomDatabase() {
         private val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("CREATE TABLE IF NOT EXISTS `trips_table`" +
-                        " (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` TEXT NOT NULL, "+
+                        " (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `timestamp` TEXT NOT NULL, "+
                         "`pickupAddress` TEXT NOT NULL, `pickupAddressLatitude` REAL NOT NULL, `pickupAddressLongitude` REAL NOT NULL,"+
                         "`dropOffAddress` TEXT NOT NULL, `dropOffAddressLatitude` REAL NOT NULL, `dropOffAddressLongitude` REAL NOT NULL,"+
                         "`distance` REAL NOT NULL, `payAmount` TEXT NOT NULL, `gigName` TEXT NOT NULL )")
