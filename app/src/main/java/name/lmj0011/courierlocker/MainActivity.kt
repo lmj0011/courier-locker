@@ -9,12 +9,14 @@ import android.view.MenuItem
 import com.google.android.material.navigation.NavigationView
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
+import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.*
+import com.crashlytics.android.Crashlytics
 import kotlinx.android.synthetic.main.app_bar_main.view.*
 import timber.log.Timber
 import name.lmj0011.courierlocker.databinding.ActivityMainBinding
@@ -39,7 +41,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Timber.i("onCreate Called")
+        Timber.i("onCreate Called") 
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         navController = findNavController(R.id.navHostFragment)
@@ -130,6 +132,20 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        if(!resources.getBoolean(R.bool.DEBUG_MODE)) { // if not in DEBUG mode then:
+
+            // hide the "Force Crash" option
+            menu?.findItem(R.id.action_force_crash)?.let {
+                it.isVisible = false
+                it.isEnabled = false
+            }
+        }
+
+
+        return super.onPrepareOptionsMenu(menu)
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.main, menu)
@@ -140,10 +156,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
+
         return when (item.itemId) {
             R.id.action_settings -> {
                 val intent = Intent(this, SettingsActivity::class.java)
                 startActivity(intent)
+                true
+            }
+            R.id.action_force_crash -> {
+                Crashlytics.getInstance().crash()
                 true
             }
             else -> super.onOptionsItemSelected(item)
