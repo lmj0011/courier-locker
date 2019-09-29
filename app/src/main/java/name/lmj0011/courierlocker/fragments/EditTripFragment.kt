@@ -177,10 +177,10 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
 
         /// setting current location's address into the pickupAddress textview
         binding.insertMyLocationButtonForPickupAddress.setOnClickListener {
-            val address = LocationHelper.getGeocoder().getFromLocation(LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
+            val address = LocationHelper.getFromLocation(binding.root, LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
 
             when{
-                address.size > 0 -> {
+                address.isNotEmpty() -> {
                     binding.pickupAddressAutoCompleteTextView.setText(address[0].getAddressLine(0))
                     this@EditTripFragment.pickupAddressLatitude = address[0].latitude
                     this@EditTripFragment.pickupAddressLongitude = address[0].longitude
@@ -192,10 +192,10 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
         }
 
         binding.insertMyLocationButtonForDropOffAddress.setOnClickListener {
-            val address = LocationHelper.getGeocoder().getFromLocation(LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
+            val address = LocationHelper.getFromLocation(binding.root, LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
 
             when{
-                address.size > 0 -> {
+                address.isNotEmpty() -> {
                     binding.dropOffAddressAutoCompleteTextView.setText(address[0].getAddressLine(0))
                     this@EditTripFragment.dropOffAddressLatitude = address[0].latitude
                     this@EditTripFragment.dropOffAddressLongitude = address[0].longitude

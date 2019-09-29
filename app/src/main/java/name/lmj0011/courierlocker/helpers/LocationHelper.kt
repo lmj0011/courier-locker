@@ -1,11 +1,15 @@
 package name.lmj0011.courierlocker.helpers
 
 import android.content.Context
+import android.location.Address
 import android.location.Geocoder
 import android.os.Handler
+import android.view.View
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.location.*
+import com.google.android.material.snackbar.Snackbar
 import name.lmj0011.courierlocker.adapters.AddressAutoSuggestAdapter
+import timber.log.Timber
 import java.io.IOException
 import java.lang.Math.toRadians
 import java.util.*
@@ -73,9 +77,23 @@ object LocationHelper {
         geocoder = Geocoder(context, Locale.getDefault())
     }
 
-    fun getGeocoder(): Geocoder {
+    private fun getGeocoder(): Geocoder {
         isFusedLocationClientSet()
         return geocoder
+    }
+
+    fun getFromLocation(v: View, latitude: Double, longitude: Double, results: Int): List<Address> {
+        return try {
+          geocoder.getFromLocation(latitude, longitude, results)
+        } catch (ex: IOException) {
+            when{
+                ex.message == "grpc failed" -> {
+                    Snackbar.make(v, "Lost GPS Signal", Snackbar.LENGTH_LONG).show()
+                    listOf()
+                }
+                else -> throw ex
+            }
+        }
     }
 
     fun startLocationUpdates() {

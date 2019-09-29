@@ -153,10 +153,10 @@ class CreateTripFragment : Fragment() {
 
         /// setting current location's address into the pickupAddress textview
         binding.insertMyLocationButtonForPickupAddress.setOnClickListener {
-            val address = LocationHelper.getGeocoder().getFromLocation(LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
+            val address = LocationHelper.getFromLocation(binding.root, LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
 
             when{
-                address.size > 0 -> {
+                address.isNotEmpty() -> {
                     binding.pickupAddressAutoCompleteTextView.setText(address[0].getAddressLine(0))
                     this@CreateTripFragment.pickupAddressLatitude = address[0].latitude
                     this@CreateTripFragment.pickupAddressLongitude = address[0].longitude
@@ -168,10 +168,10 @@ class CreateTripFragment : Fragment() {
         }
 
         binding.insertMyLocationButtonForDropOffAddress.setOnClickListener {
-            val address = LocationHelper.getGeocoder().getFromLocation(LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
+            val address = LocationHelper.getFromLocation(binding.root, LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
 
             when{
-                address.size > 0 -> {
+                address.isNotEmpty() -> {
                     binding.dropOffAddressAutoCompleteTextView.setText(address[0].getAddressLine(0))
                     this@CreateTripFragment.dropOffAddressLatitude = address[0].latitude
                     this@CreateTripFragment.dropOffAddressLongitude = address[0].longitude

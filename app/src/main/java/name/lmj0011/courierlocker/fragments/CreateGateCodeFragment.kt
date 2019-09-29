@@ -123,10 +123,10 @@ class CreateGateCodeFragment : Fragment() {
 
         /// setting current location's address into the address textview
         binding.insertMyLocationButton.setOnClickListener {
-            val address = LocationHelper.getGeocoder().getFromLocation(LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
+            val address = LocationHelper.getFromLocation(binding.root, LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
 
             when{
-                address.size > 0 -> {
+                address.isNotEmpty() -> {
                     binding.addressAutoCompleteTextView.setText(address[0].getAddressLine(0))
                     this@CreateGateCodeFragment.gateCodeAddressLatitude = address[0].latitude
                     this@CreateGateCodeFragment.gateCodeAddressLongitude = address[0].longitude

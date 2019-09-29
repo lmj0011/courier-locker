@@ -120,35 +120,7 @@ class GateCodesFragment : Fragment() {
             binding.generateGateCodesBtn.visibility = View.GONE
         }
 
-        val permissionVal = ContextCompat.checkSelfPermission(mainActivity, Manifest.permission.ACCESS_FINE_LOCATION)
-        when{
-            permissionVal != PackageManager.PERMISSION_GRANTED -> {
-                ActivityCompat.requestPermissions(mainActivity,
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                    MainActivity.MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION
-                )
-            }
-            else -> {/* nothing */}
-        }
-
-
         return binding.root
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        when(requestCode) {
-            MainActivity.MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == 0) {
-                    LocationHelper.startLocationUpdates()
-                }
-            }
-        }
     }
 
     override fun onResume() {
