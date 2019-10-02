@@ -26,7 +26,6 @@ import name.lmj0011.courierlocker.fragments.dialogs.DeleteTripDialogFragment
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.viewmodels.TripViewModel
 import name.lmj0011.courierlocker.helpers.getTripDate
-import timber.log.Timber
 
 /**
  * A simple [Fragment] subclass.
@@ -80,7 +79,7 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
             binding.gigSpinner.adapter = it
         }
 
-        binding.saveButton.setOnClickListener(this::saveButtonOnClickListener)
+        binding.editTripSaveButton.setOnClickListener(this::saveButtonOnClickListener)
 
         binding.deleteBtn.setOnClickListener {
             val dialog = DeleteTripDialogFragment()

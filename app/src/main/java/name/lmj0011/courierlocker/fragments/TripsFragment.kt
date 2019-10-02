@@ -18,6 +18,7 @@ import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.databinding.FragmentTripsBinding
 import name.lmj0011.courierlocker.factories.TripViewModelFactory
 import name.lmj0011.courierlocker.fragments.dialogs.ClearAllTripsDialogFragment
+import name.lmj0011.courierlocker.fragments.dialogs.TripsStatsDialogFragment
 import name.lmj0011.courierlocker.helpers.getCsvFromTripList
 import name.lmj0011.courierlocker.viewmodels.TripViewModel
 import timber.log.Timber
@@ -27,7 +28,10 @@ import java.io.FileOutputStream
  * A simple [Fragment] subclass.
  *
  */
-class TripsFragment : Fragment(), ClearAllTripsDialogFragment.NoticeDialogListener {
+class TripsFragment : Fragment(),
+    ClearAllTripsDialogFragment.NoticeDialogListener,
+    TripsStatsDialogFragment.TripsStatsDialogListener
+{
     private lateinit var binding: FragmentTripsBinding
     private lateinit var mainActivity: MainActivity
     private lateinit var viewModelFactory: TripViewModelFactory
@@ -70,9 +74,14 @@ class TripsFragment : Fragment(), ClearAllTripsDialogFragment.NoticeDialogListen
             this.findNavController().navigate(R.id.tripsFragment)
         }
 
+        binding.totalPayTextView.setOnClickListener {
+            val dialog = TripsStatsDialogFragment()
+            dialog.show(childFragmentManager, "TripsStatsDialogFragment")
+        }
+
 
         if(!resources.getBoolean(R.bool.DEBUG_MODE)) {
-            binding.generateTripBtn.visibility = View.GONE
+            binding.generateCustomerBtn.visibility = View.GONE
         }
 
         return binding.root
@@ -142,6 +151,15 @@ class TripsFragment : Fragment(), ClearAllTripsDialogFragment.NoticeDialogListen
         // User touched the dialog's negative button
     }
 
+    override fun getTripTotals(dialog: DialogFragment): Map<String, String> {
+        val map = mutableMapOf<String, String>()
+        map["today"] = tripViewModel.todayTotalMoney
+        map["month"] = tripViewModel.monthTotalMoney
+        map["toDate"] = tripViewModel.totalMoney
+
+        return map
+    }
+
     private fun showClearAllTripsDialog() {
         // Create an instance of the dialog fragment and show it
         val dialog = ClearAllTripsDialogFragment()
@@ -168,6 +186,6 @@ class TripsFragment : Fragment(), ClearAllTripsDialogFragment.NoticeDialogListen
     }
 
     private fun refreshTotals() {
-        binding.totalPayTextView.text = tripViewModel.totalMoney
+        binding.totalPayTextView.text = tripViewModel.todayTotalMoney
     }
 }

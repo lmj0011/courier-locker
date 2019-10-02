@@ -69,7 +69,6 @@ class GateCodeListAdapter(private val clickListener: GateCodeListener): ListAdap
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val gc = getItem(position)
-
         holder.bind(clickListener, gc)
     }
 

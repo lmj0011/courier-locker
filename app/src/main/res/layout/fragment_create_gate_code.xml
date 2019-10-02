@@ -16,13 +16,13 @@
             android:layout_height="match_parent">
 
         <AutoCompleteTextView
-                android:id="@+id/addressAutoCompleteTextView"
+                android:id="@+id/createGateCodeAddressAutoCompleteTextView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:hint="address"
                 android:inputType="textPostalAddress|textNoSuggestions"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/insertMyLocationButton"
+                app:layout_constraintEnd_toStartOf="@+id/createGateCodeInsertMyLocationButton"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.25" />
@@ -52,7 +52,7 @@
                 android:orientation="vertical"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/addressAutoCompleteTextView">
+                app:layout_constraintTop_toBottomOf="@+id/createGateCodeAddressAutoCompleteTextView">
 
             <EditText
                     android:id="@+id/gateCode1EditText"
@@ -107,7 +107,7 @@
         </LinearLayout>
 
         <Button
-                android:id="@+id/saveButton"
+                android:id="@+id/createGateCodeSaveButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Save"
@@ -116,7 +116,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/createGateCodeFragmentLinearLayout" />
 
         <ImageView
-                android:id="@+id/insertMyLocationButton"
+                android:id="@+id/createGateCodeInsertMyLocationButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:layout_constraintBottom_toBottomOf="parent"

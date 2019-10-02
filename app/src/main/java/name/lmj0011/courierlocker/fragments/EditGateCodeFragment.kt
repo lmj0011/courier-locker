@@ -63,7 +63,7 @@ class EditGateCodeFragment : Fragment() {
 
         gateCodeViewModel.setGateCode(args.gateCodeId)
 
-        binding.saveButton.setOnClickListener(this::saveButtonOnClickListener)
+        binding.editGateCodeSaveButton.setOnClickListener(this::saveButtonOnClickListener)
 
         return binding.root
     }

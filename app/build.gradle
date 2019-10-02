@@ -12,10 +12,11 @@ android {
         applicationId "name.lmj0011.courierlocker"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 7
+        versionCode 8
         versionName "1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
+        multiDexEnabled true
 
         // ref: https://stackoverflow.com/a/48674264/2445763
         kapt {

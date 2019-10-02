@@ -57,7 +57,7 @@ class CreateGateCodeFragment : Fragment() {
 
         mainActivity.hideFab()
 
-        binding.saveButton.setOnClickListener(this::saveButtonOnClickListener)
+        binding.createGateCodeSaveButton.setOnClickListener(this::saveButtonOnClickListener)
 
 
         /// Auto Complete Text View Adapter setup
@@ -71,26 +71,26 @@ class CreateGateCodeFragment : Fragment() {
         handler = LocationHelper.getNewAddressAutoCompleteHandler(adapter)
 
         // Set the AutoCompleteTextView adapter
-        binding.addressAutoCompleteTextView.setAdapter(adapter)
+        binding.createGateCodeAddressAutoCompleteTextView.setAdapter(adapter)
 
         // Auto complete threshold
         // The minimum number of characters to type to show the drop down
-        binding.addressAutoCompleteTextView.threshold = 1
+        binding.createGateCodeAddressAutoCompleteTextView.threshold = 1
 
         // Set an item click listener for auto complete text view
-        binding.addressAutoCompleteTextView.onItemClickListener = AdapterView.OnItemClickListener{
+        binding.createGateCodeAddressAutoCompleteTextView.onItemClickListener = AdapterView.OnItemClickListener{
                 parent,view,position,id->
             val address: Address? = adapter.getItem(position)
 
             address?.let {
-                binding.addressAutoCompleteTextView.setText(it.getAddressLine(0))
+                binding.createGateCodeAddressAutoCompleteTextView.setText(it.getAddressLine(0))
                 this@CreateGateCodeFragment.gateCodeAddressLatitude = it.latitude
                 this@CreateGateCodeFragment.gateCodeAddressLongitude = it.longitude
             }
 
         }
 
-        binding.addressAutoCompleteTextView.addTextChangedListener(object: TextWatcher{
+        binding.createGateCodeAddressAutoCompleteTextView.addTextChangedListener(object: TextWatcher{
             override fun afterTextChanged(s: Editable?) {
                 adapter.notifyDataSetChanged()
             }
@@ -101,7 +101,7 @@ class CreateGateCodeFragment : Fragment() {
                 handler.removeMessages(MainActivity.TRIGGER_AUTO_COMPLETE)
 
                 val bundle = Bundle()
-                bundle.putString("address", binding.addressAutoCompleteTextView.text.toString())
+                bundle.putString("address", binding.createGateCodeAddressAutoCompleteTextView.text.toString())
                 val msg = handler.obtainMessage(MainActivity.TRIGGER_AUTO_COMPLETE)
                 msg.data = bundle
                 handler.sendMessageDelayed(msg, MainActivity.AUTO_COMPLETE_DELAY)
@@ -109,25 +109,25 @@ class CreateGateCodeFragment : Fragment() {
         })
 
         // Set a dismiss listener for auto complete text view
-        binding.addressAutoCompleteTextView.setOnDismissListener { }
+        binding.createGateCodeAddressAutoCompleteTextView.setOnDismissListener { }
 
 
         // Set a focus change listener for auto complete text view
-        binding.addressAutoCompleteTextView.onFocusChangeListener = View.OnFocusChangeListener { view, b ->
+        binding.createGateCodeAddressAutoCompleteTextView.onFocusChangeListener = View.OnFocusChangeListener { view, b ->
             if(b){
-                binding.addressAutoCompleteTextView.showDropDown()
+                binding.createGateCodeAddressAutoCompleteTextView.showDropDown()
             }
         }
 
         ///////////////////////////
 
         /// setting current location's address into the address textview
-        binding.insertMyLocationButton.setOnClickListener {
+        binding.createGateCodeInsertMyLocationButton.setOnClickListener {
             val address = LocationHelper.getFromLocation(binding.root, LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
 
             when{
                 address.isNotEmpty() -> {
-                    binding.addressAutoCompleteTextView.setText(address[0].getAddressLine(0))
+                    binding.createGateCodeAddressAutoCompleteTextView.setText(address[0].getAddressLine(0))
                     this@CreateGateCodeFragment.gateCodeAddressLatitude = address[0].latitude
                     this@CreateGateCodeFragment.gateCodeAddressLongitude = address[0].longitude
                 }
@@ -155,7 +155,7 @@ class CreateGateCodeFragment : Fragment() {
     @Suppress("UNUSED_PARAMETER")
     private fun saveButtonOnClickListener(v: View) {
         val codesContainer: LinearLayout = binding.createGateCodeFragmentLinearLayout
-        val address: String = binding.addressAutoCompleteTextView.text.toString()
+        val address: String = binding.createGateCodeAddressAutoCompleteTextView.text.toString()
         val codes: ArrayList<String> = arrayListOf()
         val lat = this@CreateGateCodeFragment.gateCodeAddressLatitude
         val lng = this@CreateGateCodeFragment.gateCodeAddressLongitude

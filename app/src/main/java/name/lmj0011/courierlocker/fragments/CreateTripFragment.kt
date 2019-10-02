@@ -62,7 +62,7 @@ class CreateTripFragment : Fragment() {
             binding.gigSpinner.adapter = it
         }
 
-        binding.saveButton.setOnClickListener(this::saveButtonOnClickListener)
+        binding.createTripSaveButton.setOnClickListener(this::saveButtonOnClickListener)
 
         /// Auto Complete Text View Adapter setup
 

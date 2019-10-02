@@ -16,7 +16,16 @@
                 app:popUpTo="@+id/gateCodesFragment" />
     </fragment>
     <fragment android:id="@+id/customersFragment" android:name="name.lmj0011.courierlocker.fragments.CustomersFragment"
-              android:label="fragment_customers" tools:layout="@layout/fragment_customers"/>
+              android:label="fragment_customers" tools:layout="@layout/fragment_customers">
+        <action
+                android:id="@+id/action_customersFragment_to_editCustomerFragment"
+                app:destination="@id/editCustomerFragment"
+                app:popUpTo="@+id/customersFragment" />
+        <action
+                android:id="@+id/action_customersFragment_to_createCustomerFragment"
+                app:destination="@id/createCustomerFragment"
+                app:popUpTo="@+id/customersFragment" />
+    </fragment>
     <fragment
             android:id="@+id/createGateCodeFragment"
             android:name="name.lmj0011.courierlocker.fragments.CreateGateCodeFragment"
@@ -54,4 +63,16 @@
                 android:name="tripId"
                 app:argType="integer" />
     </fragment>
+    <fragment
+            android:id="@+id/editCustomerFragment"
+            android:name="name.lmj0011.courierlocker.fragments.EditCustomerFragment"
+            android:label="EditCustomerFragment">
+        <argument
+                android:name="customerId"
+                app:argType="integer" />
+    </fragment>
+    <fragment
+            android:id="@+id/createCustomerFragment"
+            android:name="name.lmj0011.courierlocker.fragments.CreateCustomerFragment"
+            android:label="CreateCustomerFragment" />
 </navigation>

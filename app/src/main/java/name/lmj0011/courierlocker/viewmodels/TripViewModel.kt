@@ -13,6 +13,8 @@ import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.database.Trip
 import name.lmj0011.courierlocker.database.TripDao
 import name.lmj0011.courierlocker.helpers.Util
+import name.lmj0011.courierlocker.helpers.isTripOfMonth
+import name.lmj0011.courierlocker.helpers.isTripOfToday
 import name.lmj0011.courierlocker.helpers.setTripTimestamp
 import org.json.JSONException
 import timber.log.Timber
@@ -41,6 +43,34 @@ class TripViewModel(
             val result = trips.value?.fold(0.0) { sum, trip ->
                 val toAdd = trip.payAmount.toDoubleOrNull()
                 if (toAdd == null){
+                    sum
+                } else {
+                    sum + toAdd
+                }
+            }
+
+            return Util.numberFormatInstance.format(result)
+        }
+
+    val todayTotalMoney: String
+        get() {
+            val result = trips.value?.fold(0.0) { sum, trip ->
+                val toAdd = trip.payAmount.toDoubleOrNull()
+                if (toAdd == null || !isTripOfToday(trip)){
+                    sum
+                } else {
+                    sum + toAdd
+                }
+            }
+
+            return Util.numberFormatInstance.format(result)
+        }
+
+    val monthTotalMoney: String
+        get() {
+            val result = trips.value?.fold(0.0) { sum, trip ->
+                val toAdd = trip.payAmount.toDoubleOrNull()
+                if (toAdd == null || !isTripOfMonth(trip)){
                     sum
                 } else {
                     sum + toAdd

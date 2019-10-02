@@ -78,6 +78,36 @@ fun getTripDate(trip: Trip): String {
     return "${month}/${dayOfMonth}/${year}"
 }
 
+@TargetApi(26)
+fun isTripOfToday(trip: Trip): Boolean {
+    val now = java.time.ZonedDateTime.now()
+    val month = now.month.value
+    val dayOfMonth = now.dayOfMonth
+    val year = now.year.toString().substring(2)
+
+    val tripNow = java.time.ZonedDateTime.parse(trip.timestamp)
+    val tripMonth = tripNow.month.value
+    val tripDayOfMonth = tripNow.dayOfMonth
+    val tripYear = tripNow.year.toString().substring(2)
+
+    return ("${month}/${dayOfMonth}/${year}" == "${tripMonth}/${tripDayOfMonth}/${tripYear}")
+}
+
+@TargetApi(26)
+fun isTripOfMonth(trip: Trip): Boolean {
+    val now = java.time.ZonedDateTime.now()
+    val month = now.month.value
+    val dayOfMonth = now.dayOfMonth
+    val year = now.year.toString().substring(2)
+
+    val tripNow = java.time.ZonedDateTime.parse(trip.timestamp)
+    val tripMonth = tripNow.month.value
+    val tripDayOfMonth = tripNow.dayOfMonth
+    val tripYear = tripNow.year.toString().substring(2)
+
+    return ("${month}/xx/${year}" == "${tripMonth}/xx/${tripYear}")
+}
+
 fun getCsvFromTripList(trips: List<Trip>?): String {
     /**
      * TODO use a StringBuilder to create a .csv formatted string of all Trips in the DB
