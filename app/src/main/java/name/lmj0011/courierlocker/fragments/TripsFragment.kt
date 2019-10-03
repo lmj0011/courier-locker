@@ -90,7 +90,6 @@ class TripsFragment : Fragment(),
     override fun onResume() {
         super.onResume()
         mainActivity.showFabAndSetListener(this::fabOnClickListenerCallback, R.drawable.ic_fab_add)
-        mainActivity.supportActionBar?.title = "Trips"
         mainActivity.supportActionBar?.subtitle = null
     }
 

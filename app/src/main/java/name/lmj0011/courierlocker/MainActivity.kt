@@ -126,14 +126,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             Timber.i("label: ${navController.currentDestination?.label}")
 
             when(navController.currentDestination?.label) {
-                "TripsFragment" -> {
+                "Trips" -> {
                     navController.popBackStack(R.id.gateCodesFragment, false)
                 }
-                "GateCodesFragment" -> {
+                "Gate Codes" -> {
                     navController.popBackStack(R.id.gateCodesFragment, false)
                     finish()
                 }
-                "fragment_customers" -> {
+                "Customers" -> {
                     navController.popBackStack(R.id.gateCodesFragment, false)
                     finish()
                 }
@@ -142,20 +142,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             super.onBackPressed()
         }
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        if(!resources.getBoolean(R.bool.DEBUG_MODE)) { // if not in DEBUG mode then:
-
-            // hide the "Force Crash" option
-            menu?.findItem(R.id.action_force_crash)?.let {
-                it.isVisible = false
-                it.isEnabled = false
-            }
-        }
-
-
-        return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -173,10 +159,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.action_settings -> {
                 val intent = Intent(this, SettingsActivity::class.java)
                 startActivity(intent)
-                true
-            }
-            R.id.action_force_crash -> {
-                Crashlytics.getInstance().crash()
                 true
             }
             else -> super.onOptionsItemSelected(item)

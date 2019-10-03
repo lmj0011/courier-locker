@@ -10,6 +10,7 @@ import com.github.kittinunf.fuel.json.responseJson
 import com.github.kittinunf.result.Result
 import com.mooveit.library.Fakeit
 import kotlinx.coroutines.*
+import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.database.Trip
 import name.lmj0011.courierlocker.database.TripDao
 import name.lmj0011.courierlocker.helpers.Util
@@ -155,7 +156,9 @@ class TripViewModel(
         uiScope.launch {
             val trip = Trip(
                 pickupAddress= "${Fakeit.address().streetAddress()}",
-                dropOffAddress= "${Fakeit.address().streetAddress()}"
+                dropOffAddress= "${Fakeit.address().streetAddress()}",
+                payAmount = (1..40).random().toString(),
+                gigName = "Doordash"
             ).apply {
                 setTripTimestamp(this)
             }

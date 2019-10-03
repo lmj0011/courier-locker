@@ -3,8 +3,10 @@
             xmlns:app="http://schemas.android.com/apk/res-auto"
             xmlns:tools="http://schemas.android.com/tools" android:id="@+id/navigation"
             app:startDestination="@id/tripsFragment">
-    <fragment android:id="@+id/gateCodesFragment" android:name="name.lmj0011.courierlocker.fragments.GateCodesFragment"
-              android:label="GateCodesFragment">
+    <fragment
+            android:id="@+id/gateCodesFragment"
+            android:name="name.lmj0011.courierlocker.fragments.GateCodesFragment"
+            android:label=" Gate Codes">
         <action
                 android:id="@+id/action_gateCodesFragment_to_createGateCodeFragment"
                 app:destination="@+id/createGateCodeFragment"
@@ -15,8 +17,11 @@
                 app:destination="@id/editGateCodeFragment"
                 app:popUpTo="@+id/gateCodesFragment" />
     </fragment>
-    <fragment android:id="@+id/customersFragment" android:name="name.lmj0011.courierlocker.fragments.CustomersFragment"
-              android:label="fragment_customers" tools:layout="@layout/fragment_customers">
+    <fragment
+            android:id="@+id/customersFragment"
+            android:name="name.lmj0011.courierlocker.fragments.CustomersFragment"
+            android:label="Customers"
+            tools:layout="@layout/fragment_customers">
         <action
                 android:id="@+id/action_customersFragment_to_editCustomerFragment"
                 app:destination="@id/editCustomerFragment"
@@ -29,11 +34,11 @@
     <fragment
             android:id="@+id/createGateCodeFragment"
             android:name="name.lmj0011.courierlocker.fragments.CreateGateCodeFragment"
-            android:label="CreateGateCodeFragment" />
+            android:label="Add new Gate Code" />
     <fragment
             android:id="@+id/editGateCodeFragment"
             android:name="name.lmj0011.courierlocker.fragments.EditGateCodeFragment"
-            android:label="EditGateCodeFragment" >
+            android:label="Edit Gate Code">
         <argument
                 android:name="gateCodeId"
                 app:argType="integer" />
@@ -41,7 +46,7 @@
     <fragment
             android:id="@+id/tripsFragment"
             android:name="name.lmj0011.courierlocker.fragments.TripsFragment"
-            android:label="TripsFragment" >
+            android:label="Trips">
         <action
                 android:id="@+id/action_tripsFragment_to_createTripFragment"
                 app:destination="@id/createTripFragment"
@@ -54,11 +59,11 @@
     <fragment
             android:id="@+id/createTripFragment"
             android:name="name.lmj0011.courierlocker.fragments.CreateTripFragment"
-            android:label="CreateTripFragment" />
+            android:label="Add new Trip" />
     <fragment
             android:id="@+id/editTripFragment"
             android:name="name.lmj0011.courierlocker.fragments.EditTripFragment"
-            android:label="EditTripFragment" >
+            android:label="Edit Trip">
         <argument
                 android:name="tripId"
                 app:argType="integer" />
@@ -66,7 +71,7 @@
     <fragment
             android:id="@+id/editCustomerFragment"
             android:name="name.lmj0011.courierlocker.fragments.EditCustomerFragment"
-            android:label="EditCustomerFragment">
+            android:label="Edit Customer">
         <argument
                 android:name="customerId"
                 app:argType="integer" />
@@ -74,5 +79,5 @@
     <fragment
             android:id="@+id/createCustomerFragment"
             android:name="name.lmj0011.courierlocker.fragments.CreateCustomerFragment"
-            android:label="CreateCustomerFragment" />
+            android:label="Add a Customer" />
 </navigation>

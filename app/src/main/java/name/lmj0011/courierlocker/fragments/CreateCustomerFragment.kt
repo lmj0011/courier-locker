@@ -158,7 +158,6 @@ class CreateCustomerFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        mainActivity.supportActionBar?.title = "Log a Customer"
         mainActivity.supportActionBar?.subtitle = null
     }
 

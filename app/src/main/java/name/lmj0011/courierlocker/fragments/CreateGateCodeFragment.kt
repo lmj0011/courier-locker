@@ -148,7 +148,6 @@ class CreateGateCodeFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        mainActivity.supportActionBar?.title = "Add new Gate Code"
         mainActivity.supportActionBar?.subtitle = null
     }
 

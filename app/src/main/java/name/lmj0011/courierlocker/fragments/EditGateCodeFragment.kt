@@ -10,6 +10,7 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
@@ -20,6 +21,7 @@ import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.database.GateCode
 import name.lmj0011.courierlocker.databinding.FragmentEditGateCodeBinding
 import name.lmj0011.courierlocker.factories.GateCodeViewModelFactory
+import name.lmj0011.courierlocker.fragments.dialogs.DeleteGateCodeDialogFragment
 import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
 
 
@@ -27,7 +29,7 @@ import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
  * A simple [Fragment] subclass.
  *
  */
-class EditGateCodeFragment : Fragment() {
+class EditGateCodeFragment : Fragment(), DeleteGateCodeDialogFragment.NoticeDialogListener {
 
     private lateinit var binding: FragmentEditGateCodeBinding
     private lateinit var mainActivity: MainActivity
@@ -55,7 +57,6 @@ class EditGateCodeFragment : Fragment() {
 
         gateCodeViewModel.gateCode.observe(viewLifecycleOwner, Observer {
             this.gateCode  = it
-            mainActivity.supportActionBar?.title = "Edit Gate Code"
             mainActivity.supportActionBar?.subtitle = gateCode?.address
 
             this.injectGateCodeIntoView(it)
@@ -65,11 +66,23 @@ class EditGateCodeFragment : Fragment() {
 
         binding.editGateCodeSaveButton.setOnClickListener(this::saveButtonOnClickListener)
 
+        binding.editGateCodeDeleteButton.setOnClickListener {
+            val dialog = DeleteGateCodeDialogFragment()
+            dialog.show(childFragmentManager, "DeleteGateCodeDialogFragment")
+
+        }
+
         return binding.root
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onDialogPositiveClick(dialog: DialogFragment) {
+        gateCodeViewModel.deleteGateCode(this.gateCode!!.id)
+        Toast.makeText(context, "Deleted a gate code entry", Toast.LENGTH_SHORT).show()
+        this.findNavController().navigate(R.id.gateCodesFragment)
+    }
+
+    override fun onDialogNegativeClick(dialog: DialogFragment) {
+
     }
 
     private fun injectGateCodeIntoView(gc: GateCode?) {

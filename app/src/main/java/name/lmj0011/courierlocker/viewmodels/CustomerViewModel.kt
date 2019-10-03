@@ -92,9 +92,13 @@ class CustomerViewModel(
             val customer = Customer(
                 name = Fakeit.name().name(),
                 address = Fakeit.address().streetAddress(),
-                impression = (0..1).random(),
-                note = Fakeit.lorem().words()
+                impression = (0..1).random()
             )
+
+            when(customer.impression){
+                0 -> customer.note = "nice, good tipper."
+                else -> customer.note = "stiff game strong."
+            }
 
             withContext(Dispatchers.IO){
                 this@CustomerViewModel.database.insert(customer)

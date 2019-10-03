@@ -76,7 +76,6 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
 
         customerViewModel.customer.observe(viewLifecycleOwner, Observer {
             this.customer  = it
-            mainActivity.supportActionBar?.title = "Edit Customer"
             mainActivity.supportActionBar?.subtitle = customer?.name
 
             this.injectCustomerIntoView(it)

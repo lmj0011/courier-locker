@@ -222,7 +222,6 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
 
     override fun onResume() {
         super.onResume()
-        mainActivity.supportActionBar?.title = "Add new Trip"
         mainActivity.supportActionBar?.subtitle = null
     }
 

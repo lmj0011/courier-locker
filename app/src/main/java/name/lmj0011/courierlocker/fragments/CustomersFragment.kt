@@ -79,7 +79,6 @@ class CustomersFragment : Fragment(), ClearAllCustomersDialogFragment.NoticeDial
     override fun onResume() {
         super.onResume()
         mainActivity.showFabAndSetListener(this::fabOnClickListenerCallback, R.drawable.ic_fab_add)
-        mainActivity.supportActionBar?.title = "Customers"
         mainActivity.supportActionBar?.subtitle = null
 
         initFaceColors()

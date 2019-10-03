@@ -1,23 +1,16 @@
 package name.lmj0011.courierlocker.fragments
 
 
-import android.Manifest
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
-import android.widget.Toast
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.RecyclerView
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.GateCodeListAdapter
@@ -25,8 +18,8 @@ import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.databinding.FragmentGateCodesBinding
 import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
 import name.lmj0011.courierlocker.factories.GateCodeViewModelFactory
-import name.lmj0011.courierlocker.helpers.ItemTouchHelperClass
 import name.lmj0011.courierlocker.helpers.LocationHelper
+import timber.log.Timber
 
 
 /**
@@ -41,17 +34,6 @@ class GateCodesFragment : Fragment() {
     private lateinit var listAdapter: GateCodeListAdapter
     private lateinit var gateCodeViewModel: GateCodeViewModel
     private lateinit var sharedPreferences: SharedPreferences
-
-    /**
-     * A Callback for when swiping a GateCodeList item; only 1 swipe direction allowed for now
-     */
-    private val onSwipedCallback: (RecyclerView.ViewHolder, Int) -> Unit = { viewHolder, _ ->
-        val gateCodeId = listAdapter.getItemId(viewHolder.adapterPosition)
-
-        gateCodeViewModel.deleteGateCode(gateCodeId)
-        Toast.makeText(context, "Deleted a gate code entry", Toast.LENGTH_SHORT).show()
-        listAdapter.notifyDataSetChanged()
-    }
 
     /**
      * This Observer will cause the recyclerView to refresh itself periodically
@@ -96,11 +78,6 @@ class GateCodesFragment : Fragment() {
 
         LocationHelper.lastLatitude.observe(viewLifecycleOwner, latitudeObserver)
 
-        val itemTouchHelperCallback = ItemTouchHelperClass(mainActivity, this.onSwipedCallback).swipeLeftToDeleteCallback
-
-        val itemTouchHelper = ItemTouchHelper(itemTouchHelperCallback)
-        itemTouchHelper.attachToRecyclerView(binding.gateCodesList)
-
         binding.gateCodesList.addItemDecoration(DividerItemDecoration(mainActivity, DividerItemDecoration.VERTICAL))
 
         binding.gateCodesList.adapter = listAdapter
@@ -126,12 +103,10 @@ class GateCodesFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         mainActivity.showFabAndSetListener(this::fabOnClickListenerCallback, R.drawable.ic_fab_add)
-        mainActivity.supportActionBar?.title = "Gate Codes"
         mainActivity.supportActionBar?.subtitle = null
 
         this.applyPreferences()
     }
-
 
     private fun fabOnClickListenerCallback() {
         this.findNavController().navigate(GateCodesFragmentDirections.actionGateCodesFragmentToCreateGateCodeFragment())
