@@ -12,7 +12,7 @@ android {
         applicationId "name.lmj0011.courierlocker"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 8
+        versionCode 10
         versionName "1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -39,22 +39,31 @@ android {
     flavorDimensions "default"
     productFlavors {
         dev { // active development/testing
-            def devVersionCode = defaultConfig.versionCode + 2
             applicationIdSuffix ".dev"
-            versionNameSuffix ".0.0-dev+${devVersionCode}"
-            versionCode devVersionCode
+            versionNameSuffix ".0.0-dev"
+            resValue("string", "app_name", "Courier Locker (dev)")
+            manifestPlaceholders = [
+                    appIcon: "@mipmap/ic_launcher_dev",
+                    appRoundIcon: "@mipmap/ic_launcher_dev_round"
+            ]
         }
         beta { // public testing
-            def betaVersionCode = defaultConfig.versionCode + 1
             applicationIdSuffix ".beta"
-            versionNameSuffix ".0.0-beta+${betaVersionCode}"
-            versionCode betaVersionCode
+            versionNameSuffix ".0.0-beta"
+            resValue("string", "app_name", "Courier Locker (beta)")
+            manifestPlaceholders = [
+                    appIcon: "@mipmap/ic_launcher_beta",
+                    appRoundIcon: "@mipmap/ic_launcher_beta_round"
+            ]
         }
         prod { // official release
-            def prodVersionCode = defaultConfig.versionCode
             applicationIdSuffix ".prod"
-            versionNameSuffix ".0.0+${prodVersionCode}"
-            versionCode prodVersionCode
+            versionNameSuffix ".0.0"
+            resValue("string", "app_name", "Courier Locker")
+            manifestPlaceholders = [
+                    appIcon: "@mipmap/ic_launcher",
+                    appRoundIcon: "@mipmap/ic_launcher_round"
+            ]
         }
     }
     dataBinding {
