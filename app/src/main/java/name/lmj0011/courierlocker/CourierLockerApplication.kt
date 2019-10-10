@@ -3,6 +3,7 @@ package name.lmj0011.courierlocker
 import android.app.Application
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.mooveit.library.Fakeit
+import shortbread.Shortbread
 import timber.log.Timber
 
 class CourierLockerApplication : Application() {
@@ -11,5 +12,6 @@ class CourierLockerApplication : Application() {
         Timber.plant(Timber.DebugTree())
         Fakeit.init()
         AndroidThreeTen.init(this)
+        Shortbread.create(this)
     }
 }

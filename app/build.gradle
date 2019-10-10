@@ -123,6 +123,10 @@ dependencies {
 
     // Crashlytics
     implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
+
+    // Shortbread
+    implementation 'com.github.matthiasrobbers:shortbread:1.0.2'
+    kapt 'com.github.matthiasrobbers:shortbread-compiler:1.0.2'
 }
 
 

@@ -24,6 +24,9 @@ import kotlinx.android.synthetic.main.app_bar_main.view.*
 import timber.log.Timber
 import name.lmj0011.courierlocker.databinding.ActivityMainBinding
 import name.lmj0011.courierlocker.helpers.LocationHelper
+import shortbread.Shortcut
+
+
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -228,5 +231,20 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     fun hideFab() {
         binding.drawerLayout.fab.hide()
+    }
+
+    @Shortcut(id = "shortcut_trips", icon = R.drawable.ic_menu_trips, shortLabel = "Trips")
+    fun shortCutToTrips() {
+        navController.navigate(R.id.tripsFragment)
+    }
+
+    @Shortcut(id = "shortcut_gatecodes", icon = R.drawable.ic_menu_dialpad, shortLabel = "Gate Codes")
+    fun shortCutToGatecodes() {
+        navController.navigate(R.id.gateCodesFragment)
+    }
+
+    @Shortcut(id = "shortcut_customers", icon = R.drawable.ic_menu_customer, shortLabel = "Customers")
+    fun shortCutToCustomers() {
+        navController.navigate(R.id.customersFragment)
     }
 }
