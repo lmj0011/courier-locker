@@ -18,7 +18,12 @@
 
         <EditTextPreference
                 app:key="advancedDirectionsApiKey"
-                app:title="Add Google Directions API Key to display and begin calculating trip distance"/>
+                app:title="Add Google Directions API Key to start calculating Trip distances"/>
+
+        <SwitchPreferenceCompat
+                app:key="sendCrashReports"
+                app:title="Send crash reports"
+                app:defaultValue="true"/>
 
     </PreferenceCategory>
 

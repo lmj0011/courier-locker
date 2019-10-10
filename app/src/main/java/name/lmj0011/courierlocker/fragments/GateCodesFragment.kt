@@ -19,7 +19,8 @@ import name.lmj0011.courierlocker.databinding.FragmentGateCodesBinding
 import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
 import name.lmj0011.courierlocker.factories.GateCodeViewModelFactory
 import name.lmj0011.courierlocker.helpers.LocationHelper
-import timber.log.Timber
+
+
 
 
 /**

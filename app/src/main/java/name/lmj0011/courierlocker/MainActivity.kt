@@ -17,7 +17,9 @@ import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.*
+import androidx.preference.PreferenceManager
 import com.crashlytics.android.Crashlytics
+import io.fabric.sdk.android.Fabric
 import kotlinx.android.synthetic.main.app_bar_main.view.*
 import timber.log.Timber
 import name.lmj0011.courierlocker.databinding.ActivityMainBinding
@@ -42,7 +44,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Timber.i("onCreate Called") 
+        Timber.i("onCreate Called")
+
+        val sendCrashReports = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("sendCrashReports", true)!!
+
+        if(sendCrashReports) {
+            Fabric.with(this, Crashlytics())
+        }
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         navController = findNavController(R.id.navHostFragment)
