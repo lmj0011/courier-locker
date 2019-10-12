@@ -25,6 +25,13 @@
                 app:title="Send crash reports"
                 app:defaultValue="true"/>
 
+        <Preference
+                app:key="about"
+                app:title="About app">
+        </Preference>
+
     </PreferenceCategory>
+
+
 
 </PreferenceScreen>

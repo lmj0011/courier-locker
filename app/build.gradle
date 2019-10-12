@@ -5,15 +5,19 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'androidx.navigation.safeargs'
 apply plugin: 'io.fabric'
 
+// get the first 8 chars of the latest git commit, and use it as the version build name
+def appBuildPrefix =  ['sh', '-c', 'git rev-parse --short=8 HEAD'].execute().text.trim()
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.0"
+
     defaultConfig {
         applicationId "name.lmj0011.courierlocker"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 11
-        versionName "1"
+        versionCode 12
+        versionName "0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
@@ -30,17 +34,19 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             resValue("bool", "DEBUG_MODE", "false")
+            resValue("string", "app_build", appBuildPrefix)
         }
         debug {
             minifyEnabled false
             resValue("bool", "DEBUG_MODE", "true")
+            resValue("string", "app_build", appBuildPrefix)
         }
     }
     flavorDimensions "default"
     productFlavors {
         dev { // active development/testing
             applicationIdSuffix ".dev"
-            versionNameSuffix ".0.0-dev"
+            versionNameSuffix ".1.0-dev"
             resValue("string", "app_name", "Courier Locker (dev)")
             manifestPlaceholders = [
                     appIcon: "@mipmap/ic_launcher_dev",
@@ -49,7 +55,7 @@ android {
         }
         beta { // public testing
             applicationIdSuffix ".beta"
-            versionNameSuffix ".0.0-beta"
+            versionNameSuffix ".1.0-beta"
             resValue("string", "app_name", "Courier Locker (beta)")
             manifestPlaceholders = [
                     appIcon: "@mipmap/ic_launcher_beta",
@@ -58,7 +64,7 @@ android {
         }
         prod { // official release
             applicationIdSuffix ".prod"
-            versionNameSuffix ".0.0"
+            versionNameSuffix ".1.0"
             resValue("string", "app_name", "Courier Locker")
             manifestPlaceholders = [
                     appIcon: "@mipmap/ic_launcher",

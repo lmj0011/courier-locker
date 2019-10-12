@@ -233,17 +233,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         binding.drawerLayout.fab.hide()
     }
 
-    @Shortcut(id = "shortcut_trips", icon = R.drawable.ic_menu_trips, shortLabel = "Trips")
+    @Shortcut(id = "shortcut_trips", rank = 3, icon = R.mipmap.ic_trips_shortcut, shortLabel = "Trips")
     fun shortCutToTrips() {
         navController.navigate(R.id.tripsFragment)
     }
 
-    @Shortcut(id = "shortcut_gatecodes", icon = R.drawable.ic_menu_dialpad, shortLabel = "Gate Codes")
+    @Shortcut(id = "shortcut_gatecodes", rank = 2, icon = R.mipmap.ic_gatecodes_shortcut, shortLabel = "Gate Codes")
     fun shortCutToGatecodes() {
         navController.navigate(R.id.gateCodesFragment)
     }
 
-    @Shortcut(id = "shortcut_customers", icon = R.drawable.ic_menu_customer, shortLabel = "Customers")
+    @Shortcut(id = "shortcut_customers", rank = 1, icon = R.mipmap.ic_customers_shortcut, shortLabel = "Customers")
     fun shortCutToCustomers() {
         navController.navigate(R.id.customersFragment)
     }
