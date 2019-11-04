@@ -3,14 +3,15 @@ package name.lmj0011.courierlocker.viewmodels
 import android.app.Application
 import android.content.SharedPreferences
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.json.responseJson
 import com.github.kittinunf.result.Result
 import com.mooveit.library.Fakeit
 import kotlinx.coroutines.*
-import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.database.Trip
 import name.lmj0011.courierlocker.database.TripDao
 import name.lmj0011.courierlocker.helpers.Util
@@ -19,7 +20,6 @@ import name.lmj0011.courierlocker.helpers.isTripOfToday
 import name.lmj0011.courierlocker.helpers.setTripTimestamp
 import org.json.JSONException
 import timber.log.Timber
-
 
 class TripViewModel(
     val database: TripDao,
@@ -65,6 +65,35 @@ class TripViewModel(
             }
 
             return Util.numberFormatInstance.format(result)
+        }
+
+    val totalPendingTrips: Int
+        get() {
+            val result = trips.value?.fold(0) { sum, trip ->
+                if (trip.dropOffAddress.isEmpty()){
+                    sum + 1
+                } else {
+                    sum
+                }
+            }
+
+            return result ?: 0
+        }
+
+    val todayCompletedTrips: String
+        get() {
+            val result = trips.value?.fold(0) { sum, trip ->
+                if (isTripOfToday(trip) &&
+                    trip.pickupAddress.isNotEmpty() &&
+                    trip.dropOffAddress.isNotEmpty()
+                        ){
+                    sum + 1
+                } else {
+                    sum
+                }
+            }
+
+            return result.toString()
         }
 
     val monthTotalMoney: String
@@ -182,7 +211,7 @@ class TripViewModel(
         }
     }
 
-    private fun setTripDistance(trip: Trip?): Double {
+    fun setTripDistance(trip: Trip?): Double {
         val defaultValue = 0.0
         if (trip == null || googleApiKey.isNullOrBlank()) return defaultValue
 
@@ -220,13 +249,11 @@ class TripViewModel(
     }
 
     fun validatePayAmount(amount: String?): Boolean {
-        if (amount.isNullOrEmpty()) return true
-
        return try {
-            amount.toDouble()
+            amount!!.toDouble()
             payAmountValidated.value = true
             true
-        } catch (ex: NumberFormatException) {
+        } catch (ex: Exception) {
             payAmountValidated.value = false
             false
         }

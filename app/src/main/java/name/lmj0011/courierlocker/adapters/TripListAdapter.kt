@@ -38,7 +38,7 @@ class TripListAdapter(private val clickListener: TripListener): ListAdapter<Trip
                 binding.tripDistanceTextView.text = HtmlCompat.fromHtml("<b>distance:</b> ${metersToMiles(trip.distance)} mi", HtmlCompat.FROM_HTML_MODE_LEGACY)
             }
 
-            if (trip.payAmount.isNullOrBlank() || trip.payAmount == "0") {
+            if (trip.payAmount.isNullOrBlank()) {
                 binding.tripPayTextView.visibility = TextView.GONE
             } else {
                 binding.tripPayTextView.text = HtmlCompat.fromHtml("<b>pay:</b> ${Util.numberFormatInstance.format(trip.payAmount.toDouble())} ", HtmlCompat.FROM_HTML_MODE_LEGACY)

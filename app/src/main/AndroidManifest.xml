@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="name.lmj0011.courierlocker">
+        package="name.lmj0011.courierlocker">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
             android:name=".CourierLockerApplication"
@@ -23,13 +25,25 @@
                 android:label="@string/app_name"
                 android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".SettingsActivity" />
 
-        <activity android:name=".SettingsActivity"></activity>
+        <service
+                android:name=".services.CurrentStatusForegroundService"
+                android:foregroundServiceType="location" />
+
+        <receiver
+                android:name=".services.CurrentStatusForegroundService$SetTripDropoffReceiver"
+                android:exported="false"></receiver>
+
+        <receiver
+                android:name=".services.CurrentStatusForegroundService$PendingTripNotificationDeleteReceiver"
+                android:exported="false"></receiver>
+
     </application>
 
 </manifest>

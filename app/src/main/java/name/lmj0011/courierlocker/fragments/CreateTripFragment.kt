@@ -186,7 +186,7 @@ class CreateTripFragment : Fragment() {
         tripViewModel.payAmountValidated.observe(viewLifecycleOwner, Observer {
             it?.let {
                 if(!it){
-                    Toast.makeText(mainActivity, "Enter a money amount like: 14.56", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(mainActivity, "invalid or no amount was entered", Toast.LENGTH_SHORT).show()
                 }
             }
         })
@@ -207,7 +207,7 @@ class CreateTripFragment : Fragment() {
     private fun saveButtonOnClickListener(v: View) {
         val pickupAddress = binding.pickupAddressAutoCompleteTextView.text.toString()
         val dropOffAddress = binding.dropOffAddressAutoCompleteTextView.text.toString()
-        val payAmount = binding.payAmountEditText.text.toString()
+        var payAmount = binding.payAmountEditText.text.toString()
         val gig = binding.gigSpinner.selectedItem.toString()
 
         when{
@@ -218,7 +218,9 @@ class CreateTripFragment : Fragment() {
             else -> {}
         }
 
-        if(!this.tripViewModel.validatePayAmount(payAmount)) return
+        if(!this.tripViewModel.validatePayAmount(payAmount)) {
+            payAmount = "0"
+        }
 
         this.tripViewModel.insertTrip(
             pickupAddress,

@@ -25,15 +25,6 @@ class GateCodeListAdapter(private val clickListener: GateCodeListener): ListAdap
             binding.otherGateCodes.text = ""
 
             when{
-//                gc.codes.size > 1 && gc.codes.drop(1).isNotEmpty() -> {
-//                    binding.gateCode1.text = gc.codes[0]
-//                    binding.otherGateCodes.text = gc.codes.drop(1).reduce { acc, it ->
-//                        when{
-//                            it.isNullOrBlank() -> "$acc"
-//                            else -> "$acc, $it"
-//                        }
-//                    }
-//                }
                 gc.codes.isNotEmpty()-> {
                     binding.gateCode1.text = gc.codes[0]
                 }

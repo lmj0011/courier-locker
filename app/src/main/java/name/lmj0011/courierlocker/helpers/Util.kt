@@ -5,10 +5,23 @@ import android.os.Build
 import android.text.Html
 import android.text.Spanned
 import androidx.core.text.HtmlCompat
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import name.lmj0011.courierlocker.database.GateCode
 import name.lmj0011.courierlocker.database.Trip
 import java.math.RoundingMode
 import java.text.NumberFormat
+
+// extension function for LiveData
+// ref: https://stackoverflow.com/a/54969114/2445763
+fun <T> LiveData<T>.observeOnce(observer: Observer<T>) {
+    observeForever(object : Observer<T> {
+        override fun onChanged(t: T?) {
+            observer.onChanged(t)
+            removeObserver(this)
+        }
+    })
+}
 
 class Util {
     companion object {
@@ -34,17 +47,39 @@ fun formatGateCodes(gateCodes: List<GateCode>): Spanned {
     val sb = StringBuilder()
     sb.apply {
         gateCodes.forEach {
-            append("<br>")
-            append("\t<h4>${it.address}</h4>")
-            append("\tcode: <b>${it.codes[0]}</b><br>")
+            if (it.codes.isNotEmpty()) {
+                append("<br>")
 
-            append("\t<small><i>alternatives:<i>")
-            it.codes.forEach { str ->
-                append(" $str")
+                append("\t<b>${it.codes[0]}</b><br>")
+                append("\t${it.address}")
+
+                append("<br>")
             }
-            append("<br></small>")
+        }
+    }
 
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        Html.fromHtml(sb.toString(), Html.FROM_HTML_MODE_LEGACY)
+    } else {
+        HtmlCompat.fromHtml(sb.toString(), HtmlCompat.FROM_HTML_MODE_LEGACY)
+    }
+}
+
+fun formatPendingTripMessage(trip: Trip?): Spanned {
+    val sb = StringBuilder()
+    sb.apply {
+        trip?.let {
+            append("pick up: ${it.pickupAddress}")
             append("<br>")
+            append("drop-off: ${it.dropOffAddress}")
+
+            if (trip.distance > 0) {
+                append("<br>")
+                append("distance: ${metersToMiles(trip.distance)} mi | pay: ${Util.numberFormatInstance.format(it.payAmount.toDouble())} | gig: ${it.gigName}")
+            } else {
+                append("<br>")
+                append("pay: ${Util.numberFormatInstance.format(it.payAmount.toDouble())} | gig: ${it.gigName}")
+            }
         }
     }
 
@@ -110,7 +145,7 @@ fun isTripOfMonth(trip: Trip): Boolean {
 
 fun getCsvFromTripList(trips: List<Trip>?): String {
     /**
-     * TODO use a StringBuilder to create a .csv formatted string of all Trips in the DB
+     * a StringBuilder to create a .csv formatted string of all Trips in the DB
      */
     if (trips == null) return ""
 

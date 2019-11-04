@@ -82,12 +82,12 @@ object LocationHelper {
         return geocoder
     }
 
-    fun getFromLocation(v: View, latitude: Double, longitude: Double, results: Int): List<Address> {
+    fun getFromLocation(v: View?, latitude: Double, longitude: Double, results: Int): List<Address> {
         return try {
           geocoder.getFromLocation(latitude, longitude, results)
         } catch (ex: IOException) {
             when{
-                ex.message == "grpc failed" -> {
+                (v != null && ex.message == "grpc failed") -> {
                     Snackbar.make(v, "Lost GPS Signal", Snackbar.LENGTH_LONG).show()
                     listOf()
                 }

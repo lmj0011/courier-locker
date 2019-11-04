@@ -209,7 +209,7 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
         tripViewModel.payAmountValidated.observe(viewLifecycleOwner, Observer {
             it?.let {
                 if(!it){
-                    Toast.makeText(mainActivity, "Enter a money amount like: 14.56", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(mainActivity, "invalid or no amount was entered", Toast.LENGTH_SHORT).show()
                 }
             }
         })
@@ -248,10 +248,7 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
             binding.dropOffAddressAutoCompleteTextView.setText(it.dropOffAddress)
             this@EditTripFragment.dropOffAddressLatitude = it.dropOffAddressLatitude
             this@EditTripFragment.dropOffAddressLongitude = it.dropOffAddressLongitude
-
-            if (it.payAmount != "0") {
-                binding.payAmountEditText.setText(it.payAmount)
-            }
+            binding.payAmountEditText.setText(it.payAmount)
 
             binding.gigSpinner.setSelection(
                 resources.getStringArray(R.array.gigs_array).indexOf(it.gigName)
@@ -265,7 +262,7 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
     private fun saveButtonOnClickListener(v: View) {
         val pickupAddress = binding.pickupAddressAutoCompleteTextView.text.toString()
         val dropOffAddress = binding.dropOffAddressAutoCompleteTextView.text.toString()
-        val payAmount = binding.payAmountEditText.text.toString()
+        var payAmount = binding.payAmountEditText.text.toString()
         val gig = binding.gigSpinner.selectedItem.toString()
 
         when{
@@ -276,7 +273,9 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
             else -> {}
         }
 
-        if(!this.tripViewModel.validatePayAmount(payAmount)) return
+        if(!this.tripViewModel.validatePayAmount(payAmount)) {
+            payAmount = "0"
+        }
 
         this.trip?.let {
             it.pickupAddress = pickupAddress

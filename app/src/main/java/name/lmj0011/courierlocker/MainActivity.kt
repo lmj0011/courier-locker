@@ -1,18 +1,13 @@
 package name.lmj0011.courierlocker
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.core.view.GravityCompat
 import android.view.MenuItem
 import com.google.android.material.navigation.NavigationView
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
-import android.view.View
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
@@ -24,6 +19,8 @@ import kotlinx.android.synthetic.main.app_bar_main.view.*
 import timber.log.Timber
 import name.lmj0011.courierlocker.databinding.ActivityMainBinding
 import name.lmj0011.courierlocker.helpers.LocationHelper
+import name.lmj0011.courierlocker.helpers.PermissionHelper
+import name.lmj0011.courierlocker.services.CurrentStatusForegroundService
 import shortbread.Shortcut
 
 
@@ -35,8 +32,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var appBarConfiguration : AppBarConfiguration
 
     companion object {
-        const val MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 100
-
         // for AutoCompleteTextView handler
         const val TRIGGER_AUTO_COMPLETE = 101
         const val TRIP_PICKUP_AUTO_COMPLETE = 102
@@ -50,6 +45,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         Timber.i("onCreate Called")
 
         val sendCrashReports = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("sendCrashReports", true)!!
+
+        PermissionHelper.checkPermissionApprovals(this)
 
         if(sendCrashReports) {
             Fabric.with(this, Crashlytics())
@@ -72,43 +69,46 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         LocationHelper.setFusedLocationClient(this)
 
-        val permissionVal = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-        when{
-            permissionVal != PackageManager.PERMISSION_GRANTED -> {
-                ActivityCompat.requestPermissions(this,
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                    MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION
-                )
-            }
-            else -> {/* nothing */}
-        }
-
         // hide the fab initially
         binding.drawerLayout.fab.hide()
-
     }
 
     override fun onStart() {
         super.onStart()
         Timber.i("onStart Called")
+
+        if(!PermissionHelper.permissionAccessFineLocationApproved &&
+            !PermissionHelper.backgroundLocationPermissionApproved) {
+
+            // this app currently only needs the ACCESS_FINE_LOCATION permission
+            PermissionHelper.requestBackgroundLocationAccess(this)
+        }
     }
 
     override fun onResume() {
         super.onResume()
         Timber.i("onResume Called")
 
-        when(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)){
-            PackageManager.PERMISSION_GRANTED -> LocationHelper.startLocationUpdates()
-            else -> {
-                Toast.makeText(this,"Location permissions are not enabled.", Toast.LENGTH_SHORT).show()
-            }
+        val menuItemId  = intent.extras?.getInt("menuItemId")
+        menuItemId?.let { this.navigateTo(it) }
+
+        CurrentStatusForegroundService.stopService(this)
+
+        if(PermissionHelper.permissionAccessFineLocationApproved) {
+            LocationHelper.startLocationUpdates()
+        } else {
+            Toast.makeText(this,"App has no Location permissions.", Toast.LENGTH_LONG).show()
         }
     }
 
     override fun onPause() {
         super.onPause()
         Timber.i("onPause Called")
-        LocationHelper.stopLocationUpdates()
+
+        if(PermissionHelper.permissionAccessFineLocationApproved) {
+            LocationHelper.stopLocationUpdates()
+            CurrentStatusForegroundService.startService(this)
+        }
     }
 
     override fun onStop() {
@@ -119,6 +119,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onDestroy() {
         super.onDestroy()
         Timber.i("onDestroy Called")
+        CurrentStatusForegroundService.stopService(this)
     }
 
     override fun onRestart() {
@@ -178,21 +179,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
-        when (item.itemId) {
-            R.id.nav_gate_codes -> {
-                navController.navigate(R.id.gateCodesFragment)
-            }
-            R.id.nav_customers -> {
-                navController.navigate(R.id.customersFragment)
-            }
-            R.id.nav_trips -> {
-                navController.navigate(R.id.tripsFragment)
-            }
-            R.id.nav_settings -> {
-                val intent = Intent(this, SettingsActivity::class.java)
-                startActivity(intent)
-            }
-        }
+        this.navigateTo(item.itemId)
 
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
@@ -205,12 +192,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        when(requestCode) {
-            MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == 0) {
-                    LocationHelper.startLocationUpdates()
-                }
-            }
+        PermissionHelper.checkPermissionApprovals(this)
+
+        if(PermissionHelper.permissionAccessFineLocationApproved) {
+            LocationHelper.startLocationUpdates()
         }
     }
 
@@ -246,5 +231,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     @Shortcut(id = "shortcut_customers", rank = 1, icon = R.mipmap.ic_customers_shortcut, shortLabel = "Customers")
     fun shortCutToCustomers() {
         navController.navigate(R.id.customersFragment)
+    }
+
+    private fun navigateTo(id: Int) {
+        when (id) {
+            R.id.nav_gate_codes -> {
+                navController.navigate(R.id.gateCodesFragment)
+            }
+            R.id.nav_customers -> {
+                navController.navigate(R.id.customersFragment)
+            }
+            R.id.nav_trips -> {
+                navController.navigate(R.id.tripsFragment)
+            }
+            R.id.nav_settings -> {
+                val intent = Intent(this, SettingsActivity::class.java)
+                startActivity(intent)
+            }
+        }
     }
 }
