@@ -19,6 +19,7 @@ object NotificationHelper {
     const val CURRENT_STATUS_CHANNEL_ID = "name.lmj0011.courierlocker.helpers.NotificationHelper#currentStatus"
     const val ACTION_UPDATE_DROP_OFF = "name.lmj0011.courierlocker.services.ACTION_UPDATE_DROP_OFF"
     const val ACTION_DELETE_DROP_OFF = "name.lmj0011.courierlocker.services.ACTION_DELETE_DROP_OFF"
+    const val ACTION_NEXT_PENDING_TRIP = "name.lmj0011.courierlocker.services.ACTION_NEXT_PENDING_TRIP"
     const val NOTIFICATION_GROUP_KEY_FOREGROUND = "name.lmj0011.courierlocker.NOTIFICATION_GROUP_KEY_FOREGROUND"
     const val RUNNING_FOREGROUND_SERVICES_NOTIFICATION_ID = 1000
     const val NEARBY_GATECODES_NOTIFICATION_ID = 1002

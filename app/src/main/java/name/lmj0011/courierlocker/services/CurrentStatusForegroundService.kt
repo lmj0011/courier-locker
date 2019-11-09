@@ -31,12 +31,26 @@ class CurrentStatusForegroundService : Service() {
         private lateinit var gateCodesObserver: Observer<MutableList<GateCode>>
         private lateinit var tripsObserver: Observer<MutableList<Trip>>
         private lateinit var pendingTripsObserver: Observer<MutableList<Trip>>
+        private lateinit var pendingTripsListIterator: MutableListIterator<Trip>
+        private lateinit var listOfPendingTrips: MutableList<Trip>
 
         fun startService(context: Context) {
             val startIntent = Intent(context, CurrentStatusForegroundService::class.java)
             val application = requireNotNull(context.applicationContext as Application)
             gateCodeViewModel = GateCodeViewModel(CourierLockerDatabase.getInstance(application).gateCodeDao, application)
             tripViewModel = TripViewModel(CourierLockerDatabase.getInstance(application).tripDao, application)
+
+            pendingTripsObserver = Observer {
+                it?.let {
+                    listOfPendingTrips = it.filter { t ->
+                        t.dropOffAddress.isNullOrBlank()
+                    }.toMutableList()
+
+                    resetListOfPendingTripsIterator()
+                }
+            }
+
+            tripViewModel.trips.observeForever(pendingTripsObserver)
 
             ContextCompat.startForegroundService(context, startIntent)
         }
@@ -47,53 +61,68 @@ class CurrentStatusForegroundService : Service() {
             context.stopService(stopIntent)
         }
 
+        private fun resetListOfPendingTripsIterator() {
+            if(!::listOfPendingTrips.isInitialized) return
+
+            pendingTripsListIterator = listOfPendingTrips.listIterator()
+        }
+
 
         fun pendingTripsNotification(context: Context) {
+            var trip: Trip?
 
-            pendingTripsObserver = Observer {
-
-                val listOfPendingTrips = it.filter { t ->
-                    t.dropOffAddress.isNullOrBlank()
-                }
-
-                val trip = listOfPendingTrips.firstOrNull()
-
-                trip?.let { t ->
-                    val notificationActionIntent = Intent(context, SetTripDropoffReceiver::class.java).apply {
-                        action = NotificationHelper.ACTION_UPDATE_DROP_OFF
-                        putExtra("TripId", t.id)
-                        addCategory("pending trip")
-                    }
-
-                    val notificationContentIntent = Intent(context, MainActivity::class.java).apply {
-                        putExtra("menuItemId", R.id.nav_trips)
-                        addCategory("pending trip")
-                    }
-
-                    val notificationDeleteIntent = Intent(context, PendingTripNotificationDeleteReceiver::class.java).apply {
-                        action = NotificationHelper.ACTION_DELETE_DROP_OFF
-                        putExtra("TripId", t.id)
-                        addCategory("pending trip")
-                    }
-
-                    val actionPendingIntent = PendingIntent.getBroadcast(context, 0, notificationActionIntent, PendingIntent.FLAG_CANCEL_CURRENT)
-                    val contentPendingIntent = PendingIntent.getActivity(context, 0, notificationContentIntent, 0)
-                    val deleteIntent = PendingIntent.getBroadcast(context, 0, notificationDeleteIntent, PendingIntent.FLAG_CANCEL_CURRENT)
-
-                    val notification = NotificationHelper.getPendingTripNotificationBuilder(context)
-                        .setStyle(NotificationCompat.BigTextStyle().bigText(formatPendingTripMessage(t)))
-                        .setContentIntent(contentPendingIntent)
-                        .addAction(R.drawable.ic_action_name, "Update Drop-off", actionPendingIntent)
-                        .setDeleteIntent(deleteIntent)
-                        .build()
-
-                    NotificationManagerCompat.from(context).apply {
-                        notify(NotificationHelper.PENDING_TRIP_NOTIFICATION_ID, notification)
-                    }
-                }
+            try {
+                trip = pendingTripsListIterator.next()
+            } catch (ex: NoSuchElementException) {
+                return
             }
 
-            tripViewModel.trips.observeOnce(pendingTripsObserver)
+            if(!pendingTripsListIterator.hasNext()) {
+                resetListOfPendingTripsIterator()
+            }
+
+            trip?.let { t ->
+                val notificationActionIntent = Intent(context, SetTripDropoffReceiver::class.java).apply {
+                    action = NotificationHelper.ACTION_UPDATE_DROP_OFF
+                    putExtra("TripId", t.id)
+                    addCategory("pending trip")
+                }
+
+                val notificationContentIntent = Intent(context, MainActivity::class.java).apply {
+                    putExtra("menuItemId", R.id.nav_trips)
+                    addCategory("pending trip")
+                }
+
+                val notificationDeleteIntent = Intent(context, PendingTripNotificationDeleteReceiver::class.java).apply {
+                    action = NotificationHelper.ACTION_DELETE_DROP_OFF
+                    putExtra("TripId", t.id)
+                    addCategory("pending trip")
+                }
+
+                val notificationNextPendingTripIntent = Intent(context, NextPendingTripNotificationReceiver::class.java).apply {
+                    action = NotificationHelper.ACTION_NEXT_PENDING_TRIP
+                    addCategory("next pending")
+                }
+
+                val actionPendingIntent = PendingIntent.getBroadcast(context, 0, notificationActionIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+                val contentPendingIntent = PendingIntent.getActivity(context, 0, notificationContentIntent, 0)
+                val deleteIntent = PendingIntent.getBroadcast(context, 0, notificationDeleteIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+                val actionNextPendingTripIntent = PendingIntent.getBroadcast(context, 0, notificationNextPendingTripIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+
+                val notification = NotificationHelper.getPendingTripNotificationBuilder(context)
+                    .setStyle(NotificationCompat.BigTextStyle().bigText(formatPendingTripMessage(t)))
+                    .setContentIntent(contentPendingIntent)
+                    .addAction(R.drawable.ic_action_name, "Update Drop-off", actionPendingIntent)
+                    .setDeleteIntent(deleteIntent)
+
+                if(listOfPendingTrips.size > 1) {
+                    notification.addAction(R.drawable.ic_action_name, "Next Pending", actionNextPendingTripIntent)
+                }
+
+                NotificationManagerCompat.from(context).apply {
+                    notify(NotificationHelper.PENDING_TRIP_NOTIFICATION_ID, notification.build())
+                }
+            }
         }
 
         private fun removeAllObservers() {
@@ -138,7 +167,7 @@ class CurrentStatusForegroundService : Service() {
 
         startForeground(NotificationHelper.RUNNING_FOREGROUND_SERVICES_NOTIFICATION_ID, notification)
 
-        pendingTripsNotification(this)
+        tripViewModel.trips.observeOnce(Observer { pendingTripsNotification(this) })
         this.startTripsTodayNotification()
         this.startNearbyGatecodesNotification()
 
@@ -261,19 +290,28 @@ class CurrentStatusForegroundService : Service() {
                     addCategory("pending trip")
                 }
 
+                val notificationNextPendingTripIntent = Intent(context, NextPendingTripNotificationReceiver::class.java).apply {
+                    action = NotificationHelper.ACTION_NEXT_PENDING_TRIP
+                    addCategory("next pending")
+                }
+
                 val actionPendingIntent = PendingIntent.getBroadcast(context, 0, notificationActionIntent, PendingIntent.FLAG_CANCEL_CURRENT)
                 val contentPendingIntent = PendingIntent.getActivity(context, 0, notificationContentIntent, 0)
                 val deleteIntent = PendingIntent.getBroadcast(context, 0, notificationDeleteIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+                val actionNextPendingTripIntent = PendingIntent.getBroadcast(context, 0, notificationNextPendingTripIntent, PendingIntent.FLAG_CANCEL_CURRENT)
 
                 val notification = NotificationHelper.getPendingTripNotificationBuilder(context)
                     .setStyle(NotificationCompat.BigTextStyle().bigText(formatPendingTripMessage(t)))
                     .setContentIntent(contentPendingIntent)
                     .addAction(R.drawable.ic_action_name, "Update Drop-off", actionPendingIntent)
                     .setDeleteIntent(deleteIntent)
-                    .build()
+
+                if(listOfPendingTrips.size > 1) {
+                    notification.addAction(R.drawable.ic_action_name, "Next Pending", actionNextPendingTripIntent)
+                }
 
                 NotificationManagerCompat.from(context).apply {
-                    notify(NotificationHelper.PENDING_TRIP_NOTIFICATION_ID, notification)
+                    notify(NotificationHelper.PENDING_TRIP_NOTIFICATION_ID, notification.build())
                 }
                 //////
             }
@@ -283,7 +321,13 @@ class CurrentStatusForegroundService : Service() {
 
     class PendingTripNotificationDeleteReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            tripViewModel.trips.observeOnce(pendingTripsObserver)
+            pendingTripsNotification(context)
+        }
+    }
+
+    class NextPendingTripNotificationReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            pendingTripsNotification(context)
         }
     }
 }
