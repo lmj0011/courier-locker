@@ -12,7 +12,7 @@ Features include:
 * See total earnings across multiple gigs (calculated from Trips)
 
 ## Download
-Get the app from the [releases page](https://github.com/lmj0011/courier-locker/releases).
+Get the app from the [Google Play Store](https://play.google.com/store/apps/details?id=name.lmj0011.courierlocker.prod) or [releases page](https://github.com/lmj0011/courier-locker/releases).
 
 If you want to try new features before they get to the stable release, you can download the dev version [here](https://courierlocker.org/dist/dev).
 
