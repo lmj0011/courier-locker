@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.*
 import androidx.preference.PreferenceManager
 import com.crashlytics.android.Crashlytics
@@ -18,6 +19,7 @@ import io.fabric.sdk.android.Fabric
 import kotlinx.android.synthetic.main.app_bar_main.view.*
 import timber.log.Timber
 import name.lmj0011.courierlocker.databinding.ActivityMainBinding
+import name.lmj0011.courierlocker.fragments.TripsFragmentDirections
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.PermissionHelper
 import name.lmj0011.courierlocker.services.CurrentStatusForegroundService
@@ -91,6 +93,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         val menuItemId  = intent.extras?.getInt("menuItemId")
         menuItemId?.let { this.navigateTo(it) }
+
+        val editTripId  = intent.extras?.getInt("editTripId")
+        editTripId?.let { navController.navigate(TripsFragmentDirections.actionTripsFragmentToEditTripFragment(editTripId)) }
 
         CurrentStatusForegroundService.stopService(this)
 
