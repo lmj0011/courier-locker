@@ -89,7 +89,7 @@ class CurrentStatusForegroundService : Service() {
                 }
 
                 val notificationContentIntent = Intent(context, MainActivity::class.java).apply {
-                    putExtra("menuItemId", R.id.nav_trips)
+                    putExtra("editTripId", t.id.toInt())
                     addCategory("pending trip")
                 }
 
@@ -105,7 +105,7 @@ class CurrentStatusForegroundService : Service() {
                 }
 
                 val actionPendingIntent = PendingIntent.getBroadcast(context, 0, notificationActionIntent, PendingIntent.FLAG_CANCEL_CURRENT)
-                val contentPendingIntent = PendingIntent.getActivity(context, 0, notificationContentIntent, 0)
+                val contentPendingIntent = PendingIntent.getActivity(context, 0, notificationContentIntent, PendingIntent.FLAG_CANCEL_CURRENT)
                 val deleteIntent = PendingIntent.getBroadcast(context, 0, notificationDeleteIntent, PendingIntent.FLAG_CANCEL_CURRENT)
                 val actionNextPendingTripIntent = PendingIntent.getBroadcast(context, 0, notificationNextPendingTripIntent, PendingIntent.FLAG_CANCEL_CURRENT)
 
