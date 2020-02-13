@@ -4,12 +4,12 @@ import android.content.Context
 import android.location.Address
 import android.location.Geocoder
 import android.os.Handler
+import android.view.Gravity
 import android.view.View
+import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.location.*
-import com.google.android.material.snackbar.Snackbar
 import name.lmj0011.courierlocker.adapters.AddressAutoSuggestAdapter
-import timber.log.Timber
 import java.io.IOException
 import java.lang.Math.toRadians
 import java.util.*
@@ -56,8 +56,10 @@ object LocationHelper {
                     adapter.notifyDataSetChanged()
 
                 } catch (e: IOException) {
-                    when{
-                        e.message == "grpc failed" -> { }
+                    when (e.message) {
+                        "grpc failed" -> {
+                            showNoGpsMessage(adapter.context)
+                        }
                         else -> throw e
                     }
                 }
@@ -77,6 +79,12 @@ object LocationHelper {
         geocoder = Geocoder(context, Locale.getDefault())
     }
 
+    private fun showNoGpsMessage(c: Context) {
+        val toast = Toast.makeText(c, "GPS signal lost", Toast.LENGTH_LONG)
+        toast.setGravity(Gravity.TOP, 0, 0)
+        toast.show()
+    }
+
     private fun getGeocoder(): Geocoder {
         isFusedLocationClientSet()
         return geocoder
@@ -88,7 +96,7 @@ object LocationHelper {
         } catch (ex: IOException) {
             when{
                 (v != null && ex.message == "grpc failed") -> {
-                    Snackbar.make(v, "Lost GPS Signal", Snackbar.LENGTH_LONG).show()
+                    showNoGpsMessage(v.context)
                     listOf()
                 }
                 else -> throw ex
