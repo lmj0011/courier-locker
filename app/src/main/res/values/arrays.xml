@@ -7,6 +7,7 @@
         <item>UberEats</item>
         <item>Lyft</item>
         <item>Uber</item>
+        <item>Roadie</item>
         <item>Other</item>
     </string-array>
 </resources>
