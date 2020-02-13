@@ -95,7 +95,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         menuItemId?.let { this.navigateTo(it) }
 
         val editTripId  = intent.extras?.getInt("editTripId")
-        editTripId?.let { navController.navigate(TripsFragmentDirections.actionTripsFragmentToEditTripFragment(editTripId)) }
+        editTripId?.let {
+            when {
+                it > 0 -> navController.navigate(TripsFragmentDirections.actionTripsFragmentToEditTripFragment(editTripId))
+            }
+        }
 
         CurrentStatusForegroundService.stopService(this)
 
