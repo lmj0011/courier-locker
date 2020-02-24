@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
+import br.com.simplepass.loadingbutton.presentation.State
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.AddressAutoSuggestAdapter
@@ -62,7 +63,7 @@ class CreateTripFragment : Fragment() {
             binding.gigSpinner.adapter = it
         }
 
-        binding.createTripSaveButton.setOnClickListener(this::saveButtonOnClickListener)
+        binding.createTripSaveCircularProgressButton.setOnClickListener(this::saveButtonOnClickListener)
 
         /// Auto Complete Text View Adapter setup
 
@@ -191,6 +192,16 @@ class CreateTripFragment : Fragment() {
             }
         })
 
+        tripViewModel.trips.observe(viewLifecycleOwner, Observer {
+            val btnState = binding.createTripSaveCircularProgressButton.getState()
+
+            // revert button animation and navigate back to Trips
+            if (btnState == State.MORPHING || btnState == State.PROGRESS) {
+                binding.createTripSaveCircularProgressButton.revertAnimation()
+                this.findNavController().navigate(R.id.tripsFragment)
+            }
+        })
+
         mainActivity.hideFab()
 
 
@@ -233,7 +244,7 @@ class CreateTripFragment : Fragment() {
             gig
         )
 
-        Toast.makeText(context, "New Trip added, refresh to see changes", Toast.LENGTH_SHORT).show()
-        this.findNavController().navigate(R.id.tripsFragment)
+        binding.createTripSaveCircularProgressButton.isEnabled = false
+        binding.createTripSaveCircularProgressButton.startAnimation()
     }
 }

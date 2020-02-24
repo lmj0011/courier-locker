@@ -16,7 +16,7 @@ android {
         applicationId "name.lmj0011.courierlocker"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 15
+        versionCode 17
         versionName "0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -133,6 +133,9 @@ dependencies {
     // Shortbread
     implementation 'com.github.matthiasrobbers:shortbread:1.0.2'
     kapt 'com.github.matthiasrobbers:shortbread-compiler:1.0.2'
+
+    // leandroBorgesFerreira/LoadingButtonAndroid
+    implementation 'br.com.simplepass:loading-button-android:2.2.0'
 }
 
 

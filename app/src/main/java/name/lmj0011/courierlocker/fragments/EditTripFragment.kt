@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
+import br.com.simplepass.loadingbutton.presentation.State
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.AddressAutoSuggestAdapter
@@ -79,7 +80,7 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
             binding.gigSpinner.adapter = it
         }
 
-        binding.editTripSaveButton.setOnClickListener(this::saveButtonOnClickListener)
+        binding.editTripSaveCircularProgressButton.setOnClickListener(this::saveButtonOnClickListener)
 
         binding.deleteBtn.setOnClickListener {
             val dialog = DeleteTripDialogFragment()
@@ -214,6 +215,16 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
             }
         })
 
+        tripViewModel.trips.observe(viewLifecycleOwner, Observer {
+            val btnState = binding.editTripSaveCircularProgressButton.getState()
+
+            // revert button animation and navigate back to Trips
+            if (btnState == State.MORPHING || btnState == State.PROGRESS) {
+                binding.editTripSaveCircularProgressButton.revertAnimation()
+                this.findNavController().navigate(R.id.tripsFragment)
+            }
+        })
+
         mainActivity.hideFab()
 
 
@@ -289,7 +300,8 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
         }
 
         this.tripViewModel.updateTrip(trip)
-        Toast.makeText(context, "updated Trip, refresh to see changes", Toast.LENGTH_SHORT).show()
-        this.findNavController().navigate(R.id.tripsFragment)
+
+        binding.editTripSaveCircularProgressButton.isEnabled = false
+        binding.editTripSaveCircularProgressButton.startAnimation()
     }
 }
