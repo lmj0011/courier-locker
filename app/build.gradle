@@ -16,7 +16,7 @@ android {
         applicationId "name.lmj0011.courierlocker"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 17
+        versionCode 18
         versionName "0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true

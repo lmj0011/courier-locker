@@ -233,6 +233,9 @@ class CreateTripFragment : Fragment() {
             payAmount = "0"
         }
 
+        binding.createTripSaveCircularProgressButton.isEnabled = false
+        binding.createTripSaveCircularProgressButton.startAnimation()
+
         this.tripViewModel.insertTrip(
             pickupAddress,
             this@CreateTripFragment.pickupAddressLatitude,
@@ -243,8 +246,5 @@ class CreateTripFragment : Fragment() {
             payAmount,
             gig
         )
-
-        binding.createTripSaveCircularProgressButton.isEnabled = false
-        binding.createTripSaveCircularProgressButton.startAnimation()
     }
 }

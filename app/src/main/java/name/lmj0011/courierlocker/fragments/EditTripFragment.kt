@@ -299,9 +299,9 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
             it.gigName = gig
         }
 
-        this.tripViewModel.updateTrip(trip)
-
         binding.editTripSaveCircularProgressButton.isEnabled = false
         binding.editTripSaveCircularProgressButton.startAnimation()
+
+        this.tripViewModel.updateTrip(trip)
     }
 }
