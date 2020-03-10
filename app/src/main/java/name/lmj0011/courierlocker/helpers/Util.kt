@@ -65,20 +65,20 @@ fun formatGateCodes(gateCodes: List<GateCode>): Spanned {
     }
 }
 
-fun formatPendingTripMessage(trip: Trip?): Spanned {
+fun formatRecentTripMessage(trip: Trip?): Spanned {
     val sb = StringBuilder()
     sb.apply {
         trip?.let {
-            append("pick up: ${it.pickupAddress}")
+            append("start: ${it.pickupAddress}")
             append("<br>")
-            append("drop-off: ${it.dropOffAddress}")
+            append("end: ${it.dropOffAddress}")
 
             if (trip.distance > 0) {
                 append("<br>")
-                append("distance: ${metersToMiles(trip.distance)} mi | pay: ${Util.numberFormatInstance.format(it.payAmount.toDouble())} | gig: ${it.gigName}")
+                append("${metersToMiles(trip.distance)} mi | ${Util.numberFormatInstance.format(it.payAmount.toDouble())} | ${it.gigName}")
             } else {
                 append("<br>")
-                append("pay: ${Util.numberFormatInstance.format(it.payAmount.toDouble())} | gig: ${it.gigName}")
+                append("pay: ${Util.numberFormatInstance.format(it.payAmount.toDouble())} | ${it.gigName}")
             }
         }
     }
@@ -147,13 +147,22 @@ fun getCsvFromTripList(trips: List<Trip>?): String {
     /**
      * a StringBuilder to create a .csv formatted string of all Trips in the DB
      */
-    if (trips == null) return ""
 
     val sb = StringBuilder()
-
     sb.appendln("Date,Distance,Job,Origin,Destination,Notes")
+
+    if (trips == null) {
+        return sb.toString()
+    }
+
     for (trip in trips) {
-       sb.appendln("${getTripDate(trip)},${metersToMiles(trip.distance)},${trip.gigName},\"${trip.pickupAddress}\",\"${trip.dropOffAddress}\",\"\"")
+        val stopsSb = StringBuilder()
+        stopsSb.append("${trip.stops.size} stops")
+        trip.stops.map { stop ->
+            stopsSb.append("|${stop.address}")
+        }
+
+        sb.appendln("${getTripDate(trip)},${metersToMiles(trip.distance)},${trip.gigName},\"${trip.pickupAddress}\",\"${trip.dropOffAddress}\",\"${trip.notes};${stopsSb} \",\"\"")
     }
     return sb.toString()
 }

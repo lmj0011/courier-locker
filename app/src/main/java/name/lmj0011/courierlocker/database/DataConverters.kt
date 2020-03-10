@@ -19,4 +19,26 @@ class DataConverters {
         val type = object : TypeToken<MutableList<String>>() {}.type
         return gson.fromJson(value, type)
     }
+
+    @TypeConverter
+    fun fromStopList(value: MutableList<Stop>): String {
+        val gson = Gson()
+        val type = object : TypeToken<MutableList<Stop>>() {}.type
+        return gson.toJson(value, type)
+    }
+
+    @TypeConverter
+    fun toStopList(value: String): MutableList<Stop> {
+        val gson = Gson()
+        val type = object : TypeToken<MutableList<Stop>>() {}.type
+
+        return when {
+            gson.fromJson<Stop>(value, type) == null -> {
+                mutableListOf()
+            }
+            else -> {
+                gson.fromJson(value, type)
+            }
+        }
+    }
 }

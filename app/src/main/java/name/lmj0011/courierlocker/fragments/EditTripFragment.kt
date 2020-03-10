@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.view.children
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
@@ -20,6 +21,7 @@ import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.AddressAutoSuggestAdapter
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
+import name.lmj0011.courierlocker.database.Stop
 import name.lmj0011.courierlocker.database.Trip
 import name.lmj0011.courierlocker.databinding.FragmentEditTripBinding
 import name.lmj0011.courierlocker.factories.TripViewModelFactory
@@ -64,9 +66,8 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
 
         this.tripViewModel.trip.observe(viewLifecycleOwner, Observer {
             this.trip  = it
-            mainActivity.supportActionBar?.title = "Edit Trip"
 
-            this.injectGateCodeIntoView(it)
+            this.injectTripIntoView(it)
         })
 
         this.tripViewModel.setTrip(args.tripId)
@@ -81,131 +82,15 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
         }
 
         binding.editTripSaveCircularProgressButton.setOnClickListener(this::saveButtonOnClickListener)
+        binding.editTripAddStopButton.setOnClickListener(this::addStop)
+        binding.editTripRemoveLastStopButton.setOnClickListener(this::removeLastStop)
 
-        binding.deleteBtn.setOnClickListener {
+        binding.editTripDeleteBtn.setOnClickListener {
             val dialog = DeleteTripDialogFragment()
             dialog.show(childFragmentManager, "DeleteTripDialogFragment")
 
         }
 
-        /// Auto Complete Text View Adapter setup
-
-        // Initialize a new array adapter object
-        val adapter1 = AddressAutoSuggestAdapter(
-            mainActivity, // Context
-            android.R.layout.simple_dropdown_item_1line
-        )
-
-        val adapter2 = AddressAutoSuggestAdapter(
-            mainActivity, // Context
-            android.R.layout.simple_dropdown_item_1line
-        )
-
-        handler1 = LocationHelper.getNewAddressAutoCompleteHandler(adapter1)
-
-        handler2 = LocationHelper.getNewAddressAutoCompleteHandler(adapter2)
-
-        // Set the AutoCompleteTextView adapter
-        binding.pickupAddressAutoCompleteTextView.setAdapter(adapter1)
-        binding.dropOffAddressAutoCompleteTextView.setAdapter(adapter2)
-
-        // Auto complete threshold
-        // The minimum number of characters to type to show the drop down
-        binding.pickupAddressAutoCompleteTextView.threshold = 1
-        binding.dropOffAddressAutoCompleteTextView.threshold = 1
-
-        // Set an item click listener for auto complete text view
-        binding.pickupAddressAutoCompleteTextView.onItemClickListener = AdapterView.OnItemClickListener{
-                parent,view,position,id->
-            val address: Address? = adapter1.getItem(position)
-
-            address?.let {
-                binding.pickupAddressAutoCompleteTextView.setText(it.getAddressLine(0))
-                this@EditTripFragment.pickupAddressLatitude = it.latitude
-                this@EditTripFragment.pickupAddressLongitude = it.longitude
-            }
-
-        }
-
-        binding.dropOffAddressAutoCompleteTextView.onItemClickListener = AdapterView.OnItemClickListener{
-                parent,view,position,id->
-            val address: Address? = adapter2.getItem(position)
-
-            address?.let {
-                binding.dropOffAddressAutoCompleteTextView.setText(it.getAddressLine(0))
-                this@EditTripFragment.dropOffAddressLatitude = it.latitude
-                this@EditTripFragment.dropOffAddressLongitude = it.longitude
-            }
-
-        }
-
-        binding.pickupAddressAutoCompleteTextView.addTextChangedListener(object: TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                adapter1.notifyDataSetChanged()
-            }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                handler1.removeMessages(MainActivity.TRIP_PICKUP_AUTO_COMPLETE)
-
-                val bundle = Bundle()
-                bundle.putString("address", binding.pickupAddressAutoCompleteTextView.text.toString())
-                val msg = handler1.obtainMessage(MainActivity.TRIP_PICKUP_AUTO_COMPLETE)
-                msg.data = bundle
-                handler1.sendMessageDelayed(msg, MainActivity.AUTO_COMPLETE_DELAY)
-            }
-        })
-
-        binding.dropOffAddressAutoCompleteTextView.addTextChangedListener(object: TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                adapter2.notifyDataSetChanged()
-            }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                handler2.removeMessages(MainActivity.TRIP_DROP_OFF_AUTO_COMPLETE)
-
-                val bundle = Bundle()
-                bundle.putString("address", binding.dropOffAddressAutoCompleteTextView.text.toString())
-                val msg = handler2.obtainMessage(MainActivity.TRIP_DROP_OFF_AUTO_COMPLETE)
-                msg.data = bundle
-                handler2.sendMessageDelayed(msg, MainActivity.AUTO_COMPLETE_DELAY)
-            }
-        })
-
-        /// setting current location's address into the pickupAddress textview
-        binding.insertMyLocationButtonForPickupAddress.setOnClickListener {
-            val address = LocationHelper.getFromLocation(binding.root, LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
-
-            when{
-                address.isNotEmpty() -> {
-                    binding.pickupAddressAutoCompleteTextView.setText(address[0].getAddressLine(0))
-                    this@EditTripFragment.pickupAddressLatitude = address[0].latitude
-                    this@EditTripFragment.pickupAddressLongitude = address[0].longitude
-                }
-                else -> {
-                    Toast.makeText(mainActivity, "Unable to resolve an Address from current location", Toast.LENGTH_LONG)
-                }
-            }
-        }
-
-        binding.insertMyLocationButtonForDropOffAddress.setOnClickListener {
-            val address = LocationHelper.getFromLocation(binding.root, LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
-
-            when{
-                address.isNotEmpty() -> {
-                    binding.dropOffAddressAutoCompleteTextView.setText(address[0].getAddressLine(0))
-                    this@EditTripFragment.dropOffAddressLatitude = address[0].latitude
-                    this@EditTripFragment.dropOffAddressLongitude = address[0].longitude
-                }
-                else -> {
-                    Toast.makeText(mainActivity, "Unable to resolve an Address from current location", Toast.LENGTH_LONG)
-                }
-            }
-        }
-        //////////////////
 
         tripViewModel.payAmountValidated.observe(viewLifecycleOwner, Observer {
             it?.let {
@@ -227,7 +112,6 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
 
         mainActivity.hideFab()
 
-
         return binding.root
     }
 
@@ -247,18 +131,56 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
         // User touched the dialog's negative button
     }
 
-    private fun injectGateCodeIntoView(trip: Trip?) {
+    private fun injectTripIntoView(trip: Trip?) {
         trip?.let {
 
             binding.tripDateTextView.text = getTripDate(it)
 
-            binding.pickupAddressAutoCompleteTextView.setText(it.pickupAddress)
-            this@EditTripFragment.pickupAddressLatitude = it.pickupAddressLatitude
-            this@EditTripFragment.pickupAddressLongitude = it.pickupAddressLongitude
+            val layout: LinearLayout = binding.editTripFragmentLinearLayout
+            trip.stops.forEach { stop ->
+                val view = AutoCompleteTextView(context)
+                val adapter = AddressAutoSuggestAdapter(
+                    mainActivity, // Context
+                    android.R.layout.simple_dropdown_item_1line
+                )
+                val handler = LocationHelper.getNewAddressAutoCompleteHandler(adapter)
 
-            binding.dropOffAddressAutoCompleteTextView.setText(it.dropOffAddress)
-            this@EditTripFragment.dropOffAddressLatitude = it.dropOffAddressLatitude
-            this@EditTripFragment.dropOffAddressLongitude = it.dropOffAddressLongitude
+                view.onItemClickListener = AdapterView.OnItemClickListener{
+                        parent,_view,position,id ->
+                    val address: Address? = adapter.getItem(position)
+
+                    address?.let { address ->
+                        view.setText(address.getAddressLine(0))
+                        val stop = Stop(address.getAddressLine(0), address.latitude, address.longitude)
+                        view.tag = stop
+                    }
+
+                }
+
+                view.addTextChangedListener(object: TextWatcher {
+                    override fun afterTextChanged(s: Editable?) {
+                        adapter.notifyDataSetChanged()
+                    }
+
+                    override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                        handler.removeMessages(MainActivity.TRIP_AUTO_COMPLETE + layout.childCount)
+
+                        val bundle = Bundle()
+                        bundle.putString("address", view.text.toString())
+                        val msg = handler.obtainMessage(MainActivity.TRIP_AUTO_COMPLETE)
+                        msg.data = bundle
+                        handler.sendMessageDelayed(msg, MainActivity.AUTO_COMPLETE_DELAY)
+                    }
+                })
+
+                view.setText(stop.address)
+                view.tag = stop
+
+                layout.addView(view)
+            }
+
             binding.payAmountEditText.setText(it.payAmount)
 
             binding.gigSpinner.setSelection(
@@ -270,38 +192,128 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
     }
 
     @Suppress("UNUSED_PARAMETER")
-    private fun saveButtonOnClickListener(v: View) {
-        val pickupAddress = binding.pickupAddressAutoCompleteTextView.text.toString()
-        val dropOffAddress = binding.dropOffAddressAutoCompleteTextView.text.toString()
-        var payAmount = binding.payAmountEditText.text.toString()
-        val gig = binding.gigSpinner.selectedItem.toString()
+    private fun removeLastStop(v: View) {
+        val layout: LinearLayout = binding.editTripFragmentLinearLayout
+
+        val lastChild = layout.children.last()
+        layout.removeView(lastChild)
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun addStop(v: View) {
+        val layout: LinearLayout = binding.editTripFragmentLinearLayout
+        val view = AutoCompleteTextView(context)
+        val adapter = AddressAutoSuggestAdapter(
+            mainActivity, // Context
+            android.R.layout.simple_dropdown_item_1line
+        )
+        val handler = LocationHelper.getNewAddressAutoCompleteHandler(adapter)
+
+        view.id = View.generateViewId()
+        view.hint = "enter address"
+        view.setAdapter(adapter)
+        view.threshold = 1
+
+        view.onItemClickListener = AdapterView.OnItemClickListener{
+                parent,_view,position,id ->
+            val address: Address? = adapter.getItem(position)
+
+            address?.let {
+                view.setText(it.getAddressLine(0))
+                val stop = Stop(it.getAddressLine(0), it.latitude, it.longitude)
+                view.tag = stop
+            }
+
+        }
+
+        view.addTextChangedListener(object: TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                adapter.notifyDataSetChanged()
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                handler.removeMessages(MainActivity.TRIP_AUTO_COMPLETE + layout.childCount)
+
+                val bundle = Bundle()
+                bundle.putString("address", view.text.toString())
+                val msg = handler.obtainMessage(MainActivity.TRIP_AUTO_COMPLETE)
+                msg.data = bundle
+                handler.sendMessageDelayed(msg, MainActivity.AUTO_COMPLETE_DELAY)
+            }
+        })
+
+        layout.addView(view)
+        binding.editTripFragmentScrollView.post {
+            val scroll = binding.editTripFragmentScrollView
+            scroll.scrollTo(0, scroll.height)
+        }
+
+        // inserting the current location address into this AutoCompleteTextView
+        val address = LocationHelper.getFromLocation(binding.root, LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
 
         when{
-            pickupAddress.isNullOrBlank() -> {
-                Toast.makeText(context, "Must enter a pickup address", Toast.LENGTH_LONG).show()
-                return
+            address.isNotEmpty() -> {
+                view.setText(address[0].getAddressLine(0))
+                val stop = Stop(address[0].getAddressLine(0), address[0].latitude, address[0].longitude)
+                view.tag = stop
             }
-            else -> {}
+            else -> {
+                layout.removeView(view)
+                Toast.makeText(mainActivity, "Unable to resolve an Address from current location", Toast.LENGTH_LONG)
+            }
+        }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun saveButtonOnClickListener(v: View) {
+        var payAmount = binding.payAmountEditText.text.toString()
+        val gig = binding.gigSpinner.selectedItem.toString()
+        val layout: LinearLayout = binding.editTripFragmentLinearLayout
+
+        val arrayOfStops = layout.children.map {
+            it.tag as Stop
+        }.toList().toTypedArray()
+
+        when{
+            arrayOfStops.isEmpty() -> {
+                Toast.makeText(context, "This trip has no stops, cannot save.", Toast.LENGTH_LONG).show()
+            }
+            else -> {
+                var pickupAddress = arrayOfStops.first().address
+                var pickupLat = arrayOfStops.first().latitude
+                var pickupLong = arrayOfStops.first().longitude
+
+                var dropOffAddress = arrayOfStops.last().address
+                var dropOffLat = arrayOfStops.last().latitude
+                var dropOffLong = arrayOfStops.last().longitude
+
+
+                if(!this.tripViewModel.validatePayAmount(payAmount)) {
+                    payAmount = "0"
+                }
+
+                binding.editTripSaveCircularProgressButton.isEnabled = false
+                binding.editTripSaveCircularProgressButton.startAnimation()
+
+                this.trip?.let {
+                    it.pickupAddress = pickupAddress
+                    it.pickupAddressLatitude = pickupLat
+                    it.pickupAddressLongitude = pickupLong
+                    it.dropOffAddress = dropOffAddress
+                    it.dropOffAddressLatitude = dropOffLat
+                    it.dropOffAddressLongitude = dropOffLong
+                    it.payAmount = payAmount
+                    it.gigName = gig
+                    it.stops = arrayOfStops.toMutableList()
+                }
+
+                this.tripViewModel.updateTrip(trip)
+            }
         }
 
-        if(!this.tripViewModel.validatePayAmount(payAmount)) {
-            payAmount = "0"
-        }
 
-        this.trip?.let {
-            it.pickupAddress = pickupAddress
-            it.pickupAddressLatitude = this@EditTripFragment.pickupAddressLatitude
-            it.pickupAddressLongitude = this@EditTripFragment.pickupAddressLongitude
-            it.dropOffAddress = dropOffAddress
-            it.dropOffAddressLatitude = this@EditTripFragment.dropOffAddressLatitude
-            it.dropOffAddressLongitude = this@EditTripFragment.dropOffAddressLongitude
-            it.payAmount = payAmount
-            it.gigName = gig
-        }
 
-        binding.editTripSaveCircularProgressButton.isEnabled = false
-        binding.editTripSaveCircularProgressButton.startAnimation()
-
-        this.tripViewModel.updateTrip(trip)
     }
 }

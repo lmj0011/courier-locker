@@ -59,7 +59,7 @@
     <fragment
             android:id="@+id/createTripFragment"
             android:name="name.lmj0011.courierlocker.fragments.CreateTripFragment"
-            android:label="Add new Trip" />
+            android:label="Create Trip" />
     <fragment
             android:id="@+id/editTripFragment"
             android:name="name.lmj0011.courierlocker.fragments.EditTripFragment"

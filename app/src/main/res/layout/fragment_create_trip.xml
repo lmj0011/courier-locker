@@ -15,49 +15,23 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-        <AutoCompleteTextView
-                android:id="@+id/pickupAddressAutoCompleteTextView"
+
+        <ScrollView
+                android:id="@+id/createTripFragmentScrollView"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:hint="pickup address"
-                android:inputType="textPostalAddress|textNoSuggestions"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/insertMyLocationButtonForPickupAddress"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias=".25" />
-
-
-        <ImageView
-                android:id="@+id/insertMyLocationButtonForPickupAddress"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_height="250dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.25"
-                app:srcCompat="@drawable/ic_gps_fixed" />
-
-
-        <AutoCompleteTextView
-                android:id="@+id/dropOffAddressAutoCompleteTextView"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:hint="drop-off address"
-                android:inputType="textPostalAddress|textNoSuggestions"
-                app:layout_constraintEnd_toStartOf="@+id/insertMyLocationButtonForDropOffAddress"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/pickupAddressAutoCompleteTextView" />
+                app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-                android:id="@+id/insertMyLocationButtonForDropOffAddress"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/insertMyLocationButtonForPickupAddress"
-                app:srcCompat="@drawable/ic_gps_fixed" />
+            <LinearLayout
+                    android:id="@+id/createTripFragmentLinearLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+            </LinearLayout>
+        </ScrollView>
 
         <br.com.simplepass.loadingbutton.customViews.CircularProgressButton
                 android:id="@+id/createTripSaveCircularProgressButton"
@@ -65,33 +39,67 @@
                 android:layout_height="wrap_content"
                 android:background="#D6D7D7"
                 android:text="Save"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/dropOffAddressAutoCompleteTextView"
+                app:layout_constraintTop_toTopOf="@+id/guideline3"
                 app:spinning_bar_color="@android:color/white" />
 
         <Spinner
                 android:id="@+id/gigSpinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                app:layout_constraintBottom_toTopOf="@+id/guideline3"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/payAmountEditText"
-                app:layout_constraintTop_toBottomOf="@+id/dropOffAddressAutoCompleteTextView" />
+                app:layout_constraintHorizontal_bias="0.544"
+                app:layout_constraintStart_toStartOf="@+id/guideline2"
+                app:layout_constraintTop_toBottomOf="@+id/createTripAddStopButton" />
 
         <EditText
                 android:id="@+id/payAmountEditText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_width="177dp"
+                android:layout_height="43dp"
                 android:ems="10"
                 android:hint="3.00"
                 android:includeFontPadding="false"
                 android:inputType="text|numberDecimal"
-                app:layout_constraintEnd_toStartOf="@+id/gigSpinner"
+                app:layout_constraintBottom_toTopOf="@+id/guideline3"
+                app:layout_constraintEnd_toStartOf="@+id/guideline2"
+                app:layout_constraintHorizontal_bias="0.571"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/dropOffAddressAutoCompleteTextView" />
+                app:layout_constraintTop_toBottomOf="@+id/createTripAddStopButton" />
+
+        <Button
+                android:id="@+id/createTripAddStopButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Add Stop"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/guideline2"
+                app:layout_constraintTop_toBottomOf="@+id/createTripFragmentScrollView" />
+
+        <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_begin="205dp" />
+
+        <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_begin="375dp" />
+
+        <Button
+                android:id="@+id/createTripRemoveLastStopButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Remove Last Stop"
+                app:layout_constraintEnd_toStartOf="@+id/guideline2"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/createTripFragmentScrollView" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

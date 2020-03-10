@@ -36,8 +36,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     companion object {
         // for AutoCompleteTextView handler
         const val TRIGGER_AUTO_COMPLETE = 101
-        const val TRIP_PICKUP_AUTO_COMPLETE = 102
-        const val TRIP_DROP_OFF_AUTO_COMPLETE = 103
+        const val TRIP_AUTO_COMPLETE = 10000
         const val TRIPS_WRITE_REQUEST_CODE = 104
         const val AUTO_COMPLETE_DELAY = 500L
     }

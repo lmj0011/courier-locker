@@ -19,12 +19,12 @@ object NotificationHelper {
     const val CURRENT_STATUS_CHANNEL_ID = "name.lmj0011.courierlocker.helpers.NotificationHelper#currentStatus"
     const val ACTION_UPDATE_DROP_OFF = "name.lmj0011.courierlocker.services.ACTION_UPDATE_DROP_OFF"
     const val ACTION_DELETE_DROP_OFF = "name.lmj0011.courierlocker.services.ACTION_DELETE_DROP_OFF"
-    const val ACTION_NEXT_PENDING_TRIP = "name.lmj0011.courierlocker.services.ACTION_NEXT_PENDING_TRIP"
+    const val ACTION_NEXT_RECENT_TRIP = "name.lmj0011.courierlocker.services.ACTION_NEXT_RECENT_TRIP"
     const val NOTIFICATION_GROUP_KEY_FOREGROUND = "name.lmj0011.courierlocker.NOTIFICATION_GROUP_KEY_FOREGROUND"
     const val RUNNING_FOREGROUND_SERVICES_NOTIFICATION_ID = 1000
     const val NEARBY_GATECODES_NOTIFICATION_ID = 1002
     const val TRIPS_TODAY_NOTIFICATION_ID = 1003
-    const val PENDING_TRIP_NOTIFICATION_ID = 1004
+    const val RECENT_TRIP_NOTIFICATION_ID = 1004
 
 
     /**
@@ -41,10 +41,10 @@ object NotificationHelper {
         }
     }
 
-    fun getPendingTripNotificationBuilder(context: Context): NotificationCompat.Builder {
+    fun getRecentTripNotificationBuilder(context: Context): NotificationCompat.Builder {
         return NotificationCompat.Builder(context, CURRENT_STATUS_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_action_name)
-            .setContentTitle("pending trip")
+            .setContentTitle("recent trips")
             .setGroup(NOTIFICATION_GROUP_KEY_FOREGROUND)
             .setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
             .setOnlyAlertOnce(true)

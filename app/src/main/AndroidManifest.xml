@@ -41,11 +41,11 @@
                 android:exported="false"></receiver>
 
         <receiver
-                android:name=".services.CurrentStatusForegroundService$PendingTripNotificationDeleteReceiver"
+                android:name=".services.CurrentStatusForegroundService$RecentTripNotificationDeleteReceiver"
                 android:exported="false"></receiver>
 
         <receiver
-                android:name=".services.CurrentStatusForegroundService$NextPendingTripNotificationReceiver"
+                android:name=".services.CurrentStatusForegroundService$NextRecentTripNotificationReceiver"
                 android:exported="false"></receiver>
 
     </application>

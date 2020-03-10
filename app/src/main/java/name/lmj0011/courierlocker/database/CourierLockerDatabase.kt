@@ -8,7 +8,7 @@ import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [GateCode::class, Trip::class, Customer::class], version = 3,  exportSchema = true)
+@Database(entities = [GateCode::class, Trip::class, Customer::class], version = 4,  exportSchema = true)
 @TypeConverters(DataConverters::class)
 abstract class CourierLockerDatabase : RoomDatabase() {
 
@@ -17,9 +17,11 @@ abstract class CourierLockerDatabase : RoomDatabase() {
     abstract val customerDao: CustomerDao
 
     companion object {
+        // Room already created the GateCode table based on it's class, I guess; ref: https://developer.android.com/training/data-storage/room/defining-data
 
         private val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
+                // create Trips table
                 database.execSQL("CREATE TABLE IF NOT EXISTS `trips_table`" +
                         " (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `timestamp` TEXT NOT NULL, "+
                         "`pickupAddress` TEXT NOT NULL, `pickupAddressLatitude` REAL NOT NULL, `pickupAddressLongitude` REAL NOT NULL,"+
@@ -30,10 +32,20 @@ abstract class CourierLockerDatabase : RoomDatabase() {
 
         private val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(database: SupportSQLiteDatabase) {
+                // create Customers Table
                 database.execSQL("CREATE TABLE IF NOT EXISTS `customers_table`" +
                         " (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"+
                         "`name` TEXT NOT NULL, `address` TEXT NOT NULL, `addressLatitude` REAL NOT NULL,"+
                         "`addressLongitude` REAL NOT NULL, `impression` INTEGER NOT NULL, `note` TEXT NOT NULL)")
+            }
+        }
+
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            // alter Trips table; add stops and notes columns
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE `trips_table` ADD COLUMN `stops` TEXT NOT NULL DEFAULT ''");
+                database.execSQL("ALTER TABLE `trips_table` ADD COLUMN `notes` TEXT NOT NULL DEFAULT ''");
+
             }
         }
 
@@ -54,7 +66,7 @@ abstract class CourierLockerDatabase : RoomDatabase() {
                         CourierLockerDatabase::class.java,
                         "courier_locker_database"
                     )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                     .build()
                 }
 

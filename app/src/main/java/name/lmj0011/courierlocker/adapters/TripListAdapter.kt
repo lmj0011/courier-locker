@@ -29,8 +29,8 @@ class TripListAdapter(private val clickListener: TripListener): ListAdapter<Trip
             binding.trip = trip
             binding.clickListener = clickListener
             binding.tripDateTextView.text = HtmlCompat.fromHtml("<b>${getTripDate(trip)}</b>", HtmlCompat.FROM_HTML_MODE_LEGACY)
-            binding.tripPickupAddressTextView.text = HtmlCompat.fromHtml("<b>pickup:</b> ${trip.pickupAddress}", HtmlCompat.FROM_HTML_MODE_LEGACY)
-            binding.tripDropoffAddressTextView.text = HtmlCompat.fromHtml("<b>drop-off:</b> ${trip.dropOffAddress}", HtmlCompat.FROM_HTML_MODE_LEGACY)
+            binding.tripPickupAddressTextView.text = HtmlCompat.fromHtml("<b>start:</b> ${trip.pickupAddress}", HtmlCompat.FROM_HTML_MODE_LEGACY)
+            binding.tripDropoffAddressTextView.text = HtmlCompat.fromHtml("<b>end:</b> ${trip.dropOffAddress}", HtmlCompat.FROM_HTML_MODE_LEGACY)
 
             if(googleApiKey.isNullOrBlank() || trip.distance == 0.0) {
                 binding.tripDistanceTextView.visibility = TextView.GONE

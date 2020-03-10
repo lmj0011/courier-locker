@@ -1,6 +1,5 @@
 package name.lmj0011.courierlocker.database
 
-import androidx.annotation.Nullable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -25,7 +24,6 @@ data class Trip(
     @ColumnInfo(name = "pickupAddressLongitude")
     var pickupAddressLongitude: Double = 0.0,
 
-    @Nullable
     @ColumnInfo(name = "dropOffAddress")
     var dropOffAddress: String = "",
 
@@ -42,5 +40,11 @@ data class Trip(
     var payAmount: String = "0",
 
     @ColumnInfo(name = "gigName")
-    var gigName: String = ""
+    var gigName: String = "",
+
+    @ColumnInfo(name = "stops")
+    var stops: MutableList<Stop> = mutableListOf(),
+
+    @ColumnInfo(name = "notes")
+    var notes: String = ""
 )
