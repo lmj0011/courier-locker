@@ -132,7 +132,7 @@ class CreateGateCodeFragment : Fragment() {
                     this@CreateGateCodeFragment.gateCodeAddressLongitude = address[0].longitude
                 }
                 else -> {
-                    Toast.makeText(mainActivity, "Unable to resolve an Address from current location", Toast.LENGTH_LONG)
+                    mainActivity.showToastMessage("Unable to resolve an Address from current location")
                 }
             }
         }
@@ -168,12 +168,12 @@ class CreateGateCodeFragment : Fragment() {
         }
 
         if (address.isBlank() || codes.size < 1) {
-            Toast.makeText(context, "Must enter an address and at least 1 code", Toast.LENGTH_LONG).show()
+            mainActivity.showToastMessage("Must enter an address and at least 1 code")
             return
         }
 
         this.gateCodeViewModel.insertGateCode(address, codes.toTypedArray(), lat, lng)
-        Toast.makeText(context, "New gate code added", Toast.LENGTH_SHORT).show()
+        mainActivity.showToastMessage("New gate code added")
         this.findNavController().navigate(R.id.gateCodesFragment)
     }
 

@@ -77,7 +77,7 @@ class EditGateCodeFragment : Fragment(), DeleteGateCodeDialogFragment.NoticeDial
 
     override fun onDialogPositiveClick(dialog: DialogFragment) {
         gateCodeViewModel.deleteGateCode(this.gateCode!!.id)
-        Toast.makeText(context, "Deleted a gate code entry", Toast.LENGTH_SHORT).show()
+        mainActivity.showToastMessage("Deleted a gate code entry")
         this.findNavController().navigate(R.id.gateCodesFragment)
     }
 
@@ -116,7 +116,7 @@ class EditGateCodeFragment : Fragment(), DeleteGateCodeDialogFragment.NoticeDial
         }
 
         if (address.isBlank() || codes.size < 1) {
-            Toast.makeText(context, "Must enter an address and at least 1 code", Toast.LENGTH_LONG).show()
+            mainActivity.showToastMessage("Must enter an address and at least 1 code")
             return
         }
 
@@ -127,7 +127,7 @@ class EditGateCodeFragment : Fragment(), DeleteGateCodeDialogFragment.NoticeDial
         }
 
         this.gateCodeViewModel.updateGateCode(gateCode)
-        Toast.makeText(context, "Updated gate code", Toast.LENGTH_SHORT).show()
+        mainActivity.showToastMessage("Updated gate code")
         this.findNavController().navigate(R.id.gateCodesFragment)
     }
 

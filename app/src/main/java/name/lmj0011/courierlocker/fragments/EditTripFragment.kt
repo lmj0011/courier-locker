@@ -38,14 +38,8 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
     private lateinit var binding: FragmentEditTripBinding
     private lateinit var mainActivity: MainActivity
     private lateinit var tripViewModel: TripViewModel
-    private lateinit var handler1: Handler
-    private lateinit var handler2: Handler
     private var trip: Trip? = null
 
-    private var pickupAddressLatitude: Double = 0.toDouble()
-    private var pickupAddressLongitude: Double = 0.toDouble()
-    private var dropOffAddressLatitude: Double = 0.toDouble()
-    private var dropOffAddressLongitude: Double = 0.toDouble()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -85,7 +79,7 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
         binding.editTripAddStopButton.setOnClickListener(this::addStop)
         binding.editTripRemoveLastStopButton.setOnClickListener(this::removeLastStop)
 
-        binding.editTripDeleteBtn.setOnClickListener {
+        binding.editTripDeleteCircularProgressButton.setOnClickListener {
             val dialog = DeleteTripDialogFragment()
             dialog.show(childFragmentManager, "DeleteTripDialogFragment")
 
@@ -95,7 +89,7 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
         tripViewModel.payAmountValidated.observe(viewLifecycleOwner, Observer {
             it?.let {
                 if(!it){
-                    Toast.makeText(mainActivity, "invalid or no amount was entered", Toast.LENGTH_SHORT).show()
+                    mainActivity.showToastMessage("invalid or no amount was entered")
                 }
             }
         })
@@ -123,7 +117,7 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
     override fun onDialogPositiveClick(dialog: DialogFragment) {
         // User touched the dialog's positive button
         tripViewModel.deleteTrip(this.trip!!.id)
-        Toast.makeText(context, "deleted Trip", Toast.LENGTH_SHORT).show()
+        mainActivity.showToastMessage("deleted Trip")
         this.findNavController().navigate(R.id.tripsFragment)
     }
 
@@ -245,23 +239,24 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
         })
 
         layout.addView(view)
+
         binding.editTripFragmentScrollView.post {
-            val scroll = binding.editTripFragmentScrollView
-            scroll.scrollTo(0, scroll.height)
-        }
+            // inserting the current location address into this AutoCompleteTextView
+            val address = LocationHelper.getFromLocation(binding.root, LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
 
-        // inserting the current location address into this AutoCompleteTextView
-        val address = LocationHelper.getFromLocation(binding.root, LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
+            when{
+                address.isNotEmpty() -> {
+                    view.setText(address[0].getAddressLine(0))
+                    val stop = Stop(address[0].getAddressLine(0), address[0].latitude, address[0].longitude)
+                    view.tag = stop
 
-        when{
-            address.isNotEmpty() -> {
-                view.setText(address[0].getAddressLine(0))
-                val stop = Stop(address[0].getAddressLine(0), address[0].latitude, address[0].longitude)
-                view.tag = stop
-            }
-            else -> {
-                layout.removeView(view)
-                Toast.makeText(mainActivity, "Unable to resolve an Address from current location", Toast.LENGTH_LONG)
+                    val scroll = binding.editTripFragmentScrollView
+                    scroll.scrollTo(0, scroll.height)
+                }
+                else -> {
+                    layout.removeView(view)
+                    mainActivity.showToastMessage("Unable to resolve an Address from current location")
+                }
             }
         }
     }
@@ -278,7 +273,7 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
 
         when{
             arrayOfStops.isEmpty() -> {
-                Toast.makeText(context, "This trip has no stops, cannot save.", Toast.LENGTH_LONG).show()
+                mainActivity.showToastMessage("This trip has no stops, cannot save.")
             }
             else -> {
                 var pickupAddress = arrayOfStops.first().address

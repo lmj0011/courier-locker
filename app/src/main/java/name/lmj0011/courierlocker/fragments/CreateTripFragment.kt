@@ -64,7 +64,7 @@ class CreateTripFragment : Fragment() {
         tripViewModel.payAmountValidated.observe(viewLifecycleOwner, Observer {
             it?.let {
                 if(!it){
-                    Toast.makeText(mainActivity, "invalid or no amount was entered", Toast.LENGTH_SHORT).show()
+                    mainActivity.showToastMessage("invalid or no amount was entered")
                 }
             }
         })
@@ -148,25 +148,29 @@ class CreateTripFragment : Fragment() {
         })
 
         layout.addView(view)
+
         binding.createTripFragmentScrollView.post {
-            val scroll = binding.createTripFragmentScrollView
-            scroll.scrollTo(0, scroll.height)
+            // inserting the current location address into this AutoCompleteTextView
+            val address = LocationHelper.getFromLocation(binding.root, LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
+
+            when{
+                address.isNotEmpty() -> {
+                    view.setText(address[0].getAddressLine(0))
+                    val stop = Stop(address[0].getAddressLine(0), address[0].latitude, address[0].longitude)
+                    view.tag = stop
+
+                    // scroll to down to this Stop
+                    val scroll = binding.createTripFragmentScrollView
+                    scroll.scrollTo(0, scroll.height)
+                }
+                else -> {
+                    layout.removeView(view)
+                    mainActivity.showToastMessage("Unable to resolve an Address from current location")
+                }
+            }
         }
 
-        // inserting the current location address into this AutoCompleteTextView
-        val address = LocationHelper.getFromLocation(binding.root, LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
 
-        when{
-            address.isNotEmpty() -> {
-                view.setText(address[0].getAddressLine(0))
-                val stop = Stop(address[0].getAddressLine(0), address[0].latitude, address[0].longitude)
-                view.tag = stop
-            }
-            else -> {
-                layout.removeView(view)
-                Toast.makeText(mainActivity, "Unable to resolve an Address from current location", Toast.LENGTH_LONG)
-            }
-        }
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -182,7 +186,7 @@ class CreateTripFragment : Fragment() {
 
         when{
             arrayOfStops.isEmpty() -> {
-                Toast.makeText(context, "This trip has no stops, cannot save.", Toast.LENGTH_LONG).show()
+                mainActivity.showToastMessage("This trip has no stops, cannot save.")
             }
             else -> {
                 var pickupAddress = arrayOfStops.first().address

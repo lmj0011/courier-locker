@@ -80,7 +80,7 @@ object LocationHelper {
     }
 
     private fun showNoGpsMessage(c: Context) {
-        val toast = Toast.makeText(c, "GPS signal lost", Toast.LENGTH_LONG)
+        val toast = Toast.makeText(c,"GPS signal lost",Toast.LENGTH_LONG)
         toast.setGravity(Gravity.TOP, 0, 0)
         toast.show()
     }

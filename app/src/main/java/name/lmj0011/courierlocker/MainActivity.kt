@@ -2,6 +2,7 @@ package name.lmj0011.courierlocker
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.Gravity
 import androidx.core.view.GravityCompat
 import android.view.MenuItem
 import com.google.android.material.navigation.NavigationView
@@ -105,7 +106,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if(PermissionHelper.permissionAccessFineLocationApproved) {
             LocationHelper.startLocationUpdates()
         } else {
-            Toast.makeText(this,"App has no Location permissions.", Toast.LENGTH_LONG).show()
+            this.showToastMessage("App has no Location permissions.")
         }
     }
 
@@ -207,6 +208,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
+    fun showToastMessage(message: String) {
+        val toast = Toast.makeText(this, message, Toast.LENGTH_SHORT)
+        toast.setGravity(Gravity.TOP, 0, 150)
+        toast.show()
+    }
 
     fun showFabAndSetListener(cb: () -> Unit, imgSrcId: Int) {
         binding.drawerLayout.fab.let {

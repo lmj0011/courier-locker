@@ -147,7 +147,7 @@ class CreateCustomerFragment : Fragment() {
                     this.customer.addressLongitude = address[0].longitude
                 }
                 else -> {
-                    Toast.makeText(mainActivity, "Unable to resolve an Address from current location", Toast.LENGTH_LONG)
+                    mainActivity.showToastMessage("Unable to resolve an Address from current location")
                 }
             }
         }
@@ -218,7 +218,7 @@ class CreateCustomerFragment : Fragment() {
             this.customer.impression,
             this.customer.note
         )
-        Toast.makeText(context, "Saved customer", Toast.LENGTH_SHORT).show()
+        mainActivity.showToastMessage("Saved customer")
         this.findNavController().navigate(R.id.customersFragment)
     }
 

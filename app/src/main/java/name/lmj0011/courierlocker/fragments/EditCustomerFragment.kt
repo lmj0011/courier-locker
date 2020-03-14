@@ -168,7 +168,7 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
                     this@EditCustomerFragment.customerAddressLongitude = address[0].longitude
                 }
                 else -> {
-                    Toast.makeText(mainActivity, "Unable to resolve an Address from current location", Toast.LENGTH_LONG)
+                    mainActivity.showToastMessage("Unable to resolve an Address from current location")
                 }
             }
         }
@@ -180,7 +180,7 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
     override fun onDialogPositiveClick(dialog: DialogFragment) {
         // User touched the dialog's positive button
         this.customerViewModel.deleteCustomer(this.customer!!.id)
-        Toast.makeText(context, "deleted Customer", Toast.LENGTH_SHORT).show()
+        mainActivity.showToastMessage("deleted Customer")
         this.findNavController().navigate(R.id.customersFragment)
     }
 
@@ -262,7 +262,7 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
         }
 
         this.customerViewModel.updateCustomer(customer)
-        Toast.makeText(context, "Updated customer", Toast.LENGTH_SHORT).show()
+        mainActivity.showToastMessage("Updated customer")
         this.findNavController().navigate(R.id.customersFragment)
     }
 
