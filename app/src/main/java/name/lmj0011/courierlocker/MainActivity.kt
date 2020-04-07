@@ -18,11 +18,16 @@ import androidx.preference.PreferenceManager
 import com.crashlytics.android.Crashlytics
 import io.fabric.sdk.android.Fabric
 import kotlinx.android.synthetic.main.app_bar_main.view.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import name.lmj0011.courierlocker.databinding.ActivityMainBinding
 import name.lmj0011.courierlocker.fragments.TripsFragmentDirections
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.PermissionHelper
+import name.lmj0011.courierlocker.helpers.PlexmapsXmlParser
 import name.lmj0011.courierlocker.services.CurrentStatusForegroundService
 import shortbread.Shortcut
 
@@ -59,7 +64,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setContentView(binding.root)
 
         // AppBar Navigation configuration
-        val topLevelDestinations = setOf(R.id.tripsFragment, R.id.gateCodesFragment, R.id.customersFragment)
+        val topLevelDestinations = setOf(R.id.tripsFragment, R.id.gateCodesFragment, R.id.customersFragment, R.id.mapsFragment)
         appBarConfiguration = AppBarConfiguration.Builder(topLevelDestinations)
             .setDrawerLayout(binding.drawerLayout)
             .build()
@@ -232,9 +237,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         binding.drawerLayout.fab.hide()
     }
 
-    @Shortcut(id = "shortcut_trips", rank = 3, icon = R.mipmap.ic_trips_shortcut, shortLabel = "Trips")
+    @Shortcut(id = "shortcut_trips", rank = 4, icon = R.mipmap.ic_trips_shortcut, shortLabel = "Trips")
     fun shortCutToTrips() {
         navController.navigate(R.id.tripsFragment)
+    }
+
+    @Shortcut(id = "shortcut_maps", rank = 3, icon = R.mipmap.ic_maps_shortcut, shortLabel = "Maps")
+    fun shortCutToMaps() {
+        navController.navigate(R.id.mapsFragment)
     }
 
     @Shortcut(id = "shortcut_gatecodes", rank = 2, icon = R.mipmap.ic_gatecodes_shortcut, shortLabel = "Gate Codes")
@@ -257,6 +267,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             R.id.nav_trips -> {
                 navController.navigate(R.id.tripsFragment)
+            }
+            R.id.nav_maps -> {
+                navController.navigate(R.id.mapsFragment)
             }
             R.id.nav_settings -> {
                 val intent = Intent(this, SettingsActivity::class.java)

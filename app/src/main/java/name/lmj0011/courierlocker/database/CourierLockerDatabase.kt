@@ -8,16 +8,17 @@ import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [GateCode::class, Trip::class, Customer::class], version = 4,  exportSchema = true)
+@Database(entities = [GateCode::class, Trip::class, Customer::class, Apartment::class], version = 5,  exportSchema = true)
 @TypeConverters(DataConverters::class)
 abstract class CourierLockerDatabase : RoomDatabase() {
 
     abstract val gateCodeDao: GateCodeDao
     abstract val tripDao: TripDao
     abstract val customerDao: CustomerDao
+    abstract val apartmentDao: ApartmentDao
 
     companion object {
-        // Room already created the GateCode table based on it's class, I guess; ref: https://developer.android.com/training/data-storage/room/defining-data
+        // Room already created the GateCode table based on it's data class in DB version 1: https://developer.android.com/training/data-storage/room/defining-data
 
         private val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
@@ -49,6 +50,17 @@ abstract class CourierLockerDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // create Apartments table
+                database.execSQL("CREATE TABLE IF NOT EXISTS `apartments_table`" +
+                        " (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `uid` TEXT NOT NULL, "+
+                        "`name` TEXT NOT NULL, `address` TEXT NOT NULL, `latitude` REAL NOT NULL,"+
+                        "`longitude` REAL NOT NULL, `mapImageUrl` TEXT NOT NULL, `sourceUrl` TEXT NOT NULL,"+
+                        "`buildings` TEXT NOT NULL )")
+            }
+        }
+
         @Volatile
         private var INSTANCE: CourierLockerDatabase? = null
 
@@ -66,7 +78,7 @@ abstract class CourierLockerDatabase : RoomDatabase() {
                         CourierLockerDatabase::class.java,
                         "courier_locker_database"
                     )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     .build()
                 }
 

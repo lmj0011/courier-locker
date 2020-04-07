@@ -16,4 +16,8 @@
     <string name="menu_gate_codes">Gate Codes</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_customers">Customers</string>
+    <string name="menu_maps">Maps</string>
+
+    <!-- Shared Preference Keys -->
+    <string name="sp_key_map_feed_list">mapFeedList</string>
 </resources>

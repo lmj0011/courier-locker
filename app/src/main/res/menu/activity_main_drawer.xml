@@ -9,6 +9,12 @@
                 android:id="@+id/nav_trips"
                 android:icon="@drawable/ic_menu_trips"
                 android:title="Trips"/>
+
+        <item
+                android:id="@+id/nav_maps"
+                android:icon="@drawable/ic_map"
+                android:title="@string/menu_maps"/>
+
         <item
                 android:id="@+id/nav_gate_codes"
                 android:icon="@drawable/ic_menu_dialpad"

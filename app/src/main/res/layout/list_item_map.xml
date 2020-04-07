@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:tools="http://schemas.android.com/tools"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable name="apartment" type="name.lmj0011.courierlocker.database.Apartment"/>
+        <variable name="clickListener" type="name.lmj0011.courierlocker.adapters.MapListAdapter.MapListener"/>
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="@{() -> clickListener.onClick(apartment)}"
+            android:padding="@dimen/default_list_item_padding">
+
+        <TextView
+                android:id="@+id/aptNameTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Joey Diaz Apartments" />
+
+        <TextView
+                android:id="@+id/aptAddressTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/aptNameTextView"
+                tools:text="3245 Joey Diaz Ave." />
+
+        <ImageButton
+                android:id="@+id/aptMapImageBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:contentDescription="TODO"
+                app:layout_constraintEnd_toStartOf="@+id/buildingImageBtn"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/aptAddressTextView"
+                app:srcCompat="@drawable/ic_map" />
+
+        <ImageButton
+                android:id="@+id/buildingImageBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:textSize="12sp"
+                app:layout_constraintStart_toEndOf="@+id/aptMapImageBtn"
+                app:layout_constraintTop_toBottomOf="@+id/aptAddressTextView"
+                app:srcCompat="@drawable/ic_menu_maps" />
+
+        <TextView
+                android:id="@+id/feedSrcTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TextView"
+                android:textSize="12sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/aptMapImageBtn"
+                tools:text="source: https://joeydiaz.org/plexmaps/feed" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
