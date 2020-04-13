@@ -87,9 +87,27 @@
         <action
                 android:id="@+id/action_mapsFragment_to_editMapFeedsFragment"
                 app:destination="@id/editMapFeedsFragment" />
+        <action
+                android:id="@+id/action_mapsFragment_to_editAptBuildingsMapsFragment"
+                app:destination="@id/editAptBuildingsMapsFragment" />
+        <action
+                android:id="@+id/action_mapsFragment_to_createApartmentMapFragment"
+                app:destination="@id/createApartmentMapFragment" />
     </fragment>
     <fragment
             android:id="@+id/editMapFeedsFragment"
             android:name="name.lmj0011.courierlocker.fragments.EditMapFeedsFragment"
             android:label="Map Feed List" />
+    <fragment
+            android:id="@+id/editAptBuildingsMapsFragment"
+            android:name="name.lmj0011.courierlocker.fragments.EditAptBuildingsMapsFragment"
+            android:label="Add/Remove Buildings">
+        <argument
+                android:name="aptId"
+                app:argType="long" />
+    </fragment>
+    <fragment
+            android:id="@+id/createApartmentMapFragment"
+            android:name="name.lmj0011.courierlocker.fragments.CreateApartmentMapFragment"
+            android:label="Add a Place" />
 </navigation>

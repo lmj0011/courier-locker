@@ -11,6 +11,7 @@ data class Apartment(
     @ColumnInfo(name = "id")
     var id: Long = 0L,
 
+    // currently only relevant if Apartment was pulled from an external source. (ie. not self created)
     @ColumnInfo(name = "uid")
     var uid: String = "",
 
@@ -26,9 +27,11 @@ data class Apartment(
     @ColumnInfo(name = "longitude")
     var longitude: Double = 0.0,
 
+    // can be omitted
     @ColumnInfo(name = "mapImageUrl")
     var mapImageUrl: String = "",
 
+    // currently only relevant if Apartment was pulled from an external source. (ie. not self created)
     @ColumnInfo(name = "sourceUrl")
     var sourceUrl: String = "",
 

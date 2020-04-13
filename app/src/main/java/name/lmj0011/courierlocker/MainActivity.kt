@@ -1,5 +1,6 @@
 package name.lmj0011.courierlocker
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
@@ -8,7 +9,10 @@ import android.view.MenuItem
 import com.google.android.material.navigation.NavigationView
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
@@ -235,6 +239,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     fun hideFab() {
         binding.drawerLayout.fab.hide()
+    }
+
+    fun showKeyBoard(v: View) {
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+        imm?.showSoftInput(v, InputMethodManager.SHOW_IMPLICIT)
+    }
+
+    fun hideKeyBoard(v: View) {
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+        imm?.hideSoftInputFromWindow(v.windowToken, 0)
     }
 
     @Shortcut(id = "shortcut_trips", rank = 4, icon = R.mipmap.ic_trips_shortcut, shortLabel = "Trips")

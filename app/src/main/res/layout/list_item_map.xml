@@ -36,8 +36,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:contentDescription="TODO"
-                app:layout_constraintEnd_toStartOf="@+id/buildingImageBtn"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/deleteImageBtn"
                 app:layout_constraintTop_toBottomOf="@+id/aptAddressTextView"
                 app:srcCompat="@drawable/ic_map" />
 
@@ -50,6 +49,14 @@
                 app:layout_constraintTop_toBottomOf="@+id/aptAddressTextView"
                 app:srcCompat="@drawable/ic_menu_maps" />
 
+        <ImageButton
+                android:id="@+id/deleteImageBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/aptAddressTextView"
+                app:srcCompat="@drawable/ic_delete" />
+
         <TextView
                 android:id="@+id/feedSrcTextView"
                 android:layout_width="wrap_content"
@@ -59,5 +66,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/aptMapImageBtn"
                 tools:text="source: https://joeydiaz.org/plexmaps/feed" />
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

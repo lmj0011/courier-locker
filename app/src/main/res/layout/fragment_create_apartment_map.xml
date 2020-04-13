@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+                name="apartmentViewModel"
+                type="name.lmj0011.courierlocker.viewmodels.ApartmentViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/createApartmentMapFragmentConstraintLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        <EditText
+                android:id="@+id/createApartmentMapName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="124dp"
+                android:ems="10"
+                android:hint="name"
+                android:inputType="textShortMessage"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.497"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/latitudeHiddenTextView" />
+
+        <AutoCompleteTextView
+                android:id="@+id/createApartmentMapAddressAutoCompleteTextView"
+                android:layout_width="363dp"
+                android:layout_height="wrap_content"
+                android:hint="address"
+                android:inputType="textPostalAddress|textNoSuggestions"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/createApartmentMapName" />
+
+        <TextView
+                android:id="@+id/latitudeHiddenTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+                android:id="@+id/longitudeHiddenTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        <br.com.simplepass.loadingbutton.customViews.CircularProgressButton
+                android:id="@+id/createApartmentMapCircularProgressButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="200dp"
+                android:background="#D6D7D7"
+                android:text="Save"
+                app:spinning_bar_color="@android:color/white"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/createApartmentMapAddressAutoCompleteTextView" />
+
+        <ImageView
+                android:id="@+id/createApartmentMapInsertMyLocationButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toEndOf="@+id/createApartmentMapAddressAutoCompleteTextView"
+                app:layout_constraintTop_toBottomOf="@+id/createApartmentMapName"
+                app:layout_constraintVertical_bias="0.0"
+                app:srcCompat="@drawable/ic_gps_fixed" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

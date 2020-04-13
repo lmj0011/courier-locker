@@ -48,10 +48,10 @@ class ApartmentViewModel(
 
     }
 
-    fun deleteAll() {
+    fun deleteAll(apts: MutableList<Apartment>) {
         uiScope.launch {
             withContext(Dispatchers.IO){
-                this@ApartmentViewModel.database.clear()
+                this@ApartmentViewModel.database.deleteAll(apts)
             }
         }
     }

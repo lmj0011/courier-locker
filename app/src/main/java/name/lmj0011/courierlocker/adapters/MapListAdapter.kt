@@ -1,20 +1,20 @@
 package name.lmj0011.courierlocker.adapters
 
-import android.content.Intent
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.PopupMenu
 import android.widget.TextView
-import androidx.core.content.ContextCompat.startActivity
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.database.Apartment
 import name.lmj0011.courierlocker.databinding.ListItemMapBinding
+import name.lmj0011.courierlocker.fragments.MapsFragmentDirections
+import name.lmj0011.courierlocker.fragments.dialogs.DeleteApartmentDialogFragment
 import name.lmj0011.courierlocker.fragments.dialogs.NavigateToAptBuildingDialogFragment
 import name.lmj0011.courierlocker.helpers.LocationHelper
 
@@ -37,11 +37,6 @@ class MapListAdapter(private val clickListener: MapListener, private val parentF
             binding.aptAddressTextView.text = apt.address
             binding.feedSrcTextView.text = "id: ${apt.id} | source: ${apt.sourceUrl}"
             binding.clickListener = clickListener
-
-            binding.aptMapImageBtn.visibility = ImageButton.VISIBLE
-            if (apt.mapImageUrl.isNullOrBlank()) {
-                binding.aptMapImageBtn.visibility = ImageButton.GONE
-            }
 
             binding.buildingImageBtn.visibility = ImageButton.VISIBLE
             if (apt.buildings.isEmpty()) {
@@ -77,13 +72,13 @@ class MapListAdapter(private val clickListener: MapListener, private val parentF
             }
 
             binding.aptMapImageBtn.setOnClickListener {
-                val intent = Intent(Intent.ACTION_VIEW).apply {
-                    setDataAndType(Uri.parse(apt.mapImageUrl), "image/*")
-                }
-                startActivity(binding.root.context, intent, null)
+                parentFragment.findNavController().navigate(MapsFragmentDirections.actionMapsFragmentToEditAptBuildingsMapsFragment(apt.id))
             }
 
-
+            binding.deleteImageBtn.setOnClickListener {
+                val dialog = DeleteApartmentDialogFragment(apt, clickListener.deleteBtnListener)
+                dialog.show(parentFragment.childFragmentManager, "DeleteApartmentDialogFragment")
+            }
 
             binding.executePendingBindings()
         }
@@ -113,8 +108,10 @@ class MapListAdapter(private val clickListener: MapListener, private val parentF
         }
     }
 
-    class MapListener(val clickListener: (aptId: Long) -> Unit) {
+    class MapListener(val clickListener: (aptId: Long) -> Unit, val deleteBtnListener: (aptId: Long) -> Unit) {
         fun onClick(apt: Apartment) = clickListener(apt.id)
+
+        fun onDeleteBtnClick(apt: Apartment) = deleteBtnListener(apt.id)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {

@@ -16,7 +16,7 @@ android {
         applicationId "name.lmj0011.courierlocker"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 28
+        versionCode 30
         versionName "0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -35,12 +35,14 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             resValue("bool", "DEBUG_MODE", "false")
             resValue("string", "app_build", appBuildPrefix)
+            resValue "string", "google_maps_key", (project.findProperty("GOOGLE_MAPS_API_KEY_RELEASE") ?: "")
             manifestPlaceholders = [usesCleartextTraffic:"false"]
         }
         debug {
             minifyEnabled false
             resValue("bool", "DEBUG_MODE", "true")
             resValue("string", "app_build", appBuildPrefix)
+            resValue "string", "google_maps_key", (project.findProperty("GOOGLE_MAPS_API_KEY_DEBUG") ?: "")
             manifestPlaceholders = [usesCleartextTraffic:"true"]
         }
     }
@@ -80,7 +82,7 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version_ktx"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version_ktx"
@@ -98,9 +100,6 @@ dependencies {
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
-
-    // FusedLocationProviderClient dependencies
-    implementation 'com.google.android.gms:play-services-location:17.0.0'
 
     // GSON
     implementation 'com.google.code.gson:gson:2.8.5'
@@ -138,6 +137,18 @@ dependencies {
 
     // leandroBorgesFerreira/LoadingButtonAndroid
     implementation 'br.com.simplepass:loading-button-android:2.2.0'
+
+    // Maps SDK and FusedLocationProviderClient dependencies
+    implementation 'com.android.support:support-v4:+'
+    implementation 'com.android.support:appcompat-v7:+'
+    implementation 'com.google.android.gms:play-services-basement:17.2.1'
+    implementation 'com.google.android.gms:play-services-base:17.2.1'
+    implementation 'com.google.android.gms:play-services-gcm:17.0.0'
+    implementation 'com.google.android.gms:play-services-location:17.0.0'
+
+    // Maps SDK for Android Utility Library
+    // https://developers.google.com/maps/documentation/android-sdk/v3-client-migration#import-the-beta-compatible-utility-library
+    implementation 'com.google.maps.android:android-maps-utils-sdk-v3-compat:0.1'
 }
 
 

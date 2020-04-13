@@ -6,30 +6,21 @@ import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import kotlinx.android.synthetic.main.fragment_maps.view.*
 import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
-import name.lmj0011.courierlocker.adapters.GateCodeListAdapter
 import name.lmj0011.courierlocker.adapters.MapListAdapter
-import name.lmj0011.courierlocker.database.Apartment
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.databinding.FragmentMapsBinding
 import name.lmj0011.courierlocker.factories.ApartmentViewModelFactory
-import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
-import name.lmj0011.courierlocker.factories.GateCodeViewModelFactory
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.PlexmapsXmlParser
 import name.lmj0011.courierlocker.viewmodels.ApartmentViewModel
-import timber.log.Timber
 import java.lang.Exception
 
 
@@ -73,7 +64,16 @@ class MapsFragment : Fragment() {
         viewModelFactory = ApartmentViewModelFactory(dataSource, application)
         apartmentViewModel = ViewModelProviders.of(this, viewModelFactory).get(ApartmentViewModel::class.java)
 
-        listAdapter = MapListAdapter( MapListAdapter.MapListener {  }, this)
+        listAdapter = MapListAdapter( MapListAdapter.MapListener(
+            {_ -> },
+            {aptId ->
+                uiScope.launch{
+                    withContext(Dispatchers.IO) {
+                        apartmentViewModel.database.deleteByApartmentId(aptId)
+                    }
+                }
+            }
+        ), this)
 
         apartmentViewModel.apartments.observe(viewLifecycleOwner, Observer {
             it?.let {
@@ -106,7 +106,14 @@ class MapsFragment : Fragment() {
         }
 
         binding.swipeRefresh.setOnRefreshListener {
-            apartmentViewModel.deleteAll()
+            apartmentViewModel.apartments.value?.let {
+                val apts = it.filter {apt -> // gather apts that are from external sources
+                    !apt.sourceUrl.isNullOrBlank()
+                }.toMutableList()
+
+                apartmentViewModel.deleteAll(apts)
+            }
+
             this.refreshMapList()
         }
 
@@ -115,7 +122,7 @@ class MapsFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        mainActivity.hideFab()
+        mainActivity.showFabAndSetListener(this::fabOnClickListenerCallback, R.drawable.ic_fab_add)
         mainActivity.supportActionBar?.subtitle = null
         this.applyPreferences()
     }
@@ -142,6 +149,10 @@ class MapsFragment : Fragment() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun fabOnClickListenerCallback() {
+        this.findNavController().navigate(MapsFragmentDirections.actionMapsFragmentToCreateApartmentMapFragment())
     }
 
     private fun applyPreferences() {

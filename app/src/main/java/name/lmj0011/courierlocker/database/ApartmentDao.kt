@@ -26,4 +26,7 @@ interface ApartmentDao {
 
     @Query("DELETE from apartments_table WHERE id = :key")
     fun deleteByApartmentId(key: Long): Int
+
+    @Delete
+    fun deleteAll(apartments: MutableList<Apartment>)
 }
