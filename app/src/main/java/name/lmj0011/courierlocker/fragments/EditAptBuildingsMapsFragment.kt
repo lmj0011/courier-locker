@@ -1,44 +1,36 @@
 package name.lmj0011.courierlocker.fragments
 
 
-import android.content.SharedPreferences
-import android.graphics.drawable.ColorDrawable
-import android.os.Build
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import androidx.transition.Slide
-import androidx.transition.TransitionManager
 import android.view.*
-import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
+import androidx.transition.Slide
+import androidx.transition.TransitionManager
 import com.google.android.libraries.maps.CameraUpdateFactory
 import com.google.android.libraries.maps.GoogleMap
-import com.google.android.libraries.maps.OnMapReadyCallback
 import com.google.android.libraries.maps.SupportMapFragment
-import com.google.android.libraries.maps.model.BitmapDescriptorFactory
-import com.google.android.libraries.maps.model.LatLng
-import com.google.android.libraries.maps.model.Marker
-import com.google.android.libraries.maps.model.MarkerOptions
+import com.google.android.libraries.maps.model.*
+import com.google.maps.android.clustering.ClusterManager
+import com.google.maps.android.clustering.view.DefaultClusterRenderer
 import com.google.maps.android.ui.IconGenerator
-import com.google.maps.android.ui.IconGenerator.STYLE_BLUE
-import kotlinx.android.synthetic.main.fragment_edit_apt_buildings_map.view.*
+import com.google.maps.android.ui.IconGenerator.STYLE_PURPLE
 import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
-import name.lmj0011.courierlocker.adapters.MapListAdapter
 import name.lmj0011.courierlocker.database.Apartment
 import name.lmj0011.courierlocker.database.Building
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.databinding.FragmentEditAptBuildingsMapBinding
-import name.lmj0011.courierlocker.databinding.FragmentMapsBinding
 import name.lmj0011.courierlocker.factories.ApartmentViewModelFactory
+import name.lmj0011.courierlocker.helpers.AptBldgClusterItem
 import name.lmj0011.courierlocker.viewmodels.ApartmentViewModel
-import timber.log.Timber
 
 
 /**
@@ -49,12 +41,11 @@ class EditAptBuildingsMapsFragment : Fragment(){
 
     private lateinit var binding: FragmentEditAptBuildingsMapBinding
     private lateinit var mainActivity: MainActivity
-    private lateinit var listAdapter: MapListAdapter
-    private lateinit var sharedPreferences: SharedPreferences
     private lateinit var viewModelFactory: ApartmentViewModelFactory
     private lateinit var apartmentViewModel: ApartmentViewModel
     private lateinit var mapFragment: SupportMapFragment
     private lateinit var gMap: GoogleMap
+    private lateinit var clusterManager: ClusterManager<AptBldgClusterItem>
     private lateinit var pinDropMarker: Marker
     private var selectedApt = MutableLiveData<Apartment>()
     private var selectedBldg: Building? = null
@@ -73,13 +64,21 @@ class EditAptBuildingsMapsFragment : Fragment(){
         val application = requireNotNull(this.activity).application
         val dataSource = CourierLockerDatabase.getInstance(application).apartmentDao
         viewModelFactory = ApartmentViewModelFactory(dataSource, application)
+        val args = EditAptBuildingsMapsFragmentArgs.fromBundle(arguments!!)
         apartmentViewModel = ViewModelProviders.of(this, viewModelFactory).get(ApartmentViewModel::class.java)
         mapFragment = childFragmentManager.findFragmentById(R.id.editAptBuildingsMapFragment) as SupportMapFragment
+
+        selectedApt.observe(viewLifecycleOwner, Observer {
+            if(it.buildings.isNotEmpty()) {
+                mainActivity.supportActionBar?.subtitle = it.name
+            }
+            this.refreshMap()
+        })
 
         uiScope.launch {
             withContext(Dispatchers.IO) {
                 arguments?.let {
-                    val apt = apartmentViewModel.database.get(it.getLong("aptId"))!!
+                    val apt = apartmentViewModel.database.get(args.aptId)!!
                     selectedApt.postValue(apt)
                 }
             }
@@ -87,8 +86,32 @@ class EditAptBuildingsMapsFragment : Fragment(){
 
         mapFragment.getMapAsync { map ->
             gMap = map
+            clusterManager = ClusterManager(mainActivity, gMap)
+
+            val renderer = object: DefaultClusterRenderer<AptBldgClusterItem>(mainActivity, gMap, clusterManager) {
+                private val ig = IconGenerator(mainActivity)
+
+                init {
+                    ig.setStyle(STYLE_PURPLE)
+                }
+
+                override fun onBeforeClusterItemRendered(item: AptBldgClusterItem, markerOptions: MarkerOptions) {
+                    val iconBitmap = ig.makeIcon(item.bldg.number)
+
+                    markerOptions.position(item.position)
+                    markerOptions.title(item.title)
+                    markerOptions.icon(BitmapDescriptorFactory.fromBitmap(iconBitmap))
+                }
+
+            }
+
+            clusterManager.renderer = renderer
 
             gMap.isMyLocationEnabled = true
+            gMap.uiSettings.isMapToolbarEnabled = true /* doesn't seem to work with map clustering */
+
+            gMap.setOnCameraIdleListener(clusterManager)
+            gMap.setOnMarkerClickListener(clusterManager)
 
             gMap.setOnMapClickListener {
                 this.hideEditUI()
@@ -101,16 +124,40 @@ class EditAptBuildingsMapsFragment : Fragment(){
                 this.showEditUI(null)
             }
 
-            gMap.setOnMarkerClickListener(this::onMarkerClick)
+            clusterManager.setOnClusterItemClickListener {
+                val marker = renderer.getMarker(it)
+                marker.showInfoWindow()
+                selectedBldg = it.bldg
+                pinDropMarker.isVisible = false
+                this.showEditUI(it.bldg)
 
+                true
+            }
 
+            clusterManager.setOnClusterClickListener {
+                // Zoom in the cluster. Need to create LatLngBounds and including all the cluster items
+                // inside of bounds, then animate to center of the bounds.
 
-            selectedApt.observe(viewLifecycleOwner, Observer {
-                if(it.buildings.isNotEmpty()) {
-                    mainActivity.supportActionBar?.subtitle = it.name
+                // Create the builder to collect all essential cluster items for the bounds.
+                // Zoom in the cluster. Need to create LatLngBounds and including all the cluster items
+                // inside of bounds, then animate to center of the bounds.
+
+                // Create the builder to collect all essential cluster items for the bounds.
+                val builder = LatLngBounds.builder()
+                for (item in it.items) {
+                    builder.include(item.position)
                 }
-                this.refreshMap()
-            })
+
+                // Get the LatLngBounds
+                val bounds = builder.build()
+
+                // Animate camera to zoom to center to the bound of clusters
+                gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(bounds.center, gMap.cameraPosition.zoom + 1.5f))
+
+                true
+            }
+
+            gMap.moveCamera(CameraUpdateFactory.zoomTo(16f))
         }
 
         binding.addButton.setOnClickListener {
@@ -134,21 +181,27 @@ class EditAptBuildingsMapsFragment : Fragment(){
             }
         }
 
+        binding.navToBldgImageButton.setOnClickListener {
+            val gmmIntentUri = Uri.parse("google.navigation:q=${selectedBldg?.latitude},${selectedBldg?.longitude}")
+            val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+            mapIntent.setPackage("com.google.android.apps.maps")
+            startActivity(mapIntent)
+        }
+
         binding.removeButton.setOnClickListener {
             uiScope.launch {
                 val list = selectedApt.value!!.buildings.toMutableList()
                 list.remove(selectedBldg)
                 selectedApt.value!!.buildings = list.toList()
-                selectedBldg = null
 
                 withContext(Dispatchers.IO) {
                     apartmentViewModel.updateApartment(selectedApt.value)
                     selectedApt.postValue(selectedApt.value)
                 }
+
+                mainActivity.showToastMessage("removed building: ${selectedBldg?.number}")
             }
         }
-
-
 
         binding.lifecycleOwner = this
 
@@ -191,6 +244,7 @@ class EditAptBuildingsMapsFragment : Fragment(){
 
     private fun refreshMap() {
         gMap.clear()
+        clusterManager.clearItems()
 
         pinDropMarker = gMap.addMarker(
             MarkerOptions()
@@ -199,47 +253,27 @@ class EditAptBuildingsMapsFragment : Fragment(){
         )
 
         selectedApt.value!!.buildings.forEach { bldg ->
-            val position = LatLng(bldg.latitude, bldg.longitude)
-            val ig = IconGenerator(mainActivity)
-            ig.setStyle(STYLE_BLUE)
-            val iconBitmap = ig.makeIcon(bldg.number)
-            gMap.addMarker(
-                MarkerOptions()
-                    .position(position)
-                    .title("building: ${bldg.number}")
-                    .icon(BitmapDescriptorFactory.fromBitmap(iconBitmap))
-            ).tag = bldg
+            val item = AptBldgClusterItem(bldg)
+            clusterManager.addItem(item)
         }
 
-        //
+        clusterManager.cluster()
+
         when(selectedBldg) {
             is Building -> {
                 gMap.moveCamera(CameraUpdateFactory.newLatLng(
                     LatLng(selectedBldg!!.latitude, selectedBldg!!.longitude)
                 ))
 
-                gMap.moveCamera(CameraUpdateFactory.zoomTo(gMap.cameraPosition.zoom))
             }
             else -> {
                 gMap.moveCamera(CameraUpdateFactory.newLatLng(
                     LatLng(selectedApt.value!!.latitude, selectedApt.value!!.longitude)
                 ))
-                gMap.moveCamera(CameraUpdateFactory.zoomTo(16f))
             }
         }
 
         this.hideEditUI()
-    }
-
-    private fun onMarkerClick(mk: Marker): Boolean {
-        val bldg = mk.tag as? Building
-        bldg?.let{ selectedBldg = it }
-        mk.showInfoWindow()
-        pinDropMarker.isVisible = false
-        this.showEditUI(bldg)
-        gMap.uiSettings.isMapToolbarEnabled = true
-
-        return false
     }
 
     private fun hideEditUI() {
@@ -247,12 +281,14 @@ class EditAptBuildingsMapsFragment : Fragment(){
         transition.duration = 50
         transition.addTarget(binding.inputView)
         transition.addTarget(binding.addButton)
+        transition.addTarget(binding.navToBldgImageButton)
         transition.addTarget(binding.removeButton)
         transition.addTarget(binding.buildingEditText)
 
         TransitionManager.beginDelayedTransition(binding.editAptBuildingsMapContainer, transition)
         binding.inputView.visibility = View.GONE
         binding.addButton.visibility = View.GONE
+        binding.navToBldgImageButton.visibility = View.GONE
         binding.removeButton.visibility = View.GONE
         binding.buildingEditText.visibility = View.GONE
 
@@ -265,24 +301,27 @@ class EditAptBuildingsMapsFragment : Fragment(){
         transition.duration = 50
         transition.addTarget(binding.inputView)
         transition.addTarget(binding.addButton)
+        transition.addTarget(binding.navToBldgImageButton)
         transition.addTarget(binding.removeButton)
         transition.addTarget(binding.buildingEditText)
 
         TransitionManager.beginDelayedTransition(binding.editAptBuildingsMapContainer, transition)
-        this.addOrRemoveBldg(bldg)
+        this.addOrRemoveBldgUI(bldg)
     }
 
-    private fun addOrRemoveBldg(bldg: Building?) {
+    private fun addOrRemoveBldgUI(bldg: Building?) {
         when (bldg) {
             is Building -> { // set edit ui to Remove a Building
                 binding.inputView.visibility = View.VISIBLE
                 binding.addButton.visibility = View.GONE
+                binding.navToBldgImageButton.visibility = View.VISIBLE
                 binding.removeButton.visibility = View.VISIBLE
                 binding.buildingEditText.visibility = View.GONE
             }
             else -> { // set edit ui to Add a Building to this Apartment
                 binding.inputView.visibility = View.VISIBLE
                 binding.addButton.visibility = View.VISIBLE
+                binding.navToBldgImageButton.visibility = View.GONE
                 binding.removeButton.visibility = View.GONE
                 binding.buildingEditText.visibility = View.VISIBLE
                 binding.buildingEditText.setText("")
@@ -292,6 +331,5 @@ class EditAptBuildingsMapsFragment : Fragment(){
             }
         }
     }
-
 
 }

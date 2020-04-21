@@ -9,7 +9,9 @@ import android.view.View
 import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.location.*
+import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.adapters.AddressAutoSuggestAdapter
+import timber.log.Timber
 import java.io.IOException
 import java.lang.Math.toRadians
 import java.util.*
@@ -21,6 +23,7 @@ object LocationHelper {
     private lateinit var geocoder: Geocoder
     private val locationRequest: LocationRequest = LocationRequest()
     private const val AVERAGE_RADIUS_OF_EARTH_KM = 6371.0 // km
+    private const val AVERAGE_RADIUS_OF_EARTH_MILES = 3958.8 // mi
 
     var lastLatitude = MutableLiveData<Double>().apply { value = 0.0 }
         private set
@@ -34,23 +37,27 @@ object LocationHelper {
         locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
-    fun getNewAddressAutoCompleteHandler(adapter: AddressAutoSuggestAdapter): Handler {
-        return Handler(Handler.Callback {
-            val addressStr = it.data.getString("address")
-
+    fun performAddressAutoComplete(addressStr: String, adapter: AddressAutoSuggestAdapter, job_: Job?, scope: CoroutineScope) {
+        var job = job_
+        // ref: https://stackoverflow.com/a/58282972/2445763
+        job?.cancel()
+        job = scope.launch {
+            delay(500)
             if (addressStr.isNullOrEmpty().not()){
                 val geolocation = GeoLocation.fromDegrees(LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!)
-                val boundingBox = geolocation.boundingCoordinates(25.toDouble(), 3958.8) // numbers are in miles
+                val boundingBox = geolocation.boundingCoordinates(25.toDouble(), AVERAGE_RADIUS_OF_EARTH_MILES) // numbers are in miles
 
                 try {
-                    val addresses = this@LocationHelper.getGeocoder().getFromLocationName(
-                        addressStr,
-                        3,
-                        boundingBox[0].latitudeInDegrees,
-                        boundingBox[0].longitudeInDegrees,
-                        boundingBox[1].latitudeInDegrees,
-                        boundingBox[1].longitudeInDegrees
-                    )
+                    var addresses = withContext(Dispatchers.IO) {
+                        getGeocoder().getFromLocationName(
+                            addressStr,
+                            3,
+                            boundingBox[0].latitudeInDegrees,
+                            boundingBox[0].longitudeInDegrees,
+                            boundingBox[1].latitudeInDegrees,
+                            boundingBox[1].longitudeInDegrees
+                        )
+                    }
 
                     adapter.setData(addresses)
                     adapter.notifyDataSetChanged()
@@ -58,16 +65,13 @@ object LocationHelper {
                 } catch (e: IOException) {
                     when (e.message) {
                         "grpc failed" -> {
-                            showNoGpsMessage(adapter.context)
+                            LocationHelper.showNoGpsMessage(adapter.context)
                         }
                         else -> throw e
                     }
                 }
             }
-
-
-            return@Callback false
-        })
+        }
     }
 
     /*

@@ -14,6 +14,9 @@ import android.widget.*
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.databinding.FragmentCreateGateCodeBinding
 import name.lmj0011.courierlocker.R
@@ -34,7 +37,9 @@ class CreateGateCodeFragment : Fragment() {
     private lateinit var binding: FragmentCreateGateCodeBinding
     private lateinit var mainActivity: MainActivity
     private lateinit var gateCodeViewModel: GateCodeViewModel
-    private lateinit var handler: Handler
+    private var fragmentJob = Job()
+    private var addressAutoCompleteJob: Job? = null
+    private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
 
     private var gateCodeAddressLatitude: Double = 0.toDouble()
     private var gateCodeAddressLongitude: Double = 0.toDouble()
@@ -68,8 +73,6 @@ class CreateGateCodeFragment : Fragment() {
             android.R.layout.simple_dropdown_item_1line
         )
 
-        handler = LocationHelper.getNewAddressAutoCompleteHandler(adapter)
-
         // Set the AutoCompleteTextView adapter
         binding.createGateCodeAddressAutoCompleteTextView.setAdapter(adapter)
 
@@ -98,13 +101,7 @@ class CreateGateCodeFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                handler.removeMessages(MainActivity.TRIGGER_AUTO_COMPLETE)
-
-                val bundle = Bundle()
-                bundle.putString("address", binding.createGateCodeAddressAutoCompleteTextView.text.toString())
-                val msg = handler.obtainMessage(MainActivity.TRIGGER_AUTO_COMPLETE)
-                msg.data = bundle
-                handler.sendMessageDelayed(msg, MainActivity.AUTO_COMPLETE_DELAY)
+                LocationHelper.performAddressAutoComplete(s.toString(), adapter, addressAutoCompleteJob, uiScope)
             }
         })
 
@@ -141,14 +138,15 @@ class CreateGateCodeFragment : Fragment() {
         return binding.root
     }
 
-    override fun onPause() {
-        super.onPause()
-        handler.removeMessages(MainActivity.TRIGGER_AUTO_COMPLETE)
-    }
-
     override fun onResume() {
         super.onResume()
         mainActivity.supportActionBar?.subtitle = null
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        fragmentJob.cancel()
+        addressAutoCompleteJob?.cancel()
     }
 
     @Suppress("UNUSED_PARAMETER")

@@ -17,6 +17,9 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import br.com.simplepass.loadingbutton.presentation.State
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.AddressAutoSuggestAdapter
@@ -38,6 +41,9 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
     private lateinit var binding: FragmentEditTripBinding
     private lateinit var mainActivity: MainActivity
     private lateinit var tripViewModel: TripViewModel
+    private var fragmentJob = Job()
+    private var addressAutoCompleteJob: Job? = null
+    private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
     private var trip: Trip? = null
 
 
@@ -114,6 +120,12 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
         mainActivity.supportActionBar?.subtitle = null
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        fragmentJob.cancel()
+        addressAutoCompleteJob?.cancel()
+    }
+
     override fun onDialogPositiveClick(dialog: DialogFragment) {
         // User touched the dialog's positive button
         tripViewModel.deleteTrip(this.trip!!.id)
@@ -137,8 +149,6 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
                     mainActivity, // Context
                     android.R.layout.simple_dropdown_item_1line
                 )
-                val handler = LocationHelper.getNewAddressAutoCompleteHandler(adapter)
-
                 view.onItemClickListener = AdapterView.OnItemClickListener{
                         parent,_view,position,id ->
                     val address: Address? = adapter.getItem(position)
@@ -159,13 +169,7 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
                     override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
                     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                        handler.removeMessages(MainActivity.TRIP_AUTO_COMPLETE + layout.childCount)
-
-                        val bundle = Bundle()
-                        bundle.putString("address", view.text.toString())
-                        val msg = handler.obtainMessage(MainActivity.TRIP_AUTO_COMPLETE)
-                        msg.data = bundle
-                        handler.sendMessageDelayed(msg, MainActivity.AUTO_COMPLETE_DELAY)
+                        LocationHelper.performAddressAutoComplete(s.toString(), adapter, addressAutoCompleteJob, uiScope)
                     }
                 })
 
@@ -201,7 +205,6 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
             mainActivity, // Context
             android.R.layout.simple_dropdown_item_1line
         )
-        val handler = LocationHelper.getNewAddressAutoCompleteHandler(adapter)
 
         view.id = View.generateViewId()
         view.hint = "enter address"
@@ -228,13 +231,7 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
             override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                handler.removeMessages(MainActivity.TRIP_AUTO_COMPLETE + layout.childCount)
-
-                val bundle = Bundle()
-                bundle.putString("address", view.text.toString())
-                val msg = handler.obtainMessage(MainActivity.TRIP_AUTO_COMPLETE)
-                msg.data = bundle
-                handler.sendMessageDelayed(msg, MainActivity.AUTO_COMPLETE_DELAY)
+                LocationHelper.performAddressAutoComplete(s.toString(), adapter, addressAutoCompleteJob, uiScope)
             }
         })
 

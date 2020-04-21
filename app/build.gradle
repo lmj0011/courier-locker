@@ -16,8 +16,8 @@ android {
         applicationId "name.lmj0011.courierlocker"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 30
-        versionName "0"
+        versionCode 38
+        versionName "1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
@@ -35,14 +35,14 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             resValue("bool", "DEBUG_MODE", "false")
             resValue("string", "app_build", appBuildPrefix)
-            resValue "string", "google_maps_key", (project.findProperty("GOOGLE_MAPS_API_KEY_RELEASE") ?: "")
+            resValue("string", "google_maps_key", (project.findProperty("GOOGLE_MAPS_API_KEY_RELEASE") ?: ""))
             manifestPlaceholders = [usesCleartextTraffic:"false"]
         }
         debug {
             minifyEnabled false
             resValue("bool", "DEBUG_MODE", "true")
             resValue("string", "app_build", appBuildPrefix)
-            resValue "string", "google_maps_key", (project.findProperty("GOOGLE_MAPS_API_KEY_DEBUG") ?: "")
+            resValue("string", "google_maps_key", (project.findProperty("GOOGLE_MAPS_API_KEY_DEBUG") ?: ""))
             manifestPlaceholders = [usesCleartextTraffic:"true"]
         }
     }
@@ -50,7 +50,7 @@ android {
     productFlavors {
         dev { // active development/testing
             applicationIdSuffix ".dev"
-            versionNameSuffix ".4.0-dev"
+            versionNameSuffix ".0.0-dev"
             resValue("string", "app_name", "Courier Locker (dev)")
             manifestPlaceholders = [
                     appIcon: "@mipmap/ic_launcher_dev",
@@ -59,7 +59,7 @@ android {
         }
         beta { // public testing
             applicationIdSuffix ".beta"
-            versionNameSuffix ".4.0-beta"
+            versionNameSuffix ".0.0-beta"
             resValue("string", "app_name", "Courier Locker (beta)")
             manifestPlaceholders = [
                     appIcon: "@mipmap/ic_launcher_beta",
@@ -68,7 +68,7 @@ android {
         }
         prod { // official release
             applicationIdSuffix ".prod"
-            versionNameSuffix ".4.0"
+            versionNameSuffix ".0.0"
             resValue("string", "app_name", "Courier Locker")
             manifestPlaceholders = [
                     appIcon: "@mipmap/ic_launcher",

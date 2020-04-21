@@ -19,6 +19,9 @@ import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import name.lmj0011.courierlocker.MainActivity
 
 import name.lmj0011.courierlocker.R
@@ -42,7 +45,9 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
     private lateinit var mainActivity: MainActivity
     private var customer: Customer? = null
     private lateinit var customerViewModel: CustomerViewModel
-    private lateinit var handler: Handler
+    private var fragmentJob = Job()
+    private var addressAutoCompleteJob: Job? = null
+    private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
     private var customerAddressLatitude = 0.0
     private var customerAddressLongitude = 0.0
 
@@ -103,8 +108,6 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
             android.R.layout.simple_dropdown_item_1line
         )
 
-        handler = LocationHelper.getNewAddressAutoCompleteHandler(adapter)
-
         // Set the AutoCompleteTextView adapter
         binding.editCustomerAddressAutoCompleteTextView.setAdapter(adapter)
 
@@ -134,13 +137,7 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
             override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                handler.removeMessages(MainActivity.TRIGGER_AUTO_COMPLETE)
-
-                val bundle = Bundle()
-                bundle.putString("address", binding.editCustomerAddressAutoCompleteTextView.text.toString())
-                val msg = handler.obtainMessage(MainActivity.TRIGGER_AUTO_COMPLETE)
-                msg.data = bundle
-                handler.sendMessageDelayed(msg, MainActivity.AUTO_COMPLETE_DELAY)
+                LocationHelper.performAddressAutoComplete(s.toString(), adapter, addressAutoCompleteJob, uiScope)
             }
         })
 
@@ -175,6 +172,12 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
         //////////////////
 
         return binding.root
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        fragmentJob.cancel()
+        addressAutoCompleteJob?.cancel()
     }
 
     override fun onDialogPositiveClick(dialog: DialogFragment) {

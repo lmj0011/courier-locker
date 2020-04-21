@@ -19,6 +19,7 @@ import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.databinding.FragmentMapsBinding
 import name.lmj0011.courierlocker.factories.ApartmentViewModelFactory
 import name.lmj0011.courierlocker.helpers.LocationHelper
+import name.lmj0011.courierlocker.helpers.PermissionHelper
 import name.lmj0011.courierlocker.helpers.PlexmapsXmlParser
 import name.lmj0011.courierlocker.viewmodels.ApartmentViewModel
 import java.lang.Exception
@@ -65,7 +66,9 @@ class MapsFragment : Fragment() {
         apartmentViewModel = ViewModelProviders.of(this, viewModelFactory).get(ApartmentViewModel::class.java)
 
         listAdapter = MapListAdapter( MapListAdapter.MapListener(
-            {_ -> },
+            {aptId ->
+                this.findNavController().navigate(MapsFragmentDirections.actionMapsFragmentToCreateOrEditApartmentMapFragment(aptId))
+            },
             {aptId ->
                 uiScope.launch{
                     withContext(Dispatchers.IO) {
@@ -106,18 +109,29 @@ class MapsFragment : Fragment() {
         }
 
         binding.swipeRefresh.setOnRefreshListener {
-            apartmentViewModel.apartments.value?.let {
-                val apts = it.filter {apt -> // gather apts that are from external sources
-                    !apt.sourceUrl.isNullOrBlank()
-                }.toMutableList()
+            binding.swipeRefresh.isRefreshing = false
 
-                apartmentViewModel.deleteAll(apts)
-            }
-
-            this.refreshMapList()
+//            TODO implement some sort of apt merge strategy
+//            apartmentViewModel.apartments.value?.let {
+//                val apts = it.filter {apt -> // gather apts that are from external sources
+//                    !apt.sourceUrl.isNullOrBlank()
+//                }.toMutableList()
+//
+//                apartmentViewModel.deleteAll(apts)
+//            }
+//
+//            this.refreshMapList()
         }
 
         return binding.root
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        if(!PermissionHelper.permissionAccessFineLocationApproved) {
+            PermissionHelper.requestBackgroundLocationAccess(mainActivity)
+        }
     }
 
     override fun onResume() {
@@ -152,7 +166,7 @@ class MapsFragment : Fragment() {
     }
 
     private fun fabOnClickListenerCallback() {
-        this.findNavController().navigate(MapsFragmentDirections.actionMapsFragmentToCreateApartmentMapFragment())
+        this.findNavController().navigate(MapsFragmentDirections.actionMapsFragmentToCreateOrEditApartmentMapFragment(0L))
     }
 
     private fun applyPreferences() {

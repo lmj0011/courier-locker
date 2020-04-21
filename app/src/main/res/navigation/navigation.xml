@@ -91,8 +91,8 @@
                 android:id="@+id/action_mapsFragment_to_editAptBuildingsMapsFragment"
                 app:destination="@id/editAptBuildingsMapsFragment" />
         <action
-                android:id="@+id/action_mapsFragment_to_createApartmentMapFragment"
-                app:destination="@id/createApartmentMapFragment" />
+                android:id="@+id/action_mapsFragment_to_createOrEditApartmentMapFragment"
+                app:destination="@id/createOrEditApartmentMapFragment" />
     </fragment>
     <fragment
             android:id="@+id/editMapFeedsFragment"
@@ -107,7 +107,11 @@
                 app:argType="long" />
     </fragment>
     <fragment
-            android:id="@+id/createApartmentMapFragment"
-            android:name="name.lmj0011.courierlocker.fragments.CreateApartmentMapFragment"
-            android:label="Add a Place" />
+            android:id="@+id/createOrEditApartmentMapFragment"
+            android:name="name.lmj0011.courierlocker.fragments.CreateOrEditApartmentMapFragment"
+            android:label="Add a Place" >
+        <argument
+                android:name="aptId"
+                app:argType="long" />
+    </fragment>
 </navigation>

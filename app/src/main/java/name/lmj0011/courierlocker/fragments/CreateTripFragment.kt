@@ -13,6 +13,9 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import br.com.simplepass.loadingbutton.presentation.State
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.AddressAutoSuggestAdapter
@@ -31,6 +34,9 @@ class CreateTripFragment : Fragment() {
     private lateinit var binding: FragmentCreateTripBinding
     private lateinit var mainActivity: MainActivity
     private lateinit var tripViewModel: TripViewModel
+    private var fragmentJob = Job()
+    private var addressAutoCompleteJob: Job? = null
+    private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -91,6 +97,12 @@ class CreateTripFragment : Fragment() {
         mainActivity.supportActionBar?.subtitle = null
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        fragmentJob.cancel()
+        addressAutoCompleteJob?.cancel()
+    }
+
     @Suppress("UNUSED_PARAMETER")
     private fun removeLastStop(v: View) {
         val layout: LinearLayout = binding.createTripFragmentLinearLayout
@@ -110,7 +122,6 @@ class CreateTripFragment : Fragment() {
             mainActivity, // Context
             android.R.layout.simple_dropdown_item_1line
         )
-        val handler = LocationHelper.getNewAddressAutoCompleteHandler(adapter)
 
         view.id = View.generateViewId()
         view.hint = "enter address"
@@ -137,13 +148,7 @@ class CreateTripFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                handler.removeMessages(MainActivity.TRIP_AUTO_COMPLETE + layout.childCount)
-
-                val bundle = Bundle()
-                bundle.putString("address", view.text.toString())
-                val msg = handler.obtainMessage(MainActivity.TRIP_AUTO_COMPLETE)
-                msg.data = bundle
-                handler.sendMessageDelayed(msg, MainActivity.AUTO_COMPLETE_DELAY)
+                LocationHelper.performAddressAutoComplete(s.toString(), adapter, addressAutoCompleteJob, uiScope)
             }
         })
 

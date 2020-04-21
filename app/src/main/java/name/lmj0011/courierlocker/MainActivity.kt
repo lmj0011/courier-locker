@@ -20,6 +20,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.*
 import androidx.preference.PreferenceManager
 import com.crashlytics.android.Crashlytics
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import io.fabric.sdk.android.Fabric
 import kotlinx.android.synthetic.main.app_bar_main.view.*
 import kotlinx.coroutines.Dispatchers
@@ -44,11 +45,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var appBarConfiguration : AppBarConfiguration
 
     companion object {
-        // for AutoCompleteTextView handler
-        const val TRIGGER_AUTO_COMPLETE = 101
-        const val TRIP_AUTO_COMPLETE = 10000
         const val TRIPS_WRITE_REQUEST_CODE = 104
-        const val AUTO_COMPLETE_DELAY = 500L
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -91,7 +88,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if(!PermissionHelper.permissionAccessFineLocationApproved &&
             !PermissionHelper.backgroundLocationPermissionApproved) {
 
-            // this app currently only needs the ACCESS_FINE_LOCATION permission
             PermissionHelper.requestBackgroundLocationAccess(this)
         }
     }

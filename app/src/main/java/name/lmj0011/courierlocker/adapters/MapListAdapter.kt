@@ -47,8 +47,12 @@ class MapListAdapter(private val clickListener: MapListener, private val parentF
                 binding.feedSrcTextView.visibility = TextView.GONE
             }
 
-            apt.buildings.forEach {
-                popup.menu.add(it.number)
+            // ref: https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.comparisons/natural-order.html
+            val lengthThenNatural = compareBy<String> { it.length }
+                .then(naturalOrder())
+
+            apt.buildings.map { it.number }.sortedWith(lengthThenNatural).forEach {
+                popup.menu.add(it)
             }
 
             popup.setOnMenuItemClickListener {

@@ -17,6 +17,9 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import name.lmj0011.courierlocker.MainActivity
 
 import name.lmj0011.courierlocker.R
@@ -38,8 +41,10 @@ class CreateCustomerFragment : Fragment() {
     private lateinit var binding: FragmentCreateCustomerBinding
     private lateinit var mainActivity: MainActivity
     private lateinit var customerViewModel: CustomerViewModel
-    private lateinit var handler: Handler
     private var customer = Customer()
+    private var fragmentJob = Job()
+    private var addressAutoCompleteJob: Job? = null
+    private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -82,8 +87,6 @@ class CreateCustomerFragment : Fragment() {
             android.R.layout.simple_dropdown_item_1line
         )
 
-        handler = LocationHelper.getNewAddressAutoCompleteHandler(adapter)
-
         // Set the AutoCompleteTextView adapter
         binding.createCustomerAddressAutoCompleteTextView.setAdapter(adapter)
 
@@ -113,13 +116,7 @@ class CreateCustomerFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                handler.removeMessages(MainActivity.TRIGGER_AUTO_COMPLETE)
-
-                val bundle = Bundle()
-                bundle.putString("address", binding.createCustomerAddressAutoCompleteTextView.text.toString())
-                val msg = handler.obtainMessage(MainActivity.TRIGGER_AUTO_COMPLETE)
-                msg.data = bundle
-                handler.sendMessageDelayed(msg, MainActivity.AUTO_COMPLETE_DELAY)
+                LocationHelper.performAddressAutoComplete(s.toString(), adapter, addressAutoCompleteJob, uiScope)
             }
         })
 
@@ -159,6 +156,12 @@ class CreateCustomerFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         mainActivity.supportActionBar?.subtitle = null
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        fragmentJob.cancel()
+        addressAutoCompleteJob?.cancel()
     }
 
 

@@ -16,7 +16,8 @@
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
 
         <Button
                 android:id="@+id/addButton"
@@ -34,9 +35,10 @@
                 android:layout_height="0dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.461"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/inputView" />
+                app:layout_constraintTop_toBottomOf="@+id/inputView"
+                app:layout_constraintVertical_bias="1.0" />
 
         <Button
                 android:id="@+id/removeButton"
@@ -44,8 +46,9 @@
                 android:layout_height="wrap_content"
                 android:text="Remove"
                 android:visibility="gone"
-                app:layout_constraintEnd_toStartOf="@+id/addButton"
-                app:layout_constraintTop_toTopOf="@+id/inputView" />
+                app:layout_constraintStart_toStartOf="@+id/inputView"
+                app:layout_constraintTop_toTopOf="@+id/inputView"
+                tools:visibility="visible" />
 
         <EditText
                 android:id="@+id/buildingEditText"
@@ -55,9 +58,19 @@
                 android:hint="bldg #"
                 android:inputType="textVisiblePassword"
                 android:visibility="gone"
-                app:layout_constraintEnd_toStartOf="@+id/removeButton"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/inputView" />
+                app:layout_constraintTop_toTopOf="@+id/inputView"
+                tools:visibility="gone" />
+
+        <ImageButton
+                android:id="@+id/navToBldgImageButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_directions_28dp"
+                tools:visibility="visible" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
