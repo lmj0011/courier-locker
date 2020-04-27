@@ -9,6 +9,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.GROUP_ALERT_SUMMARY
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.Observer
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
@@ -20,8 +21,10 @@ import name.lmj0011.courierlocker.database.Trip
 import name.lmj0011.courierlocker.helpers.*
 import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
 import name.lmj0011.courierlocker.viewmodels.TripViewModel
+import timber.log.Timber
+import java.lang.Exception
 
-class CurrentStatusForegroundService : Service() {
+class CurrentStatusForegroundService : LifecycleService() {
     private var mutableListOfGateCodes = mutableListOf<GateCode>()
     private var mutableListOfTrips = mutableListOf<Trip>()
 
@@ -55,7 +58,6 @@ class CurrentStatusForegroundService : Service() {
 
         fun stopService(context: Context) {
             val stopIntent = Intent(context, CurrentStatusForegroundService::class.java)
-            removeAllObservers()
             context.stopService(stopIntent)
         }
 
@@ -125,26 +127,10 @@ class CurrentStatusForegroundService : Service() {
             }
         }
 
-        private fun removeAllObservers() {
-            if(::gateCodeViewModel.isInitialized && ::gateCodesObserver.isInitialized) {
-                gateCodeViewModel.gateCodes.removeObserver(gateCodesObserver)
-            }
-
-            if (::latitudeObserver.isInitialized){
-                LocationHelper.lastLatitude.removeObserver(latitudeObserver)
-            }
-
-            if (::tripViewModel.isInitialized && ::tripsObserver.isInitialized){
-                tripViewModel.trips.removeObserver(tripsObserver)
-            }
-
-            if (::tripViewModel.isInitialized && ::recentTripsObserver.isInitialized){
-                tripViewModel.trips.removeObserver(recentTripsObserver)
-            }
-        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
         LocationHelper.setFusedLocationClient(this)
         LocationHelper.startLocationUpdates()
 
@@ -175,7 +161,17 @@ class CurrentStatusForegroundService : Service() {
     }
 
     override fun onBind(intent: Intent): IBinder? {
+        super.onBind(intent)
         return null
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        try {
+            tripViewModel.trips.removeObserver(recentTripsObserver)
+        } catch (ex: Exception) {
+            Timber.e(ex)
+        }
     }
 
 
@@ -208,7 +204,7 @@ class CurrentStatusForegroundService : Service() {
             }
         }
 
-        tripViewModel.trips.observeForever(tripsObserver)
+        tripViewModel.trips.observe(this, tripsObserver)
     }
 
     private fun startNearbyGatecodesNotification () {
@@ -225,7 +221,7 @@ class CurrentStatusForegroundService : Service() {
             mutableListOfGateCodes = it
         }
 
-        gateCodeViewModel.gateCodes.observeForever(gateCodesObserver)
+        gateCodeViewModel.gateCodes.observe(this, gateCodesObserver)
 
 
         latitudeObserver = Observer {
@@ -253,7 +249,7 @@ class CurrentStatusForegroundService : Service() {
 
         }
 
-        LocationHelper.lastLatitude.observeForever(latitudeObserver)
+        LocationHelper.lastLatitude.observe(this, latitudeObserver)
     }
 
     class SetTripDropoffReceiver : BroadcastReceiver() {

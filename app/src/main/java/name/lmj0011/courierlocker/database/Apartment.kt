@@ -36,5 +36,5 @@ data class Apartment(
     var sourceUrl: String = "",
 
     @ColumnInfo(name = "buildings")
-    var buildings: List<Building> = mutableListOf()
+    var buildings: MutableList<Building> = mutableListOf()
 )

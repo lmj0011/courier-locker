@@ -19,7 +19,7 @@ class GateCodeViewModel(
 
     private val uiScope = CoroutineScope(Dispatchers.Main +  viewModelJob)
 
-    val gateCodes = database.getAllGateCodes()
+    var gateCodes = database.getAllGateCodes()
 
     val gateCode = MutableLiveData<GateCode?>()
 

@@ -7,11 +7,13 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import timber.log.Timber
 
 @Database(entities = [GateCode::class, Trip::class, Customer::class, Apartment::class], version = 5,  exportSchema = true)
 @TypeConverters(DataConverters::class)
 abstract class CourierLockerDatabase : RoomDatabase() {
 
+    abstract val baseDao: BaseDao
     abstract val gateCodeDao: GateCodeDao
     abstract val tripDao: TripDao
     abstract val customerDao: CustomerDao
@@ -84,6 +86,42 @@ abstract class CourierLockerDatabase : RoomDatabase() {
 
                 return instance
             }
+        }
+
+        fun getDbData(context: Context): ByteArray? {
+            var data: ByteArray? = null
+
+            try {
+                val currentdb = context.getDatabasePath("courier_locker_database")
+
+                data = currentdb.readBytes()
+            } catch (e: Exception) {
+                Timber.i("backup db failed!")
+            }
+
+            return data
+        }
+
+        fun setDbData(context: Context, data: ByteArray) {
+            try {
+                val currentdb = context.getDatabasePath("courier_locker_database")
+                val currentdbSHM = context.getDatabasePath("courier_locker_database-shm")
+                val currentdbWAL = context.getDatabasePath("courier_locker_database-wal")
+                val output = currentdb.outputStream()
+
+                output.write(data)
+                output.flush()
+                output.close()
+
+                if(currentdbSHM.delete() && currentdbWAL.delete()) {
+                    Timber.i("journal files (-shm -wal) deleted successfully!")
+                }
+
+                Timber.i("imported db successfully!")
+            } catch (e: Exception) {
+                Timber.i("importing db failed!")
+            }
+
         }
     }
 

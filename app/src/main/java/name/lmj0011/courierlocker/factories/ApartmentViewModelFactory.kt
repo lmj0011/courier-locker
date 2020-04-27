@@ -4,14 +4,12 @@ import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import name.lmj0011.courierlocker.database.ApartmentDao
-import name.lmj0011.courierlocker.database.GateCodeDao
 import name.lmj0011.courierlocker.viewmodels.ApartmentViewModel
-import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
 
 /**
  * This is pretty much boiler plate code for a ViewModel Factory.
  *
- * Provides the GateCodeDao and context to the ViewModel.
+ * Provides the Dao and context to the ViewModel.
  */
 class ApartmentViewModelFactory(
     private val dataSource: ApartmentDao,

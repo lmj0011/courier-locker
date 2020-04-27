@@ -7,7 +7,7 @@ import androidx.room.Query
 import androidx.room.Update
 
 @Dao
-interface TripDao {
+interface TripDao: BaseDao {
 
     @Insert
     fun insert(trip: Trip)

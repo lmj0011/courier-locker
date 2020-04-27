@@ -7,7 +7,7 @@ import androidx.room.Query
 import androidx.room.Update
 
 @Dao
-interface GateCodeDao {
+interface GateCodeDao: BaseDao {
 
     @Insert
     fun insert(gateCode: GateCode)

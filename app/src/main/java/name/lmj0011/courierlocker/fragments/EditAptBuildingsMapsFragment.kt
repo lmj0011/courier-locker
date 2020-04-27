@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.transition.Slide
 import androidx.transition.TransitionManager
@@ -27,10 +28,12 @@ import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.database.Apartment
 import name.lmj0011.courierlocker.database.Building
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
+import name.lmj0011.courierlocker.databinding.FragmentCreateOrEditApartmentMapBinding
 import name.lmj0011.courierlocker.databinding.FragmentEditAptBuildingsMapBinding
 import name.lmj0011.courierlocker.factories.ApartmentViewModelFactory
 import name.lmj0011.courierlocker.helpers.AptBldgClusterItem
 import name.lmj0011.courierlocker.viewmodels.ApartmentViewModel
+import java.lang.Exception
 
 
 /**
@@ -56,10 +59,23 @@ class EditAptBuildingsMapsFragment : Fragment(){
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = DataBindingUtil.inflate(
-            inflater, R.layout.fragment_edit_apt_buildings_map, container, false)
-
         mainActivity = activity as MainActivity
+
+        try {
+            binding = DataBindingUtil.inflate(
+                inflater, R.layout.fragment_edit_apt_buildings_map, container, false)
+        } catch (ex: Exception) {
+            // hacky work-around to Google Maps SDK crashing
+            // ref: https://issuetracker.google.com/issues/154855417
+            mainActivity.findNavController(R.id.navHostFragment).navigate(R.id.mapsFragment)
+            mainActivity.showToastMessage("Problem loading the Google Map, please try again later.")
+
+            val binding = DataBindingUtil.inflate(
+                inflater, R.layout.fragment_create_or_edit_apartment_map, container, false
+            ) as FragmentCreateOrEditApartmentMapBinding
+
+            return binding.root
+        }
 
         val application = requireNotNull(this.activity).application
         val dataSource = CourierLockerDatabase.getInstance(application).apartmentDao
@@ -162,19 +178,21 @@ class EditAptBuildingsMapsFragment : Fragment(){
 
         binding.addButton.setOnClickListener {
             uiScope.launch {
-                selectedBldg = Building(
+                val b = Building(
                     binding.buildingEditText.text.toString(),
                     pinDropMarker.position.latitude,
                     pinDropMarker.position.longitude
                 )
 
-                val list = selectedApt.value!!.buildings.toMutableList()
-                list.add(selectedBldg!!)
-                selectedApt.value!!.buildings = list.toList()
+                selectedBldg = b
 
-                withContext(Dispatchers.IO) {
-                    apartmentViewModel.updateApartment(selectedApt.value)
-                    selectedApt.postValue(selectedApt.value)
+                selectedApt.value?.let { apt ->
+                    apt.buildings.add(b)
+
+                    withContext(Dispatchers.IO) {
+                        apartmentViewModel.updateApartment(apt)
+                        selectedApt.postValue(apt)
+                    }
                 }
 
                 mainActivity.hideKeyBoard(binding.buildingEditText)
@@ -190,9 +208,7 @@ class EditAptBuildingsMapsFragment : Fragment(){
 
         binding.removeButton.setOnClickListener {
             uiScope.launch {
-                val list = selectedApt.value!!.buildings.toMutableList()
-                list.remove(selectedBldg)
-                selectedApt.value!!.buildings = list.toList()
+                selectedBldg?.let{ selectedApt.value!!.buildings.remove(it) }
 
                 withContext(Dispatchers.IO) {
                     apartmentViewModel.updateApartment(selectedApt.value)
@@ -225,7 +241,6 @@ class EditAptBuildingsMapsFragment : Fragment(){
         inflater.inflate(R.menu.edit_map_feeds, menu)
     }
 
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -253,8 +268,10 @@ class EditAptBuildingsMapsFragment : Fragment(){
         )
 
         selectedApt.value!!.buildings.forEach { bldg ->
-            val item = AptBldgClusterItem(bldg)
-            clusterManager.addItem(item)
+            bldg?.let{
+                val item = AptBldgClusterItem(it)
+                clusterManager.addItem(item)
+            }
         }
 
         clusterManager.cluster()

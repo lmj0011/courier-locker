@@ -11,6 +11,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
+import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.TripListAdapter
@@ -19,6 +20,7 @@ import name.lmj0011.courierlocker.databinding.FragmentTripsBinding
 import name.lmj0011.courierlocker.factories.TripViewModelFactory
 import name.lmj0011.courierlocker.fragments.dialogs.ClearAllTripsDialogFragment
 import name.lmj0011.courierlocker.fragments.dialogs.TripsStatsDialogFragment
+import name.lmj0011.courierlocker.helpers.ListLock
 import name.lmj0011.courierlocker.helpers.getCsvFromTripList
 import name.lmj0011.courierlocker.viewmodels.TripViewModel
 import timber.log.Timber
@@ -37,6 +39,8 @@ class TripsFragment : Fragment(),
     private lateinit var viewModelFactory: TripViewModelFactory
     private lateinit var tripViewModel: TripViewModel
     private lateinit var listAdapter: TripListAdapter
+    private var fragmentJob: Job = Job()
+    private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -67,7 +71,8 @@ class TripsFragment : Fragment(),
 
         tripViewModel.trips.observe(viewLifecycleOwner, Observer {
             listAdapter.submitList(it)
-            refreshTotals()
+            listAdapter.notifyDataSetChanged()
+            this.refreshTotals()
         })
 
         binding.swipeRefresh.setOnRefreshListener {
@@ -91,6 +96,7 @@ class TripsFragment : Fragment(),
         super.onResume()
         mainActivity.showFabAndSetListener(this::fabOnClickListenerCallback, R.drawable.ic_fab_add)
         mainActivity.supportActionBar?.subtitle = null
+        this.refreshList()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -182,6 +188,22 @@ class TripsFragment : Fragment(),
         }
 
         startActivityForResult(intent, MainActivity.TRIPS_WRITE_REQUEST_CODE)
+    }
+
+    private fun refreshList() {
+        uiScope.launch {
+            val trips = withContext(Dispatchers.IO) {
+                tripViewModel.database.getAllTrips()
+            }
+
+            trips.value?.let {
+                listAdapter.submitList(it)
+                listAdapter.notifyDataSetChanged()
+                this@TripsFragment.refreshTotals()
+            }
+
+            binding.swipeRefresh.isRefreshing = false
+        }
     }
 
     private fun refreshTotals() {

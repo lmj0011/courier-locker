@@ -7,7 +7,7 @@ import androidx.room.Query
 import androidx.room.Update
 
 @Dao
-interface CustomerDao {
+interface CustomerDao: BaseDao {
 
     @Insert
     fun insert(customer: Customer)

@@ -12,24 +12,18 @@ import android.view.Menu
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
-import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.*
 import androidx.preference.PreferenceManager
 import com.crashlytics.android.Crashlytics
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import io.fabric.sdk.android.Fabric
 import kotlinx.android.synthetic.main.app_bar_main.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import timber.log.Timber
 import name.lmj0011.courierlocker.databinding.ActivityMainBinding
 import name.lmj0011.courierlocker.fragments.TripsFragmentDirections
+import name.lmj0011.courierlocker.fragments.dialogs.ImportedAppDataDialogFragment
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.PermissionHelper
 import name.lmj0011.courierlocker.helpers.PlexmapsXmlParser
@@ -43,6 +37,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration : AppBarConfiguration
+    private lateinit var topLevelDestinations: Set<Int>
 
     companion object {
         const val TRIPS_WRITE_REQUEST_CODE = 104
@@ -65,7 +60,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setContentView(binding.root)
 
         // AppBar Navigation configuration
-        val topLevelDestinations = setOf(R.id.tripsFragment, R.id.gateCodesFragment, R.id.customersFragment, R.id.mapsFragment)
+        topLevelDestinations = setOf(R.id.tripsFragment, R.id.gateCodesFragment, R.id.customersFragment, R.id.mapsFragment)
         appBarConfiguration = AppBarConfiguration.Builder(topLevelDestinations)
             .setDrawerLayout(binding.drawerLayout)
             .build()
@@ -73,7 +68,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setSupportActionBar(binding.drawerLayout.toolbar)
         setupActionBarWithNavController(navController, appBarConfiguration)
         binding.navView.setNavigationItemSelectedListener(this::onNavigationItemSelected)
-        /////
 
         LocationHelper.setFusedLocationClient(this)
 
@@ -96,15 +90,28 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onResume()
         Timber.i("onResume Called")
 
-        val menuItemId  = intent.extras?.getInt("menuItemId")
-        menuItemId?.let { this.navigateTo(it) }
+        // any message that the previous Activity wants to send
+        intent.extras?.getString("messageFromCaller")?.let {
+            this.showToastMessage(it, Toast.LENGTH_LONG)
+        }
 
-        val editTripId  = intent.extras?.getInt("editTripId")
-        editTripId?.let {
+        intent.extras?.getInt("menuItemId")?.let {
+            this.navigateTo(it)
+        }
+
+        intent.extras?.getInt("editTripId")?.let {
             when {
-                it > 0 -> navController.navigate(TripsFragmentDirections.actionTripsFragmentToEditTripFragment(editTripId))
+                it > 0 -> navController.navigate(TripsFragmentDirections.actionTripsFragmentToEditTripFragment(it))
             }
         }
+
+        intent.extras?.getBoolean("importedAppData")?.let {
+            if(!it) return
+
+            val dialog = ImportedAppDataDialogFragment()
+            dialog.show(supportFragmentManager, "ImportedAppDataDialogFragment")
+        }
+
 
         CurrentStatusForegroundService.stopService(this)
 
@@ -142,31 +149,27 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        return findNavController(R.id.navHostFragment).navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+        this.onBackPressed()
+        return true
     }
 
     override fun onBackPressed() {
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            binding.drawerLayout.closeDrawer(GravityCompat.START)
-        } else {
-            Timber.i("label: ${navController.currentDestination?.label}")
-
-            when(navController.currentDestination?.label) {
-                "Trips" -> {
-                    navController.popBackStack(R.id.gateCodesFragment, false)
+            // an open drawer means user is at a top level destination, close app
+            finish()
+        }else if(topLevelDestinations.contains(navController.currentDestination?.id)) {
+            binding.drawerLayout.openDrawer(GravityCompat.START)
+        }else {
+            when(navController.currentDestination?.id) {
+                // seems to be the only way to get the Maps recyclerview to show updated items when navigated
+                // from EditAptBuildingsMapsFragment
+                R.id.editAptBuildingsMapsFragment -> {
+                    navController.navigate(R.id.mapsFragment)
                 }
-                "Gate Codes" -> {
-                    navController.popBackStack(R.id.gateCodesFragment, false)
-                    finish()
+                else -> {
+                    super.onBackPressed()
                 }
-                "Customers" -> {
-                    navController.popBackStack(R.id.gateCodesFragment, false)
-                    finish()
-                }
-
             }
-
-            super.onBackPressed()
         }
     }
 
@@ -213,8 +216,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    fun showToastMessage(message: String) {
-        val toast = Toast.makeText(this, message, Toast.LENGTH_SHORT)
+    fun showToastMessage(message: String, duration: Int = Toast.LENGTH_SHORT) {
+        val toast = Toast.makeText(this, message, duration)
         toast.setGravity(Gravity.TOP, 0, 150)
         toast.show()
     }

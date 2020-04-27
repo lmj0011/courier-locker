@@ -2,15 +2,15 @@
 <PreferenceScreen
         xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory
-            app:key="gateCodesCategory"
-            app:title="Gate Codes">
+<!--    <PreferenceCategory-->
+<!--            app:key="gateCodesCategory"-->
+<!--            app:title="Gate Codes">-->
 
-        <SwitchPreferenceCompat
-                app:key="gateCodesLocationUpdating"
-                app:title="always order by nearest"/>
+<!--        <SwitchPreferenceCompat-->
+<!--                app:key="gateCodesLocationUpdating"-->
+<!--                app:title="always order by nearest"/>-->
 
-    </PreferenceCategory>
+<!--    </PreferenceCategory>-->
 
     <PreferenceCategory
             app:key="advancedCategory"
@@ -18,15 +18,30 @@
 
         <EditTextPreference
                 app:key="advancedDirectionsApiKey"
+                app:icon="@drawable/ic_vpn_key"
                 app:title="Add Google Directions API Key to start calculating Trip distances"/>
 
         <SwitchPreferenceCompat
                 app:key="sendCrashReports"
                 app:title="Send crash reports"
+                app:icon="@drawable/ic_bug_report"
                 app:defaultValue="true"/>
 
         <Preference
+                app:key="exportAppData"
+                app:icon="@android:drawable/stat_sys_upload_done"
+                app:title="Export App Data">
+        </Preference>
+
+        <Preference
+                app:key="importAppData"
+                app:icon="@android:drawable/stat_sys_download"
+                app:title="Import App Data">
+        </Preference>
+
+        <Preference
                 app:key="about"
+                app:icon="@drawable/ic_info"
                 app:title="About app">
         </Preference>
 

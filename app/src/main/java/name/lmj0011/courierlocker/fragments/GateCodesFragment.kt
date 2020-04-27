@@ -11,16 +11,18 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.GateCodeListAdapter
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
+import name.lmj0011.courierlocker.database.GateCode
 import name.lmj0011.courierlocker.databinding.FragmentGateCodesBinding
 import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
 import name.lmj0011.courierlocker.factories.GateCodeViewModelFactory
+import name.lmj0011.courierlocker.helpers.ListLock
 import name.lmj0011.courierlocker.helpers.LocationHelper
-
-
 
 
 /**
@@ -35,16 +37,30 @@ class GateCodesFragment : Fragment() {
     private lateinit var listAdapter: GateCodeListAdapter
     private lateinit var gateCodeViewModel: GateCodeViewModel
     private lateinit var sharedPreferences: SharedPreferences
+    private var fragmentJob: Job = Job()
+    private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
+
+    private val scrollListener = object: RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy)
+
+            // unlock list when scrolled all the way to the top
+            if (!recyclerView.canScrollVertically(-1)) {
+                ListLock.unlock()
+            } else {
+                ListLock.lock()
+            }
+        }
+    }
 
     /**
      * This Observer will cause the recyclerView to refresh itself periodically
      */
-    private val latitudeObserver = Observer<Double> {
-        gateCodeViewModel.gateCodes.value?.lastOrNull()?.let {
-            gateCodeViewModel.updateGateCode(it)
+    private val lastLocationListener = Observer<Double> {
+        if(!ListLock.isListLocked) {
+            this.refreshList()
         }
     }
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -67,17 +83,12 @@ class GateCodesFragment : Fragment() {
 
 
         gateCodeViewModel.gateCodes.observe(viewLifecycleOwner, Observer {
-            it?.let {
-                if (binding.liveLocationUpdatingSwitch.isChecked) {
-                    listAdapter.submitList(listAdapter.filterByClosestGateCodeLocation(it))
-                    binding.gateCodesList.smoothScrollToPosition(0)
-                } else {
-                    listAdapter.submitList(it)
-                }
+            if (!ListLock.isListLocked) {
+                it?.let { this.submitListToAdapter(it) }
             }
         })
 
-        LocationHelper.lastLatitude.observe(viewLifecycleOwner, latitudeObserver)
+        LocationHelper.lastLatitude.observe(viewLifecycleOwner, lastLocationListener)
 
         binding.gateCodesList.addItemDecoration(DividerItemDecoration(mainActivity, DividerItemDecoration.VERTICAL))
 
@@ -88,6 +99,7 @@ class GateCodesFragment : Fragment() {
         binding.lifecycleOwner = this
 
         binding.liveLocationUpdatingSwitch.setOnCheckedChangeListener { _, isChecked ->
+            ListLock.unlock()
             sharedPreferences.edit().apply {
                 putBoolean("gateCodesLocationUpdating", isChecked)
                 commit()
@@ -105,8 +117,30 @@ class GateCodesFragment : Fragment() {
         super.onResume()
         mainActivity.showFabAndSetListener(this::fabOnClickListenerCallback, R.drawable.ic_fab_add)
         mainActivity.supportActionBar?.subtitle = null
-
         this.applyPreferences()
+        this.refreshList()
+        binding.gateCodesList.addOnScrollListener(scrollListener)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        binding.gateCodesList.removeOnScrollListener(scrollListener)
+        ListLock.unlock()
+    }
+
+    private fun refreshList() {
+        val gcs = gateCodeViewModel.gateCodes.value
+        gcs?.let{ this.submitListToAdapter(gcs) }
+    }
+
+    private fun submitListToAdapter (list: MutableList<GateCode>) {
+        if (binding.liveLocationUpdatingSwitch.isChecked) {
+            listAdapter.submitList(listAdapter.filterByClosestGateCodeLocation(list))
+            binding.gateCodesList.smoothScrollToPosition(0)
+        } else {
+            listAdapter.submitList(list)
+        }
+        listAdapter.notifyDataSetChanged()
     }
 
     private fun fabOnClickListenerCallback() {

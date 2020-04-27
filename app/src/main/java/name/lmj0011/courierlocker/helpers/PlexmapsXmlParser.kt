@@ -94,7 +94,7 @@ class PlexmapsXmlParser() {
         var latitude = 0.toDouble()
         var longitude = 0.toDouble()
         var mapImageUrl = ""
-        var buildings = listOf<Building>()
+        var buildings = mutableListOf<Building>()
 
         var sourceRowId = parser.getAttributeValue(null, "id")
 
@@ -129,7 +129,7 @@ class PlexmapsXmlParser() {
     }
 
     @Throws(XmlPullParserException::class, IOException::class)
-    private fun readApartmentBuildings(parser: XmlPullParser): List<Building> {
+    private fun readApartmentBuildings(parser: XmlPullParser): MutableList<Building> {
         parser.require(XmlPullParser.START_TAG, ns, "buildings")
         val buildings = mutableListOf<Building>()
 
@@ -143,7 +143,7 @@ class PlexmapsXmlParser() {
             }
         }
 
-        return buildings.toList()
+        return buildings
     }
 
     @Throws(XmlPullParserException::class, IOException::class)

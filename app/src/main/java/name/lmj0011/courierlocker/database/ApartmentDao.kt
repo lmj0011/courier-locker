@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.*
 
 @Dao
-interface ApartmentDao {
+interface ApartmentDao: BaseDao {
 
     @Insert
     fun insert(apartment: Apartment)

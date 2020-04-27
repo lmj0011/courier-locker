@@ -2,15 +2,8 @@ package name.lmj0011.courierlocker.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import com.mooveit.library.Fakeit
-import name.lmj0011.courierlocker.database.GateCode
-import name.lmj0011.courierlocker.database.GateCodeDao
-import kotlin.random.Random
 import kotlinx.coroutines.*
-import name.lmj0011.courierlocker.database.Apartment
-import name.lmj0011.courierlocker.database.ApartmentDao
-
+import name.lmj0011.courierlocker.database.*
 
 class ApartmentViewModel(
     val database: ApartmentDao,
@@ -21,7 +14,7 @@ class ApartmentViewModel(
 
     private val uiScope = CoroutineScope(Dispatchers.Main +  viewModelJob)
 
-    val apartments = database.getAllApartments()
+    var apartments = database.getAllApartments()
 
     override fun onCleared() {
         super.onCleared()

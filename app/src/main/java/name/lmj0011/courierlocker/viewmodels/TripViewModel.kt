@@ -3,9 +3,7 @@ package name.lmj0011.courierlocker.viewmodels
 import android.app.Application
 import android.content.SharedPreferences
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.json.responseJson
@@ -35,7 +33,7 @@ class TripViewModel(
 
     private val googleApiKey = preferences.getString("advancedDirectionsApiKey", "")!!
 
-    val trips = database.getAllTrips()
+    var trips = database.getAllTrips()
 
     val trip = MutableLiveData<Trip?>()
 
@@ -52,7 +50,11 @@ class TripViewModel(
                 }
             }
 
-            return Util.numberFormatInstance.format(result)
+            result?.let{
+                return Util.numberFormatInstance.format(it)
+            }
+
+            return Util.numberFormatInstance.format(0.0)
         }
 
     val todayTotalMoney: String
@@ -66,20 +68,11 @@ class TripViewModel(
                 }
             }
 
-            return Util.numberFormatInstance.format(result)
-        }
-
-    val totalRecentTrips: Int
-        get() {
-            val result = trips.value?.fold(0) { sum, trip ->
-                if (trip.dropOffAddress.isEmpty()){
-                    sum + 1
-                } else {
-                    sum
-                }
+            result?.let{
+                return Util.numberFormatInstance.format(it)
             }
 
-            return result ?: 0
+            return Util.numberFormatInstance.format(0.0)
         }
 
     val todayCompletedTrips: String
@@ -95,7 +88,11 @@ class TripViewModel(
                 }
             }
 
-            return result.toString()
+            result?.let{
+                return it.toString()
+            }
+
+            return "0"
         }
 
     val monthTotalMoney: String
@@ -109,7 +106,11 @@ class TripViewModel(
                 }
             }
 
-            return Util.numberFormatInstance.format(result)
+            result?.let{
+                return Util.numberFormatInstance.format(it)
+            }
+
+            return Util.numberFormatInstance.format(0.0)
         }
 
 

@@ -16,6 +16,7 @@ import name.lmj0011.courierlocker.databinding.ListItemMapBinding
 import name.lmj0011.courierlocker.fragments.MapsFragmentDirections
 import name.lmj0011.courierlocker.fragments.dialogs.DeleteApartmentDialogFragment
 import name.lmj0011.courierlocker.fragments.dialogs.NavigateToAptBuildingDialogFragment
+import name.lmj0011.courierlocker.helpers.ListLock
 import name.lmj0011.courierlocker.helpers.LocationHelper
 
 
@@ -51,7 +52,7 @@ class MapListAdapter(private val clickListener: MapListener, private val parentF
             val lengthThenNatural = compareBy<String> { it.length }
                 .then(naturalOrder())
 
-            apt.buildings.map { it.number }.sortedWith(lengthThenNatural).forEach {
+            apt.buildings.filter { it.number != null }.map { it.number }.sortedWith(lengthThenNatural).forEach {
                 popup.menu.add(it)
             }
 
@@ -72,6 +73,7 @@ class MapListAdapter(private val clickListener: MapListener, private val parentF
             }
 
             binding.buildingImageBtn.setOnClickListener {
+                ListLock.lock()
                 popup.show()
             }
 

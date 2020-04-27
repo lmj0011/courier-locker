@@ -10,11 +10,10 @@ Features include:
 * Store and keep track of Trips, Apartment Codes, and Customers
 * Export Trips to a spreadsheet
 * See total earnings across multiple gigs (calculated from Trips)
+* Create personal maps of places that are difficult to navigate. (ie. apartment complexes)
 
 ## Download
-Get the app from the [Google Play Store](https://play.google.com/store/apps/details?id=name.lmj0011.courierlocker.prod) or [releases page](https://github.com/lmj0011/courier-locker/releases).
-
-If you want to try new features before they get to the stable release, you can download the dev version [here](https://courierlocker.org/dist/dev).
+Get the app from the [Google Play Store](https://play.google.com/store/apps/details?id=name.lmj0011.courierlocker.prod).
 
 ## Issues, Feature Requests and Contributing
 
@@ -40,7 +39,7 @@ Please make sure to read the full guidelines. Your issue may be closed without w
 
 ## License
 
-    Copyright 2019 Landan Jackson
+    Copyright 2019-2020 Landan Jackson
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
