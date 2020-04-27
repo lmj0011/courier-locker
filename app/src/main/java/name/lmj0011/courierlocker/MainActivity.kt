@@ -26,7 +26,6 @@ import name.lmj0011.courierlocker.fragments.TripsFragmentDirections
 import name.lmj0011.courierlocker.fragments.dialogs.ImportedAppDataDialogFragment
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.PermissionHelper
-import name.lmj0011.courierlocker.helpers.PlexmapsXmlParser
 import name.lmj0011.courierlocker.services.CurrentStatusForegroundService
 import shortbread.Shortcut
 
@@ -44,6 +43,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(R.style.AppTheme_NoActionBar)
         super.onCreate(savedInstanceState)
         Timber.i("onCreate Called")
 
@@ -69,20 +69,24 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setupActionBarWithNavController(navController, appBarConfiguration)
         binding.navView.setNavigationItemSelectedListener(this::onNavigationItemSelected)
 
-        LocationHelper.setFusedLocationClient(this)
-
         // hide the fab initially
         binding.drawerLayout.fab.hide()
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        Timber.i("onRestart Called")
+        CurrentStatusForegroundService.stopService(this)
     }
 
     override fun onStart() {
         super.onStart()
         Timber.i("onStart Called")
 
-        if(!PermissionHelper.permissionAccessFineLocationApproved &&
-            !PermissionHelper.backgroundLocationPermissionApproved) {
-
-            PermissionHelper.requestBackgroundLocationAccess(this)
+        if(!PermissionHelper.permissionAccessFineLocationApproved) {
+            PermissionHelper.requestFineLocationAccess(this)
+        } else {
+            LocationHelper.startLocationUpdates()
         }
     }
 
@@ -112,13 +116,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             dialog.show(supportFragmentManager, "ImportedAppDataDialogFragment")
         }
 
-
-        CurrentStatusForegroundService.stopService(this)
-
-        if(PermissionHelper.permissionAccessFineLocationApproved) {
-            LocationHelper.startLocationUpdates()
-        } else {
-            this.showToastMessage("App has no Location permissions.")
+        if(!PermissionHelper.permissionAccessFineLocationApproved) {
+            this.showToastMessage("Location permission is required for some features to work.", Toast.LENGTH_LONG)
         }
     }
 
@@ -127,7 +126,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         Timber.i("onPause Called")
 
         if(PermissionHelper.permissionAccessFineLocationApproved) {
-            LocationHelper.stopLocationUpdates()
             CurrentStatusForegroundService.startService(this)
         }
     }
@@ -141,11 +139,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onDestroy()
         Timber.i("onDestroy Called")
         CurrentStatusForegroundService.stopService(this)
-    }
-
-    override fun onRestart() {
-        super.onRestart()
-        Timber.i("onRestart Called")
     }
 
     override fun onSupportNavigateUp(): Boolean {

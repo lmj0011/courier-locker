@@ -143,7 +143,7 @@ class MapsFragment : Fragment() {
         super.onStart()
 
         if(!PermissionHelper.permissionAccessFineLocationApproved) {
-            PermissionHelper.requestBackgroundLocationAccess(mainActivity)
+            PermissionHelper.requestFineLocationAccess(mainActivity)
         }
     }
 

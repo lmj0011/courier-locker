@@ -131,10 +131,6 @@ class CurrentStatusForegroundService : LifecycleService() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
-        LocationHelper.setFusedLocationClient(this)
-        LocationHelper.startLocationUpdates()
-
-        //do heavy work on a background thread
 
         // add category to Intent to make it unique
         val notificationIntent = Intent(this, MainActivity::class.java).addCategory("Running Foreground service.")

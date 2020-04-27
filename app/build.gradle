@@ -16,7 +16,7 @@ android {
         applicationId "name.lmj0011.courierlocker"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 45
+        versionCode 46
         versionName "1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -50,34 +50,40 @@ android {
     productFlavors {
         dev { // active development/testing
             applicationIdSuffix ".dev"
-            versionNameSuffix ".1.0-dev"
+            versionNameSuffix ".1.2-dev"
             resValue("string", "app_name", "Courier Locker (dev)")
             manifestPlaceholders = [
                     appIcon: "@mipmap/ic_launcher_dev",
-                    appRoundIcon: "@mipmap/ic_launcher_dev_round"
+                    appRoundIcon: "@mipmap/ic_launcher_dev_round",
+                    appThemeLauncher: "@style/AppTheme.Launcher"
             ]
         }
         beta { // public testing
             applicationIdSuffix ".beta"
-            versionNameSuffix ".1.0-beta"
+            versionNameSuffix ".1.2-beta"
             resValue("string", "app_name", "Courier Locker (beta)")
             manifestPlaceholders = [
                     appIcon: "@mipmap/ic_launcher_beta",
-                    appRoundIcon: "@mipmap/ic_launcher_beta_round"
+                    appRoundIcon: "@mipmap/ic_launcher_beta_round",
+                    appThemeLauncher: "@style/AppTheme.Launcher"
             ]
         }
         prod { // official release
             applicationIdSuffix ".prod"
-            versionNameSuffix ".1.0"
+            versionNameSuffix ".1.2"
             resValue("string", "app_name", "Courier Locker")
             manifestPlaceholders = [
                     appIcon: "@mipmap/ic_launcher",
-                    appRoundIcon: "@mipmap/ic_launcher_round"
+                    appRoundIcon: "@mipmap/ic_launcher_round",
+                    appThemeLauncher: "@style/AppTheme.Launcher"
             ]
         }
     }
     dataBinding {
         enabled = true
+    }
+    lintOptions {
+        checkReleaseBuilds false
     }
 }
 

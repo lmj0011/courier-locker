@@ -118,11 +118,6 @@ object LocationHelper {
         )
     }
 
-    fun stopLocationUpdates() {
-        isFusedLocationClientSet()
-        fusedLocationClient.removeLocationUpdates(locationCallback)
-    }
-
     /**
      * ref: https://stackoverflow.com/a/12600225/2445763
      */
@@ -153,8 +148,8 @@ object LocationHelper {
 
             if (locationResult.locations.isNotEmpty()) {
                 // get latest location info
-                lastLatitude.value  = locationResult.lastLocation.latitude
-                lastLongitude.value = locationResult.lastLocation.longitude
+                lastLatitude.postValue(locationResult.lastLocation.latitude)
+                lastLongitude.postValue(locationResult.lastLocation.longitude)
             }
 
         }

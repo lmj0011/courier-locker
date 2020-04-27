@@ -29,13 +29,13 @@
 
         <Preference
                 app:key="exportAppData"
-                app:icon="@android:drawable/stat_sys_upload_done"
+                app:icon="@drawable/ic_file_upload"
                 app:title="Export App Data">
         </Preference>
 
         <Preference
                 app:key="importAppData"
-                app:icon="@android:drawable/stat_sys_download"
+                app:icon="@drawable/ic_file_download"
                 app:title="Import App Data">
         </Preference>
 
