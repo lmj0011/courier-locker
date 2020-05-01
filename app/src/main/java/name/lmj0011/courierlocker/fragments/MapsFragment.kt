@@ -88,6 +88,7 @@ class MapsFragment : Fragment() {
                     withContext(Dispatchers.IO) {
                         apartmentViewModel.database.deleteByApartmentId(aptId)
                     }
+                    listAdapter.notifyDataSetChanged()
                 }
             }
         ), this)

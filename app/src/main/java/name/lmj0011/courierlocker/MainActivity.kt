@@ -142,27 +142,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        this.onBackPressed()
-        return true
+        when(navController.currentDestination?.id) {
+            // seems to be the only way to get the Maps recyclerview to show updated items when navigated
+            // from EditAptBuildingsMapsFragment
+            R.id.editAptBuildingsMapsFragment -> {
+                navController.navigate(R.id.mapsFragment)
+                return true
+            }
+        }
+
+        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 
     override fun onBackPressed() {
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            // an open drawer means user is at a top level destination, close app
-            finish()
-        }else if(topLevelDestinations.contains(navController.currentDestination?.id)) {
-            binding.drawerLayout.openDrawer(GravityCompat.START)
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
         }else {
-            when(navController.currentDestination?.id) {
-                // seems to be the only way to get the Maps recyclerview to show updated items when navigated
-                // from EditAptBuildingsMapsFragment
-                R.id.editAptBuildingsMapsFragment -> {
-                    navController.navigate(R.id.mapsFragment)
-                }
-                else -> {
-                    super.onBackPressed()
-                }
-            }
+            super.onBackPressed()
         }
     }
 
