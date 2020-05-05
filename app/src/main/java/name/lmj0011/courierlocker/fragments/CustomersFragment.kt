@@ -4,6 +4,7 @@ package name.lmj0011.courierlocker.fragments
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.*
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
@@ -14,21 +15,28 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
+import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.MainActivity
 
 import name.lmj0011.courierlocker.databinding.FragmentCustomersBinding
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.CustomerListAdapter
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
+import name.lmj0011.courierlocker.database.Customer
 import name.lmj0011.courierlocker.factories.CustomerViewModelFactory
 import name.lmj0011.courierlocker.fragments.dialogs.ClearAllCustomersDialogFragment
+import name.lmj0011.courierlocker.helpers.interfaces.SearchableRecyclerView
 import name.lmj0011.courierlocker.viewmodels.CustomerViewModel
 
 /**
  * A simple [Fragment] subclass.
  *
  */
-class CustomersFragment : Fragment(), ClearAllCustomersDialogFragment.NoticeDialogListener {
+class CustomersFragment :
+    Fragment(),
+    ClearAllCustomersDialogFragment.NoticeDialogListener,
+    SearchableRecyclerView
+{
 
     private lateinit var binding: FragmentCustomersBinding
     private lateinit var mainActivity: MainActivity
@@ -36,6 +44,8 @@ class CustomersFragment : Fragment(), ClearAllCustomersDialogFragment.NoticeDial
     private lateinit var listAdapter: CustomerListAdapter
     private lateinit var customerViewModel: CustomerViewModel
     private lateinit var sharedPreferences: SharedPreferences
+    private var fragmentJob: Job = Job()
+    private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -73,6 +83,39 @@ class CustomersFragment : Fragment(), ClearAllCustomersDialogFragment.NoticeDial
             binding.generateCustomerBtn.visibility = View.GONE
         }
 
+        binding.customersSearchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                var list = customerViewModel.customers.value
+
+                list?.let {
+                    uiScope.launch {
+                        val filteredList = withContext(Dispatchers.Default) {
+                            listAdapter.filterBySearchQuery(newText, it)
+                        }
+
+                        this@CustomersFragment.submitListToAdapter(filteredList)
+                    }
+                }
+                return false
+            }
+        })
+
+        binding.customersSearchView.setOnCloseListener {
+            this@CustomersFragment.toggleSearch(mainActivity, binding.customersSearchView, false)
+            false
+        }
+
+        binding.customersSearchView.setOnQueryTextFocusChangeListener { view, hasFocus ->
+            if (hasFocus) { } else{
+                binding.customersSearchView.setQuery("", true)
+                this@CustomersFragment.toggleSearch(mainActivity, binding.customersSearchView, false)
+            }
+        }
+
         return binding.root
     }
 
@@ -85,6 +128,11 @@ class CustomersFragment : Fragment(), ClearAllCustomersDialogFragment.NoticeDial
         this.applyPreferences()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        fragmentJob?.cancel()
+    }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.customers, menu)
@@ -95,6 +143,10 @@ class CustomersFragment : Fragment(), ClearAllCustomersDialogFragment.NoticeDial
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
+            R.id.action_maps_search -> {
+                this@CustomersFragment.toggleSearch(mainActivity, binding.customersSearchView, true)
+                true
+            }
             R.id.action_customers_clear_all -> {
                 this.showClearAllCustomersDialog()
                 true
@@ -134,6 +186,11 @@ class CustomersFragment : Fragment(), ClearAllCustomersDialogFragment.NoticeDial
             ContextCompat.getDrawable(mainActivity, R.drawable.ic_sad_face)!!,
             ContextCompat.getColor(mainActivity, R.color.colorSadFace)
         )
+    }
+
+    private fun submitListToAdapter (list: MutableList<Customer>) {
+        listAdapter.submitList(list)
+        listAdapter.notifyDataSetChanged()
     }
 
 }

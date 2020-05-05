@@ -129,7 +129,7 @@ class MapListAdapter(private val clickListener: MapListener, private val parentF
         return ViewHolder.from(parent, this.parentFragment)
     }
 
-    fun filterByClosestGateCodeLocation(list: MutableList<Apartment>): MutableList<Apartment> {
+    fun filterByClosestLocation(list: MutableList<Apartment>): MutableList<Apartment> {
         return list.sortedBy {
             LocationHelper.calculateApproxDistanceBetweenMapPoints(
                 LocationHelper.lastLatitude.value!!,
@@ -137,6 +137,17 @@ class MapListAdapter(private val clickListener: MapListener, private val parentF
                 it.latitude,
                 it.longitude
             )
+        }.toMutableList()
+    }
+
+    fun filterBySearchQuery(query: String?, list: MutableList<Apartment>): MutableList<Apartment> {
+        if (query.isNullOrBlank()) return list
+
+        return list.filter {
+            val inName = it.name.contains(query, true)
+            val inAddress = it.address.contains(query, true)
+
+            return@filter inName || inAddress
         }.toMutableList()
     }
 }

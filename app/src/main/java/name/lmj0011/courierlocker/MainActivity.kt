@@ -143,12 +143,28 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onSupportNavigateUp(): Boolean {
         when(navController.currentDestination?.id) {
-            // seems to be the only way to get the Maps recyclerview to show updated items when navigated
-            // from EditAptBuildingsMapsFragment
+            R.id.editTripFragment -> {
+                // resets the recyclerview to original state
+                navController.navigate(R.id.tripsFragment)
+                return true
+            }
             R.id.editAptBuildingsMapsFragment -> {
+                // resets the recyclerview to original state
                 navController.navigate(R.id.mapsFragment)
                 return true
             }
+            R.id.editGateCodeFragment -> {
+                // resets the recyclerview to original state
+                navController.navigate(R.id.gateCodesFragment)
+                return true
+            }
+            R.id.editCustomerFragment -> {
+                // resets the recyclerview to original state
+                navController.navigate(R.id.customersFragment)
+                return true
+            }
+
+            else -> { }
         }
 
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()

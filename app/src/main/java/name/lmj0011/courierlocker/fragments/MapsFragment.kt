@@ -4,6 +4,7 @@ package name.lmj0011.courierlocker.fragments
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.*
+import androidx.appcompat.widget.SearchView
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -23,14 +24,16 @@ import name.lmj0011.courierlocker.factories.ApartmentViewModelFactory
 import name.lmj0011.courierlocker.helpers.ListLock
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.PermissionHelper
+import name.lmj0011.courierlocker.helpers.interfaces.SearchableRecyclerView
 import name.lmj0011.courierlocker.viewmodels.ApartmentViewModel
+import timber.log.Timber
 
 
 /**
  * A simple [Fragment] subclass.
  *
  */
-class MapsFragment : Fragment() {
+class MapsFragment : Fragment(), SearchableRecyclerView {
 
     private lateinit var binding: FragmentMapsBinding
     private lateinit var mainActivity: MainActivity
@@ -45,6 +48,7 @@ class MapsFragment : Fragment() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
 
+            Timber.i("scrollListener called!")
             // unlock list when scrolled all the way to the top
             if (!recyclerView.canScrollVertically(-1)) {
                 ListLock.unlock()
@@ -59,6 +63,7 @@ class MapsFragment : Fragment() {
      */
     private val lastLocationListener = Observer<Double> {
         if(!ListLock.isListLocked) {
+            Timber.i("lastLocationListener called!")
             this.refreshList()
         }
     }
@@ -121,6 +126,44 @@ class MapsFragment : Fragment() {
             binding.generateMapBtn.visibility = View.GONE
         }
 
+        binding.mapsSearchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                var list = apartmentViewModel.apartments.value
+
+                list?.let {
+                    uiScope.launch {
+                        val filteredList = withContext(Dispatchers.Default) {
+                            listAdapter.filterBySearchQuery(newText, it)
+                        }
+
+                        this@MapsFragment.submitListToAdapter(filteredList)
+                    }
+                }
+                return false
+            }
+        })
+
+        binding.mapsSearchView.setOnCloseListener {
+            this@MapsFragment.toggleSearch(mainActivity, binding.mapsSearchView, false)
+            false
+        }
+
+        binding.mapsSearchView.setOnQueryTextFocusChangeListener { view, hasFocus ->
+            if (hasFocus) {
+                ListLock.lock()
+                binding.mapList.removeOnScrollListener(scrollListener)
+            } else{
+                binding.mapsSearchView.setQuery("", true)
+                this@MapsFragment.toggleSearch(mainActivity, binding.mapsSearchView, false)
+                ListLock.unlock()
+                binding.mapList.addOnScrollListener(scrollListener)
+            }
+        }
+
         binding.swipeRefresh.setOnRefreshListener {
             ListLock.unlock()
             this.findNavController().navigate(R.id.mapsFragment)
@@ -170,7 +213,7 @@ class MapsFragment : Fragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
-        inflater.inflate(R.menu.edit_map_feeds, menu)
+        inflater.inflate(R.menu.maps, menu)
     }
 
 
@@ -179,6 +222,10 @@ class MapsFragment : Fragment() {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
+            R.id.action_maps_search -> {
+                this@MapsFragment.toggleSearch(mainActivity, binding.mapsSearchView, true)
+                true
+            }
             R.id.action_edit_map_feeds -> {
                 this.findNavController().navigate(MapsFragmentDirections.actionMapsFragmentToEditMapFeedsFragment())
                 true
@@ -231,8 +278,14 @@ class MapsFragment : Fragment() {
 
     private fun submitListToAdapter (list: MutableList<Apartment>) {
         if (binding.liveLocationUpdatingSwitch.isChecked) {
-            listAdapter.submitList(listAdapter.filterByClosestGateCodeLocation(list))
-            binding.mapList.smoothScrollToPosition(0)
+            uiScope.launch {
+                val filteredList = withContext(Dispatchers.Default) {
+                    listAdapter.filterByClosestLocation(list)
+                }
+
+                listAdapter.submitList(filteredList)
+                binding.mapList.smoothScrollToPosition(0)
+            }
         } else {
             listAdapter.submitList(list)
         }

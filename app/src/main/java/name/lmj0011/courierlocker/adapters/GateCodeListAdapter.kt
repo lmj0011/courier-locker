@@ -77,4 +77,17 @@ class GateCodeListAdapter(private val clickListener: GateCodeListener): ListAdap
             )
         }.toMutableList()
     }
+
+    fun filterBySearchQuery(query: String?, list: MutableList<GateCode>): MutableList<GateCode> {
+        if (query.isNullOrBlank()) return list
+
+        return list.filter {
+            val inAddress = it.address.contains(query, true)
+            val inCodes = it.codes.any { str ->
+                str.contains(query, true)
+            }
+
+            return@filter inAddress || inCodes
+        }.toMutableList()
+    }
 }

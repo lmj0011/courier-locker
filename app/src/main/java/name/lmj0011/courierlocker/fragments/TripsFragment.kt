@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
+import androidx.appcompat.widget.SearchView
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
@@ -16,12 +17,13 @@ import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.TripListAdapter
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
+import name.lmj0011.courierlocker.database.Trip
 import name.lmj0011.courierlocker.databinding.FragmentTripsBinding
 import name.lmj0011.courierlocker.factories.TripViewModelFactory
 import name.lmj0011.courierlocker.fragments.dialogs.ClearAllTripsDialogFragment
 import name.lmj0011.courierlocker.fragments.dialogs.TripsStatsDialogFragment
-import name.lmj0011.courierlocker.helpers.ListLock
 import name.lmj0011.courierlocker.helpers.getCsvFromTripList
+import name.lmj0011.courierlocker.helpers.interfaces.SearchableRecyclerView
 import name.lmj0011.courierlocker.viewmodels.TripViewModel
 import timber.log.Timber
 import java.io.FileOutputStream
@@ -32,7 +34,8 @@ import java.io.FileOutputStream
  */
 class TripsFragment : Fragment(),
     ClearAllTripsDialogFragment.NoticeDialogListener,
-    TripsStatsDialogFragment.TripsStatsDialogListener
+    TripsStatsDialogFragment.TripsStatsDialogListener,
+    SearchableRecyclerView
 {
     private lateinit var binding: FragmentTripsBinding
     private lateinit var mainActivity: MainActivity
@@ -89,6 +92,39 @@ class TripsFragment : Fragment(),
             binding.generateCustomerBtn.visibility = View.GONE
         }
 
+        binding.tripsSearchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                var list = tripViewModel.trips.value
+
+                list?.let {
+                    uiScope.launch {
+                        val filteredList = withContext(Dispatchers.Default) {
+                            listAdapter.filterBySearchQuery(newText, it)
+                        }
+
+                        this@TripsFragment.submitListToAdapter(filteredList)
+                    }
+                }
+                return false
+            }
+        })
+
+        binding.tripsSearchView.setOnCloseListener {
+            this@TripsFragment.toggleSearch(mainActivity, binding.tripsSearchView, false)
+            false
+        }
+
+        binding.tripsSearchView.setOnQueryTextFocusChangeListener { view, hasFocus ->
+            if (hasFocus) { } else{
+                binding.tripsSearchView.setQuery("", true)
+                this@TripsFragment.toggleSearch(mainActivity, binding.tripsSearchView, false)
+            }
+        }
+
         return binding.root
     }
 
@@ -110,6 +146,10 @@ class TripsFragment : Fragment(),
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
+            R.id.action_maps_search -> {
+                this@TripsFragment.toggleSearch(mainActivity, binding.tripsSearchView, true)
+                true
+            }
             R.id.action_trips_export -> {
                 this.createFile("text/csv", "trips.csv")
                 true
@@ -191,22 +231,18 @@ class TripsFragment : Fragment(),
     }
 
     private fun refreshList() {
-        uiScope.launch {
-            val trips = withContext(Dispatchers.IO) {
-                tripViewModel.database.getAllTrips()
-            }
-
-            trips.value?.let {
-                listAdapter.submitList(it)
-                listAdapter.notifyDataSetChanged()
-                this@TripsFragment.refreshTotals()
-            }
-
-            binding.swipeRefresh.isRefreshing = false
-        }
+        val trips = tripViewModel.trips.value
+        trips?.let { this.submitListToAdapter(it) }
+        binding.swipeRefresh.isRefreshing = false
     }
 
     private fun refreshTotals() {
         binding.totalPayTextView.text = tripViewModel.todayTotalMoney
+    }
+
+    private fun submitListToAdapter (list: MutableList<Trip>) {
+        listAdapter.submitList(list)
+        listAdapter.notifyDataSetChanged()
+        this@TripsFragment.refreshTotals()
     }
 }

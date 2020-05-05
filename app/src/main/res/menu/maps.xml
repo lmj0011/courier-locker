@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/action_maps_search"
+            android:title="Search"
+            android:icon="@drawable/ic_search"
+            android:orderInCategory="100"
+            app:showAsAction="always"/>
     <item android:id="@+id/action_edit_map_feeds"
             android:title="Edit Map Feeds"
-            android:orderInCategory="100"
+            android:orderInCategory="101"
             app:showAsAction="never"/>
 </menu>

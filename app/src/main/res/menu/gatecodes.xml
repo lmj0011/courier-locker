@@ -6,8 +6,4 @@
             android:icon="@drawable/ic_search"
             android:orderInCategory="100"
             app:showAsAction="always"/>
-    <item android:id="@+id/action_customers_clear_all"
-            android:title="Clear All"
-            android:orderInCategory="101"
-            app:showAsAction="never"/>
 </menu>

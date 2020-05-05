@@ -86,4 +86,18 @@ class TripListAdapter(private val clickListener: TripListener): ListAdapter<Trip
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder.from(parent)
     }
+
+    fun filterBySearchQuery(query: String?, list: MutableList<Trip>): MutableList<Trip> {
+        if (query.isNullOrBlank()) return list
+
+        return list.filter {
+            val inDate = getTripDate(it).contains(query, true)
+            val inPickupAddress = it.pickupAddress.contains(query, true)
+            val inDropOffAddress = it.dropOffAddress.contains(query, true)
+            val inPayAmount = it.payAmount.contains(query, true)
+            val inGigName = it.gigName.contains(query, true)
+
+            return@filter inGigName || inPickupAddress || inDropOffAddress|| inPayAmount || inDate
+        }.toMutableList()
+    }
 }

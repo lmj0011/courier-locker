@@ -71,4 +71,16 @@ class CustomerListAdapter(private val clickListener: CustomerListener): ListAdap
         return ViewHolder.from(parent)
     }
 
+    fun filterBySearchQuery(query: String?, list: MutableList<Customer>): MutableList<Customer> {
+        if (query.isNullOrBlank()) return list
+
+        return list.filter {
+            val inName = it.name.contains(query, true)
+            val inAddress = it.address.contains(query, true)
+            val inNote = it.note.contains(query, true)
+
+            return@filter inName || inAddress || inNote
+        }.toMutableList()
+    }
+
 }
