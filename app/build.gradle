@@ -36,6 +36,7 @@ android {
             resValue("bool", "DEBUG_MODE", "false")
             resValue("string", "app_build", appBuildPrefix)
             resValue("string", "google_maps_key", (project.findProperty("GOOGLE_MAPS_API_KEY_RELEASE") ?: ""))
+            resValue("string", "google_directions_key", (project.findProperty("GOOGLE_DIRECTIONS_API_KEY_DEBUG") ?: ""))
             manifestPlaceholders = [usesCleartextTraffic:"false"]
         }
         debug {
@@ -98,6 +99,29 @@ android {
     lintOptions {
         checkReleaseBuilds false
     }
+
+    task generateDependencyListFile {
+        configurations.implementation.setCanBeResolved(true)
+        configurations.androidTestImplementation.setCanBeResolved(true)
+
+        doLast {
+            def str = "# auto-generated from ${this.name}; this file should be checked into version control\n"
+            def resolvedImplementationConfig = configurations.implementation.resolvedConfiguration
+            def resolvedAndroidTestImplementationConfig = configurations.androidTestImplementation.resolvedConfiguration
+
+            resolvedImplementationConfig.firstLevelModuleDependencies.each { dep ->
+                str += "${dep.moduleGroup}:${dep.moduleName}:${dep.moduleVersion}\n"
+            }
+
+            resolvedAndroidTestImplementationConfig.firstLevelModuleDependencies.each { dep ->
+                str += "${dep.moduleGroup}:${dep.moduleName}:${dep.moduleVersion}\n"
+            }
+
+            new File(projectDir, "deps.list.txt").text = str
+        }
+    }
+
+    preBuild.dependsOn(generateDependencyListFile)
 }
 
 dependencies {
@@ -181,9 +205,9 @@ dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.0.5'
 
     // Flipper https://fbflipper.com/docs/getting-started/android-native
-    debugImplementation 'com.facebook.flipper:flipper:0.51.0'
+    debugImplementation 'com.facebook.flipper:flipper:0.58.0'
     debugImplementation 'com.facebook.soloader:soloader:0.9.0'
-    releaseImplementation 'com.facebook.flipper:flipper-noop:0.51.0'
+    releaseImplementation 'com.github.theGlenn:flipper-android-no-op:0.3.0'
 
     // dependency injection
     implementation 'org.kodein.di:kodein-di:7.0.0'
