@@ -1,6 +1,7 @@
 package name.lmj0011.courierlocker.database
 
 import androidx.lifecycle.LiveData
+import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
@@ -20,6 +21,12 @@ interface CustomerDao: BaseDao {
 
     @Query("DELETE FROM customers_table")
     fun clear()
+
+    @Query("SELECT * FROM customers_table ORDER BY id DESC")
+    fun getAllCustomersByThePage(): DataSource.Factory<Int, Customer>
+
+    @Query("SELECT * FROM customers_table WHERE name LIKE :query OR address LIKE :query OR note LIKE :query ORDER BY id DESC")
+    fun getAllCustomersByThePageFiltered(query: String): DataSource.Factory<Int, Customer>
 
     @Query("SELECT * FROM customers_table ORDER BY id DESC")
     fun getAllCustomers(): LiveData<MutableList<Customer>>

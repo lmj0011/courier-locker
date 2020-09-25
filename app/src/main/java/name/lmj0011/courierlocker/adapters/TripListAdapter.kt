@@ -5,50 +5,50 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
+import androidx.paging.PagedListAdapter
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.database.Trip
 import name.lmj0011.courierlocker.databinding.ListItemTripBinding
 import name.lmj0011.courierlocker.helpers.Util
-import name.lmj0011.courierlocker.helpers.getTripDate
-import name.lmj0011.courierlocker.helpers.metersToMiles
 
-class TripListAdapter(private val clickListener: TripListener): ListAdapter<Trip, TripListAdapter.ViewHolder>(TripDiffCallback()) {
-    override fun getItemId(position: Int): Long {
-        // return the Item's database row id
-        return super.getItem(position).id
-    }
-
+class TripListAdapter(private val clickListener: TripListener): PagedListAdapter<Trip, TripListAdapter.ViewHolder>(TripDiffCallback()) {
     class ViewHolder private constructor(val binding: ListItemTripBinding, val context: Context) : RecyclerView.ViewHolder(binding.root){
 
-        private val googleApiKey = PreferenceManager.getDefaultSharedPreferences(context).getString("advancedDirectionsApiKey", "")!!
+        private val googleApiKey = when(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("googleDirectionsKey", false)) {
+            true -> context.resources.getString(R.string.google_directions_key)
+            else -> ""
+        }
 
-        fun bind(clickListener: TripListener, trip: Trip) {
-            binding.trip = trip
-            binding.clickListener = clickListener
-            binding.tripDateTextView.text = HtmlCompat.fromHtml("<b>${getTripDate(trip)}</b>", HtmlCompat.FROM_HTML_MODE_LEGACY)
-            binding.tripPickupAddressTextView.text = HtmlCompat.fromHtml("<b>start:</b> ${trip.pickupAddress}", HtmlCompat.FROM_HTML_MODE_LEGACY)
-            binding.tripDropoffAddressTextView.text = HtmlCompat.fromHtml("<b>end:</b> ${trip.dropOffAddress}", HtmlCompat.FROM_HTML_MODE_LEGACY)
+        fun bind(clickListener: TripListener, trip: Trip?) {
+            trip?.let {
+                binding.trip = trip
+                binding.clickListener = clickListener
+                binding.tripDateTextView.text = HtmlCompat.fromHtml("<b>${Util.getTripDate(trip)}</b>", HtmlCompat.FROM_HTML_MODE_LEGACY)
+                binding.tripPickupAddressTextView.text = HtmlCompat.fromHtml("<b>start:</b> ${trip.pickupAddress}", HtmlCompat.FROM_HTML_MODE_LEGACY)
+                binding.tripDropoffAddressTextView.text = HtmlCompat.fromHtml("<b>end:</b> ${trip.dropOffAddress}", HtmlCompat.FROM_HTML_MODE_LEGACY)
 
-            if(googleApiKey.isNullOrBlank() || trip.distance == 0.0) {
-                binding.tripDistanceTextView.visibility = TextView.GONE
-            } else {
-                binding.tripDistanceTextView.text = HtmlCompat.fromHtml("<b>distance:</b> ${metersToMiles(trip.distance)} mi", HtmlCompat.FROM_HTML_MODE_LEGACY)
+                if(googleApiKey.isNullOrBlank()) {
+                    binding.tripDistanceTextView.visibility = TextView.GONE
+                } else {
+                    binding.tripDistanceTextView.text = HtmlCompat.fromHtml("<b>distance:</b> ${Util.metersToMiles(trip.distance)} mi", HtmlCompat.FROM_HTML_MODE_LEGACY)
+                }
+
+                if (trip.payAmount.isNullOrBlank()) {
+                    binding.tripPayTextView.visibility = TextView.GONE
+                } else {
+                    binding.tripPayTextView.text = HtmlCompat.fromHtml("<b>pay:</b> ${Util.numberFormatInstance.format(trip.payAmount.toDouble())} ", HtmlCompat.FROM_HTML_MODE_LEGACY)
+                }
+
+                if (trip.gigName.isNullOrBlank()) {
+                    binding.tripGigTextView.visibility = TextView.GONE
+                } else {
+                    binding.tripGigTextView.text = HtmlCompat.fromHtml("<b>gig:</b> ${trip.gigName}", HtmlCompat.FROM_HTML_MODE_LEGACY)
+                }
             }
 
-            if (trip.payAmount.isNullOrBlank()) {
-                binding.tripPayTextView.visibility = TextView.GONE
-            } else {
-                binding.tripPayTextView.text = HtmlCompat.fromHtml("<b>pay:</b> ${Util.numberFormatInstance.format(trip.payAmount.toDouble())} ", HtmlCompat.FROM_HTML_MODE_LEGACY)
-            }
-
-            if (trip.gigName.isNullOrBlank()) {
-                binding.tripGigTextView.visibility = TextView.GONE
-            } else {
-                binding.tripGigTextView.text = HtmlCompat.fromHtml("<b>gig:</b> ${trip.gigName}", HtmlCompat.FROM_HTML_MODE_LEGACY)
-            }
 
             binding.executePendingBindings()
         }
@@ -78,7 +78,7 @@ class TripListAdapter(private val clickListener: TripListener): ListAdapter<Trip
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val trip = getItem(position)
+        val trip: Trip? = getItem(position)
 
         holder.bind(clickListener, trip)
     }
@@ -91,7 +91,7 @@ class TripListAdapter(private val clickListener: TripListener): ListAdapter<Trip
         if (query.isNullOrBlank()) return list
 
         return list.filter {
-            val inDate = getTripDate(it).contains(query, true)
+            val inDate = Util.getTripDate(it).contains(query, true)
             val inPickupAddress = it.pickupAddress.contains(query, true)
             val inDropOffAddress = it.dropOffAddress.contains(query, true)
             val inPayAmount = it.payAmount.contains(query, true)

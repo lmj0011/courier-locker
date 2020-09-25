@@ -10,21 +10,26 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
+import androidx.paging.PagedList
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.GateCodeListAdapter
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.database.GateCode
+import name.lmj0011.courierlocker.database.Stop
 import name.lmj0011.courierlocker.databinding.FragmentGateCodesBinding
 import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
 import name.lmj0011.courierlocker.factories.GateCodeViewModelFactory
 import name.lmj0011.courierlocker.helpers.ListLock
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.interfaces.SearchableRecyclerView
+import timber.log.Timber
 
 
 /**
@@ -84,11 +89,8 @@ class GateCodesFragment : Fragment(), SearchableRecyclerView {
             this.findNavController().navigate(GateCodesFragmentDirections.actionGateCodesFragmentToEditGateCodeFragment(gateCodeId.toInt()))
         })
 
-
-        gateCodeViewModel.gateCodes.observe(viewLifecycleOwner, Observer {
-            if (!ListLock.isListLocked) {
-                it?.let { this.submitListToAdapter(it) }
-            }
+        gateCodeViewModel.gatecodesPaged.observe(viewLifecycleOwner, Observer {
+            this.submitListToAdapter(it)
         })
 
         LocationHelper.lastLatitude.observe(viewLifecycleOwner, lastLocationListener)
@@ -103,13 +105,14 @@ class GateCodesFragment : Fragment(), SearchableRecyclerView {
 
         binding.liveLocationUpdatingSwitch.setOnCheckedChangeListener { _, isChecked ->
             ListLock.unlock()
+            gateCodeViewModel.isOrderedByNearest.postValue(isChecked)
             sharedPreferences.edit().apply {
                 putBoolean("gateCodesLocationUpdating", isChecked)
                 commit()
             }
         }
 
-        if(!resources.getBoolean(R.bool.DEBUG_MODE)) {
+        if(!sharedPreferences.getBoolean("enableDebugMode", false)) {
             binding.generateGateCodesBtn.visibility = View.GONE
         }
 
@@ -119,17 +122,7 @@ class GateCodesFragment : Fragment(), SearchableRecyclerView {
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                var list = gateCodeViewModel.gateCodes.value
-
-                list?.let {
-                    uiScope.launch {
-                        val filteredList = withContext(Dispatchers.Default) {
-                            listAdapter.filterBySearchQuery(newText, it)
-                        }
-
-                        this@GateCodesFragment.submitListToAdapter(filteredList)
-                    }
-                }
+                gateCodeViewModel.filterText.postValue(newText)
                 return false
             }
         })
@@ -193,17 +186,12 @@ class GateCodesFragment : Fragment(), SearchableRecyclerView {
     }
 
     private fun refreshList() {
-        val gcs = gateCodeViewModel.gateCodes.value
+        val gcs = gateCodeViewModel.gatecodesPaged.value
         gcs?.let{ this.submitListToAdapter(gcs) }
     }
 
-    private fun submitListToAdapter (list: MutableList<GateCode>) {
-        if (binding.liveLocationUpdatingSwitch.isChecked) {
-            listAdapter.submitList(listAdapter.filterByClosestGateCodeLocation(list))
-            binding.gateCodesList.smoothScrollToPosition(0)
-        } else {
-            listAdapter.submitList(list)
-        }
+    private fun submitListToAdapter (list: PagedList<GateCode>) {
+        listAdapter.submitList(list)
         listAdapter.notifyDataSetChanged()
     }
 
@@ -212,7 +200,9 @@ class GateCodesFragment : Fragment(), SearchableRecyclerView {
     }
 
     private fun applyPreferences() {
-        binding.liveLocationUpdatingSwitch.isChecked = sharedPreferences.getBoolean("gateCodesLocationUpdating", false)
+        val isChecked = sharedPreferences.getBoolean("gateCodesLocationUpdating", false)
+        binding.liveLocationUpdatingSwitch.isChecked = isChecked
+        gateCodeViewModel.isOrderedByNearest.postValue(isChecked)
     }
 
 }

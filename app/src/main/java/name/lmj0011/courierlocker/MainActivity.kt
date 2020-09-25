@@ -20,13 +20,16 @@ import androidx.preference.PreferenceManager
 import com.crashlytics.android.Crashlytics
 import io.fabric.sdk.android.Fabric
 import kotlinx.android.synthetic.main.app_bar_main.view.*
+import kotlinx.coroutines.*
 import timber.log.Timber
 import name.lmj0011.courierlocker.databinding.ActivityMainBinding
 import name.lmj0011.courierlocker.fragments.TripsFragmentDirections
 import name.lmj0011.courierlocker.fragments.dialogs.ImportedAppDataDialogFragment
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.PermissionHelper
+import name.lmj0011.courierlocker.helpers.PreferenceHelper
 import name.lmj0011.courierlocker.services.CurrentStatusForegroundService
+import org.kodein.di.instance
 import shortbread.Shortcut
 
 
@@ -37,6 +40,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration : AppBarConfiguration
     private lateinit var topLevelDestinations: Set<Int>
+    private lateinit var preferences: PreferenceHelper
+
 
     companion object {
         const val TRIPS_WRITE_REQUEST_CODE = 104
@@ -47,9 +52,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onCreate(savedInstanceState)
         Timber.i("onCreate Called")
 
+        preferences = (applicationContext as CourierLockerApplication).kodein.instance()
         val sendCrashReports = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("sendCrashReports", true)!!
-
-        PermissionHelper.checkPermissionApprovals(this)
 
         if(sendCrashReports) {
             Fabric.with(this, Crashlytics())
@@ -125,7 +129,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onPause()
         Timber.i("onPause Called")
 
-        if(PermissionHelper.permissionAccessFineLocationApproved) {
+        if(preferences.enableCurrentStatusService() && PermissionHelper.permissionAccessFineLocationApproved) {
             CurrentStatusForegroundService.startService(this)
         }
     }
@@ -221,9 +225,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    fun showToastMessage(message: String, duration: Int = Toast.LENGTH_SHORT) {
+    fun showToastMessage(message: String, duration: Int = Toast.LENGTH_SHORT, position: Int = Gravity.TOP) {
         val toast = Toast.makeText(this, message, duration)
-        toast.setGravity(Gravity.TOP, 0, 150)
+        toast.setGravity(position, 0, 150)
         toast.show()
     }
 

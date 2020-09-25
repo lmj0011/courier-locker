@@ -1,52 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen
-        xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:key="preferenceScreen">
 
-<!--    <PreferenceCategory-->
-<!--            app:key="gateCodesCategory"-->
-<!--            app:title="Gate Codes">-->
+    <PreferenceCategory
+            app:key="servicesCategory"
+            app:title="Services">
 
-<!--        <SwitchPreferenceCompat-->
-<!--                app:key="gateCodesLocationUpdating"-->
-<!--                app:title="always order by nearest"/>-->
+        <SwitchPreferenceCompat
+                app:key="@string/pref_enable_current_status_service"
+                app:title="@string/pref_enable_current_status_service_title"
+                app:summary="@string/pref_enable_current_status_service_summary"
+                app:defaultValue="true"/>
+    </PreferenceCategory>
 
-<!--    </PreferenceCategory>-->
+    <PreferenceCategory
+            app:key="backupCategory"
+            app:title="Backup">
+
+        <Preference
+                app:key="createBackup"
+                app:title="Create Backup"
+                app:summary="Export app data to a backup file">
+        </Preference>
+
+        <Preference
+                app:key="restoreBackup"
+                app:title="Restore Backup"
+                app:summary="Restore app data from a backup file">
+        </Preference>
+
+        <SwitchPreferenceCompat
+                app:key="enableAutomaticBackups"
+                app:title="Enable Automatic Backups"
+                app:summary="Begin producing daily backup files"
+                app:defaultValue="false"/>
+
+        <Preference
+                app:key="automaticBackupLocation"
+                app:title="Automatic Backup Location"
+                app:isPreferenceVisible="false">
+        </Preference>
+
+    </PreferenceCategory>
 
     <PreferenceCategory
             app:key="advancedCategory"
             app:title="Advanced">
 
-        <EditTextPreference
-                app:key="advancedDirectionsApiKey"
-                app:icon="@drawable/ic_vpn_key"
-                app:title="Add Google Directions API Key to start calculating Trip distances"/>
-
         <SwitchPreferenceCompat
                 app:key="sendCrashReports"
                 app:title="Send crash reports"
-                app:icon="@drawable/ic_bug_report"
                 app:defaultValue="true"/>
 
         <Preference
-                app:key="exportAppData"
-                app:icon="@drawable/ic_file_upload"
-                app:title="Export App Data">
-        </Preference>
-
-        <Preference
-                app:key="importAppData"
-                app:icon="@drawable/ic_file_download"
-                app:title="Import App Data">
-        </Preference>
-
-        <Preference
                 app:key="about"
-                app:icon="@drawable/ic_info"
                 app:title="About app">
         </Preference>
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+            app:key="debugCategory"
+            app:title="Debug Tools">
 
+        <SwitchPreferenceCompat
+                app:defaultValue="false"
+                app:key="enableDebugMode"
+                app:title="Enable Debug Controls" />
+
+        <SwitchPreferenceCompat
+                app:key="googleDirectionsKey"
+                app:title="Enable Directions API key"
+                app:summary="Should only be enabled if you are sure there is a valid key included with this app build"
+                app:defaultValue="false" />
+
+        <EditTextPreference
+                app:key="@string/pref_key_bounding_coordinates_distance"
+                app:title=""
+                app:summary="@string/pref_bounding_coordinates_distance_summary"
+                app:dialogTitle="@string/pref_bounding_coordinates_distance_dialog_title" />
+
+    </PreferenceCategory>
 
 </PreferenceScreen>

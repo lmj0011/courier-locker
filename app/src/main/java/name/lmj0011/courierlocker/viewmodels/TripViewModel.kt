@@ -1,23 +1,24 @@
 package name.lmj0011.courierlocker.viewmodels
 
 import android.app.Application
-import android.content.SharedPreferences
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
+import androidx.paging.PagedList
+import androidx.paging.toLiveData
 import androidx.preference.PreferenceManager
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.json.responseJson
 import com.github.kittinunf.result.Result
 import com.mooveit.library.Fakeit
 import kotlinx.coroutines.*
+import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.database.Stop
 import name.lmj0011.courierlocker.database.Trip
 import name.lmj0011.courierlocker.database.TripDao
+import name.lmj0011.courierlocker.helpers.*
 import name.lmj0011.courierlocker.helpers.Util
-import name.lmj0011.courierlocker.helpers.isTripOfMonth
-import name.lmj0011.courierlocker.helpers.isTripOfToday
-import name.lmj0011.courierlocker.helpers.setTripTimestamp
-import org.json.JSONException
 import timber.log.Timber
 import java.net.URLEncoder
 
@@ -25,24 +26,55 @@ class TripViewModel(
     val database: TripDao,
     application: Application
 ) : AndroidViewModel(application) {
+
+    lateinit var todayDate: String
+    lateinit var monthDate: String
+
+    init {
+        val now = org.threeten.bp.ZonedDateTime.now()
+        val month = now.month.value
+        val dayOfMonth = now.dayOfMonth
+        val year = now.year.toString()
+
+        todayDate = "${year}-${month}-${dayOfMonth}"
+    }
     private var viewModelJob = Job()
 
     private val uiScope = CoroutineScope(Dispatchers.Main +  viewModelJob)
 
-    private val preferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplication())
+    private val googleApiKey = when(PreferenceManager.getDefaultSharedPreferences(application).getBoolean("googleDirectionsKey", false)) {
+        true -> application.resources.getString(R.string.google_directions_key)
+        else -> ""
+    }
 
-    private val googleApiKey = preferences.getString("advancedDirectionsApiKey", "")!!
+    var filterText = MutableLiveData<String>().apply { postValue(null) }
 
-    var trips = database.getAllTrips()
+    var errorMsg = MutableLiveData("")
+
+    var tripPayAmountsForToday = database.getAllTodayTripPayAmounts()
+
+    var tripPayAmountsForMonth = database.getAllMonthTripPayAmounts()
+
+    var tripPayAmounts: LiveData<List<String>> = database.getAllTripPayAmounts()
+
+    var tripsPaged: LiveData<PagedList<Trip>> = Transformations.switchMap(filterText) { query ->
+        return@switchMap if (query.isNullOrEmpty()) {
+            database.getAllTripsByThePage().toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
+        } else {
+            database.getAllTripsByThePageFiltered("%$query%").toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
+        }
+    }
 
     val trip = MutableLiveData<Trip?>()
 
     var payAmountValidated = MutableLiveData<Boolean?>()
 
+    var trips: LiveData<MutableList<Trip>> = database.getAllTrips()
+
     val totalMoney: String
         get() {
-            val result = trips.value?.fold(0.0) { sum, trip ->
-                val toAdd = trip.payAmount.toDoubleOrNull()
+            val result = tripPayAmounts.value?.fold(0.0) { sum, pa ->
+                val toAdd = pa.toDoubleOrNull()
                 if (toAdd == null){
                     sum
                 } else {
@@ -59,9 +91,9 @@ class TripViewModel(
 
     val todayTotalMoney: String
         get() {
-            val result = trips.value?.fold(0.0) { sum, trip ->
-                val toAdd = trip.payAmount.toDoubleOrNull()
-                if (toAdd == null || !isTripOfToday(trip)){
+            val result = tripPayAmountsForToday.value?.fold(0.0) { sum, pa ->
+                val toAdd = pa.toDoubleOrNull()
+                if (toAdd == null){
                     sum
                 } else {
                     sum + toAdd
@@ -78,28 +110,22 @@ class TripViewModel(
     val todayCompletedTrips: String
         get() {
             val result = trips.value?.fold(0) { sum, trip ->
-                if (isTripOfToday(trip) &&
-                    trip.pickupAddress.isNotEmpty() &&
-                    trip.dropOffAddress.isNotEmpty()
-                        ){
-                    sum + 1
-                } else {
+                if (trip == null || !Util.isTripOfToday(trip) || trip.pickupAddress.isEmpty() || trip.dropOffAddress.isEmpty()){
                     sum
+                } else {
+                    sum + 1
                 }
+
             }
 
-            result?.let{
-                return it.toString()
-            }
-
-            return "0"
+            return result.toString()
         }
 
     val monthTotalMoney: String
         get() {
-            val result = trips.value?.fold(0.0) { sum, trip ->
-                val toAdd = trip.payAmount.toDoubleOrNull()
-                if (toAdd == null || !isTripOfMonth(trip)){
+            val result = tripPayAmountsForMonth.value?.fold(0.0) { sum, pa ->
+                val toAdd = pa.toDoubleOrNull()
+                if (toAdd == null){
                     sum
                 } else {
                     sum + toAdd
@@ -160,7 +186,7 @@ class TripViewModel(
     ) {
         uiScope.launch {
             val trip = Trip().apply {
-                setTripTimestamp(this)
+                Util.setTripTimestamp(this)
                 this.pickupAddress = pickupAddress
                 this.pickupAddressLatitude = pickupAddressLatitude
                 this.pickupAddressLongitude = pickupAddressLongitude
@@ -174,7 +200,7 @@ class TripViewModel(
 
 
             withContext(Dispatchers.IO){
-                trip.distance = this@TripViewModel.setTripDistance(trip)
+                trip.distance = this@TripViewModel.calculateTripDistance(trip)
                 this@TripViewModel.database.insert(trip)
             }
         }
@@ -192,8 +218,14 @@ class TripViewModel(
         uiScope.launch {
             withContext(Dispatchers.IO){
                 trip?.let {
-                    it.distance = this@TripViewModel.setTripDistance(it)
-                    this@TripViewModel.database.update(it)
+                    try {
+                        it.distance = this@TripViewModel.calculateTripDistance(it)
+                        this@TripViewModel.database.update(it)
+                    } catch (ex: Exception) {
+                        this@TripViewModel.errorMsg.postValue("distance calculation error!")
+                        this@TripViewModel.database.update(it)
+                        Timber.e(ex)
+                    }
                 }
             }
         }
@@ -208,16 +240,15 @@ class TripViewModel(
         }
     }
 
-
     fun insertNewRandomTripRow() {
         uiScope.launch {
             val trip = Trip(
                 pickupAddress= "${Fakeit.address().streetAddress()}",
                 dropOffAddress= "${Fakeit.address().streetAddress()}",
                 payAmount = (1..40).random().toString(),
-                gigName = "Doordash"
+                gigName = arrayOf("Doordash", "Grubhub", "Postmates", "UberEats", "Lyft", "Uber", "Roadie" ).random()
             ).apply {
-                setTripTimestamp(this)
+                Util.setTripTimestamp(this)
             }
 
             withContext(Dispatchers.IO){
@@ -239,7 +270,7 @@ class TripViewModel(
         }
     }
 
-    fun setTripDistance(trip: Trip?): Double {
+    fun calculateTripDistance(trip: Trip?): Double {
         val defaultValue = 0.0
         if (trip == null || googleApiKey.isNullOrBlank()) return defaultValue
 
@@ -249,7 +280,9 @@ class TripViewModel(
         sb.append("?mode=driving")
         sb.append("&origin=${trip.pickupAddressLatitude},${trip.pickupAddressLongitude}")
         sb.append("&destination=${trip.dropOffAddressLatitude},${trip.dropOffAddressLongitude}")
-        sb.append("&waypoints=${generateWaypointsQueryStr(trip.stops)}")
+        generateWaypointsQueryStr(trip.stops).let {
+            if(it.isNotBlank()) sb.append("&waypoints=$it")
+        }
         sb.append("&key=$googleApiKey")
 
         val (request, response, result) = sb.toString()
@@ -263,23 +296,17 @@ class TripViewModel(
                 return defaultValue
             }
             is Result.Success -> {
-                try {
-                    var totalDistance = 0.toDouble()
-                    val data = result.value.obj()
-                    val route = data.getJSONArray("routes").getJSONObject(0)
-                    val legs = route.getJSONArray("legs")
+                var totalDistance = defaultValue
+                val data = result.value.obj()
+                val route = data.getJSONArray("routes").getJSONObject(0)
+                val legs = route.getJSONArray("legs")
 
-                    for (i in 0 until legs.length()) {
-                        val leg = legs.getJSONObject(i)
-                        totalDistance += leg.getJSONObject("distance").getDouble("value")
-                    }
-
-                    return totalDistance
-                } catch (ex: JSONException) {
-                    Timber.e("JSONException: ${ex.message}")
+                for (i in 0 until legs.length()) {
+                    val leg = legs.getJSONObject(i)
+                    totalDistance += leg.getJSONObject("distance").getDouble("value")
                 }
 
-                return defaultValue
+                return totalDistance
             }
         }
     }

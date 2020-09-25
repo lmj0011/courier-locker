@@ -1,16 +1,22 @@
 package name.lmj0011.courierlocker.helpers
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageManager
 import android.location.Address
 import android.location.Geocoder
 import android.os.Handler
 import android.view.Gravity
 import android.view.View
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.location.*
 import kotlinx.coroutines.*
+import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.adapters.AddressAutoSuggestAdapter
+import org.kodein.di.instance
 import timber.log.Timber
 import java.io.IOException
 import java.lang.Math.toRadians
@@ -21,6 +27,7 @@ object LocationHelper {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var geocoder: Geocoder
+    private lateinit var preferences: PreferenceHelper
     private val locationRequest: LocationRequest = LocationRequest()
     private const val AVERAGE_RADIUS_OF_EARTH_KM = 6371.0 // km
     private const val AVERAGE_RADIUS_OF_EARTH_MILES = 3958.8 // mi
@@ -45,7 +52,7 @@ object LocationHelper {
             delay(500)
             if (addressStr.isNullOrEmpty().not()){
                 val geolocation = GeoLocation.fromDegrees(LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!)
-                val boundingBox = geolocation.boundingCoordinates(25.toDouble(), AVERAGE_RADIUS_OF_EARTH_MILES) // numbers are in miles
+                val boundingBox = geolocation.boundingCoordinates(preferences.boundingCoordinatesDistance, AVERAGE_RADIUS_OF_EARTH_MILES) // numbers are in miles
 
                 try {
                     var addresses = withContext(Dispatchers.IO) {
@@ -80,6 +87,7 @@ object LocationHelper {
     fun setFusedLocationClient(context: Context){
         if(this::fusedLocationClient.isInitialized) return
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+        preferences = (context.applicationContext as CourierLockerApplication).kodein.instance()
         geocoder = Geocoder(context, Locale.getDefault())
     }
 
@@ -108,14 +116,17 @@ object LocationHelper {
         }
     }
 
+    @SuppressLint("MissingPermission")
     fun startLocationUpdates() {
         isFusedLocationClientSet()
 
-        fusedLocationClient.requestLocationUpdates(
-            locationRequest,
-            locationCallback,
-            null /* Looper */
-        )
+        if (PermissionHelper.permissionAccessFineLocationApproved) {
+            fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                null /* Looper */
+            )
+        }
     }
 
     /**

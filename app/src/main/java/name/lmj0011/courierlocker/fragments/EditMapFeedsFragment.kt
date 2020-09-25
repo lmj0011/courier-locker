@@ -31,7 +31,7 @@ import name.lmj0011.courierlocker.factories.TripViewModelFactory
 import name.lmj0011.courierlocker.fragments.dialogs.DeleteTripDialogFragment
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.viewmodels.TripViewModel
-import name.lmj0011.courierlocker.helpers.getTripDate
+import name.lmj0011.courierlocker.helpers.Util
 import timber.log.Timber
 
 /**
@@ -64,7 +64,7 @@ class EditMapFeedsFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         mainActivity.supportActionBar?.subtitle = null
-        binding.editMapFeedsEditText.setText(sharedPreferences.getString(resources.getString(R.string.sp_key_map_feed_list), ""))
+        binding.editMapFeedsEditText.setText(sharedPreferences.getString(resources.getString(R.string.pref_key_map_feed_list), ""))
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -73,7 +73,7 @@ class EditMapFeedsFragment : Fragment() {
         binding.editMapFeedsSaveCircularProgressButton.startAnimation()
 
         sharedPreferences.edit().apply {
-            putString(resources.getString(R.string.sp_key_map_feed_list), binding.editMapFeedsEditText.text.toString())
+            putString(resources.getString(R.string.pref_key_map_feed_list), binding.editMapFeedsEditText.text.toString())
             commit()
         }
 

@@ -1,15 +1,16 @@
 package name.lmj0011.courierlocker.database
 
+import android.content.ContentValues
 import android.content.Context
+import android.database.sqlite.SQLiteDatabase
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import timber.log.Timber
 
-@Database(entities = [GateCode::class, Trip::class, Customer::class, Apartment::class], version = 5,  exportSchema = true)
+@Database(entities = [GateCode::class, Trip::class, Customer::class, Apartment::class, GigLabel::class], version = 6,  exportSchema = true)
 @TypeConverters(DataConverters::class)
 abstract class CourierLockerDatabase : RoomDatabase() {
 
@@ -18,6 +19,8 @@ abstract class CourierLockerDatabase : RoomDatabase() {
     abstract val tripDao: TripDao
     abstract val customerDao: CustomerDao
     abstract val apartmentDao: ApartmentDao
+    abstract val gigLabelDao: GigLabelDao
+    abstract val settingsDao: SettingsDao
 
     companion object {
         // Room already created the GateCode table based on it's data class in DB version 1: https://developer.android.com/training/data-storage/room/defining-data
@@ -63,8 +66,22 @@ abstract class CourierLockerDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // create GigLabels table
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `gig_labels_table` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `order` INTEGER NOT NULL, `visible` INTEGER NOT NULL)
+                """.trimIndent()
+                )
+            }
+        }
+
+
         @Volatile
         private var INSTANCE: CourierLockerDatabase? = null
+
+        @Volatile
+        lateinit var context: Context
 
         /**
          * about migrations: https://medium.com/androiddevelopers/understanding-migrations-with-room-f01e04b07929
@@ -72,6 +89,7 @@ abstract class CourierLockerDatabase : RoomDatabase() {
          */
         fun getInstance(context: Context): CourierLockerDatabase {
             synchronized(this) {
+                CourierLockerDatabase.context = context
                 var instance = INSTANCE
 
                 if (instance == null) {
@@ -80,7 +98,7 @@ abstract class CourierLockerDatabase : RoomDatabase() {
                         CourierLockerDatabase::class.java,
                         "courier_locker_database"
                     )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                     .build()
                 }
 
@@ -88,41 +106,6 @@ abstract class CourierLockerDatabase : RoomDatabase() {
             }
         }
 
-        fun getDbData(context: Context): ByteArray? {
-            var data: ByteArray? = null
-
-            try {
-                val currentdb = context.getDatabasePath("courier_locker_database")
-
-                data = currentdb.readBytes()
-            } catch (e: Exception) {
-                Timber.i("backup db failed!")
-            }
-
-            return data
-        }
-
-        fun setDbData(context: Context, data: ByteArray) {
-            try {
-                val currentdb = context.getDatabasePath("courier_locker_database")
-                val currentdbSHM = context.getDatabasePath("courier_locker_database-shm")
-                val currentdbWAL = context.getDatabasePath("courier_locker_database-wal")
-                val output = currentdb.outputStream()
-
-                output.write(data)
-                output.flush()
-                output.close()
-
-                if(currentdbSHM.delete() && currentdbWAL.delete()) {
-                    Timber.i("journal files (-shm -wal) deleted successfully!")
-                }
-
-                Timber.i("imported db successfully!")
-            } catch (e: Exception) {
-                Timber.i("importing db failed!")
-            }
-
-        }
     }
 
 }

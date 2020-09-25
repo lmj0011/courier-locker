@@ -5,10 +5,15 @@ import name.lmj0011.courierlocker.database.CustomerDao
 import android.app.Application
 import android.content.SharedPreferences
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
+import androidx.paging.PagedList
+import androidx.paging.toLiveData
 import androidx.preference.PreferenceManager
 import com.mooveit.library.Fakeit
 import kotlinx.coroutines.*
+import name.lmj0011.courierlocker.helpers.Const
 
 
 class CustomerViewModel(
@@ -19,11 +24,23 @@ class CustomerViewModel(
 
     private val uiScope = CoroutineScope(Dispatchers.Main +  viewModelJob)
 
+    var filterText = MutableLiveData<String>().apply { postValue(null) }
+
     private val preferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplication())
 
     val customers = database.getAllCustomers()
 
     val customer = MutableLiveData<Customer?>()
+
+    var customersPaged: LiveData<PagedList<Customer>> = Transformations.switchMap(filterText) { query ->
+        return@switchMap if (query.isNullOrEmpty()) {
+            database.getAllCustomersByThePage()
+                .toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
+        } else {
+            database.getAllCustomersByThePageFiltered("%$query%")
+                .toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
+        }
+    }
 
 
     override fun onCleared() {

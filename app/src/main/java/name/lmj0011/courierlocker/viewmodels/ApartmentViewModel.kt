@@ -1,9 +1,14 @@
 package name.lmj0011.courierlocker.viewmodels
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.*
+import androidx.paging.PagedList
+import androidx.paging.toLiveData
 import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.database.*
+import name.lmj0011.courierlocker.helpers.Const
+import name.lmj0011.courierlocker.helpers.LocationHelper
+import timber.log.Timber
 
 class ApartmentViewModel(
     val database: ApartmentDao,
@@ -14,7 +19,65 @@ class ApartmentViewModel(
 
     private val uiScope = CoroutineScope(Dispatchers.Main +  viewModelJob)
 
+    var isOrderedByNearest = MutableLiveData<Boolean>().apply { postValue(false) }
+
+    var filterText = MutableLiveData<String>().apply { postValue(null) }
+
     var apartments = database.getAllApartments()
+
+    private val doubleTrigger = MediatorLiveData<Pair<Boolean?, String?>>().apply {
+        addSource(isOrderedByNearest) {
+            value = Pair(it, filterText.value)
+        }
+
+        addSource(filterText) {
+            value = Pair(isOrderedByNearest.value, it)
+        }
+    }
+
+    var apartmentsPaged: LiveData<PagedList<Apartment>> = Transformations.switchMap(doubleTrigger) { pair ->
+        val filterByLocation = pair.first
+        val query = pair.second
+
+        return@switchMap if (query.isNullOrEmpty()) {
+            database.getAllApartmentsByThePage()
+                .mapByPage { list ->
+                    when(filterByLocation) {
+                        true -> {
+                            list.sortedBy {
+                                LocationHelper.calculateApproxDistanceBetweenMapPoints(
+                                    LocationHelper.lastLatitude.value!!,
+                                    LocationHelper.lastLongitude.value!!,
+                                    it.latitude,
+                                    it.longitude
+                                )
+                            }
+                        }
+                        else -> { list }
+                    }
+                }
+                .toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
+        } else {
+            database.getAllApartmentsByThePageFiltered("%$query%")
+                .mapByPage { list ->
+                    when(filterByLocation) {
+                        true -> {
+                            list.sortedBy {
+                                LocationHelper.calculateApproxDistanceBetweenMapPoints(
+                                    LocationHelper.lastLatitude.value!!,
+                                    LocationHelper.lastLongitude.value!!,
+                                    it.latitude,
+                                    it.longitude
+                                )
+                            }
+                        }
+                        else -> { list }
+                    }
+                }
+                .toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
+        }
+    }
+
 
     override fun onCleared() {
         super.onCleared()

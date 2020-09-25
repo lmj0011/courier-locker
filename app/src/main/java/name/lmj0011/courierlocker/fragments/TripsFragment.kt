@@ -2,6 +2,7 @@ package name.lmj0011.courierlocker.fragments
 
 import android.app.Activity
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.SearchView
@@ -11,6 +12,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
+import androidx.paging.PagedList
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.MainActivity
@@ -19,11 +22,13 @@ import name.lmj0011.courierlocker.adapters.TripListAdapter
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.database.Trip
 import name.lmj0011.courierlocker.databinding.FragmentTripsBinding
+import name.lmj0011.courierlocker.factories.GigLabelViewModelFactory
 import name.lmj0011.courierlocker.factories.TripViewModelFactory
 import name.lmj0011.courierlocker.fragments.dialogs.ClearAllTripsDialogFragment
 import name.lmj0011.courierlocker.fragments.dialogs.TripsStatsDialogFragment
-import name.lmj0011.courierlocker.helpers.getCsvFromTripList
+import name.lmj0011.courierlocker.helpers.Util
 import name.lmj0011.courierlocker.helpers.interfaces.SearchableRecyclerView
+import name.lmj0011.courierlocker.viewmodels.GigLabelViewModel
 import name.lmj0011.courierlocker.viewmodels.TripViewModel
 import timber.log.Timber
 import java.io.FileOutputStream
@@ -42,6 +47,7 @@ class TripsFragment : Fragment(),
     private lateinit var viewModelFactory: TripViewModelFactory
     private lateinit var tripViewModel: TripViewModel
     private lateinit var listAdapter: TripListAdapter
+    private lateinit var sharedPreferences: SharedPreferences
     private var fragmentJob: Job = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
 
@@ -55,6 +61,7 @@ class TripsFragment : Fragment(),
         mainActivity = activity as MainActivity
         setHasOptionsMenu(true)
 
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity)
         val application = requireNotNull(this.activity).application
         val dataSource = CourierLockerDatabase.getInstance(application).tripDao
         viewModelFactory = TripViewModelFactory(dataSource, application)
@@ -72,11 +79,19 @@ class TripsFragment : Fragment(),
 
         binding.lifecycleOwner = this
 
-        tripViewModel.trips.observe(viewLifecycleOwner, Observer {
+        tripViewModel.tripsPaged.observe(viewLifecycleOwner, Observer {
             listAdapter.submitList(it)
             listAdapter.notifyDataSetChanged()
-            this.refreshTotals()
         })
+
+        tripViewModel.trips.observe(viewLifecycleOwner, Observer {})
+        tripViewModel.tripPayAmounts.observe(viewLifecycleOwner, Observer {})
+
+        tripViewModel.tripPayAmountsForToday.observe(viewLifecycleOwner, Observer {
+            binding.totalPayTextView.text = tripViewModel.todayTotalMoney
+        })
+
+        tripViewModel.tripPayAmountsForMonth.observe(viewLifecycleOwner, Observer {})
 
         binding.swipeRefresh.setOnRefreshListener {
             this.findNavController().navigate(R.id.tripsFragment)
@@ -88,7 +103,7 @@ class TripsFragment : Fragment(),
         }
 
 
-        if(!resources.getBoolean(R.bool.DEBUG_MODE)) {
+        if(!sharedPreferences.getBoolean("enableDebugMode", false)) {
             binding.generateCustomerBtn.visibility = View.GONE
         }
 
@@ -98,17 +113,7 @@ class TripsFragment : Fragment(),
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                var list = tripViewModel.trips.value
-
-                list?.let {
-                    uiScope.launch {
-                        val filteredList = withContext(Dispatchers.Default) {
-                            listAdapter.filterBySearchQuery(newText, it)
-                        }
-
-                        this@TripsFragment.submitListToAdapter(filteredList)
-                    }
-                }
+                tripViewModel.filterText.postValue(newText)
                 return false
             }
         })
@@ -154,6 +159,10 @@ class TripsFragment : Fragment(),
                 this.createFile("text/csv", "trips.csv")
                 true
             }
+            R.id.action_edit_gig_labels -> {
+                this.findNavController().navigate(R.id.action_tripsFragment_to_gigLabelsFragment)
+                true
+            }
             R.id.action_trips_clear_all -> {
                 this.showClearAllTripsDialog()
                 true
@@ -173,7 +182,7 @@ class TripsFragment : Fragment(),
         when(requestCode) {
             MainActivity.TRIPS_WRITE_REQUEST_CODE -> {
                 val trips = this.tripViewModel.trips.value?.toMutableList()
-                val str = getCsvFromTripList(trips?.reversed())
+                val str = Util.getCsvFromTripList(trips?.reversed())
 
                 data?.data?.let {
                     // ref: https://developer.android.com/guide/topics/providers/document-provider#edit
@@ -231,18 +240,14 @@ class TripsFragment : Fragment(),
     }
 
     private fun refreshList() {
-        val trips = tripViewModel.trips.value
+        val trips = tripViewModel.tripsPaged.value
         trips?.let { this.submitListToAdapter(it) }
         binding.swipeRefresh.isRefreshing = false
     }
 
-    private fun refreshTotals() {
-        binding.totalPayTextView.text = tripViewModel.todayTotalMoney
-    }
 
-    private fun submitListToAdapter (list: MutableList<Trip>) {
+    private fun submitListToAdapter (list: PagedList<Trip>) {
         listAdapter.submitList(list)
         listAdapter.notifyDataSetChanged()
-        this@TripsFragment.refreshTotals()
     }
 }

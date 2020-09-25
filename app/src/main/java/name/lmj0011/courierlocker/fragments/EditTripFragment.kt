@@ -2,12 +2,9 @@ package name.lmj0011.courierlocker.fragments
 
 import android.location.Address
 import android.os.Bundle
-import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.*
 import androidx.core.view.children
 import androidx.databinding.DataBindingUtil
@@ -17,9 +14,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import br.com.simplepass.loadingbutton.presentation.State
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.AddressAutoSuggestAdapter
@@ -30,8 +25,9 @@ import name.lmj0011.courierlocker.databinding.FragmentEditTripBinding
 import name.lmj0011.courierlocker.factories.TripViewModelFactory
 import name.lmj0011.courierlocker.fragments.dialogs.DeleteTripDialogFragment
 import name.lmj0011.courierlocker.helpers.LocationHelper
+import name.lmj0011.courierlocker.helpers.Util
 import name.lmj0011.courierlocker.viewmodels.TripViewModel
-import name.lmj0011.courierlocker.helpers.getTripDate
+import timber.log.Timber
 
 /**
  * A simple [Fragment] subclass.
@@ -55,6 +51,7 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
             inflater, R.layout.fragment_edit_trip, container, false)
 
         mainActivity = activity as MainActivity
+        setHasOptionsMenu(true)
 
         val application = requireNotNull(this.activity).application
         val dataSource = CourierLockerDatabase.getInstance(application).tripDao
@@ -71,15 +68,6 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
         })
 
         this.tripViewModel.setTrip(args.tripId)
-
-        ArrayAdapter.createFromResource(
-            mainActivity,
-            R.array.gigs_array,
-            android.R.layout.simple_spinner_item
-        ).also {
-            it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            binding.gigSpinner.adapter = it
-        }
 
         binding.editTripSaveCircularProgressButton.setOnClickListener(this::saveButtonOnClickListener)
         binding.editTripAddStopButton.setOnClickListener(this::addStop)
@@ -110,6 +98,10 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
             }
         })
 
+        tripViewModel.errorMsg.observe(viewLifecycleOwner, Observer {
+            if (it.isNotBlank()) mainActivity.showToastMessage(it)
+        })
+
         mainActivity.hideFab()
 
         return binding.root
@@ -126,6 +118,25 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
         addressAutoCompleteJob?.cancel()
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.edit_trips, menu)
+    }
+
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        return when (item.itemId) {
+            R.id.action_edit_gig_labels -> {
+                this.findNavController().navigate(R.id.action_editTripFragment_to_gigLabelsFragment)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
     override fun onDialogPositiveClick(dialog: DialogFragment) {
         // User touched the dialog's positive button
         tripViewModel.deleteTrip(this.trip!!.id)
@@ -140,15 +151,21 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
     private fun injectTripIntoView(trip: Trip?) {
         trip?.let {
 
-            binding.tripDateTextView.text = getTripDate(it)
+            binding.tripDateTextView.text = Util.getTripDate(it)
 
             val layout: LinearLayout = binding.editTripFragmentLinearLayout
+            layout.removeAllViewsInLayout()
             trip.stops.forEach { stop ->
                 val view = AutoCompleteTextView(context)
                 val adapter = AddressAutoSuggestAdapter(
                     mainActivity, // Context
                     android.R.layout.simple_dropdown_item_1line
                 )
+
+                view.id = View.generateViewId()
+                view.setAdapter(adapter)
+                view.threshold = 1
+
                 view.onItemClickListener = AdapterView.OnItemClickListener{
                         parent,_view,position,id ->
                     val address: Address? = adapter.getItem(position)
@@ -181,10 +198,31 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
 
             binding.payAmountEditText.setText(it.payAmount)
 
-            binding.gigSpinner.setSelection(
-                resources.getStringArray(R.array.gigs_array).indexOf(it.gigName)
-            )
+            uiScope.launch {
+                val spinnerValues  = ArrayList<String>()
 
+                withContext(Dispatchers.IO) {
+                    val gigNames = CourierLockerDatabase.getInstance(mainActivity.application).tripDao.getAllGigsThatAreVisible()
+                        .map { g -> g.name }
+                        .toMutableList()
+
+                    /**
+                     * gig label may be named something that is now hidden or deleted
+                     * in that case, we'll add it dynamically to the spinner
+                    **/
+                    if(!gigNames.any { name -> name == it.gigName }) spinnerValues.add(it.gigName)
+
+                    gigNames.forEach { name ->
+                        spinnerValues.add(name)
+                    }
+                }
+
+                binding.gigSpinner.adapter = ArrayAdapter<String>(mainActivity, android.R.layout.simple_spinner_item, spinnerValues).also { adapter ->
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                }
+
+                binding.gigSpinner.setSelection(spinnerValues.indexOf(it.gigName))
+            }
         }
 
     }

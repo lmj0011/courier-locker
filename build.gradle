@@ -7,6 +7,7 @@ buildscript {
     ext.lifecycle_version = "2.0.0"
     ext.version_coroutine = "1.2.2"
     ext.version_kittinunf_fuel = "2.2.0"
+    ext.paging_version = "2.1.2"
 
     repositories {
         google()
@@ -18,7 +19,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.6.3'
+        classpath 'com.android.tools.build:gradle:4.0.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$nav_version_ktx"
         classpath 'com.google.gms:google-services:4.3.2'  // Google Services plugin

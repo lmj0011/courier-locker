@@ -12,6 +12,16 @@
             android:layout_width="match_parent"
             android:theme="@style/AppTheme.AppBarOverlay">
 
+    <com.google.android.material.progressindicator.ProgressIndicator
+            android:id="@+id/progress_indicator"
+            style="@style/Widget.MaterialComponents.ProgressIndicator.Linear.Indeterminate"
+            app:indicatorColor="@color/colorAccent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:indeterminateOnly="true"
+            android:visibility="gone"/>
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <fragment

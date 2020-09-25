@@ -13,9 +13,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import br.com.simplepass.loadingbutton.presentation.State
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.AddressAutoSuggestAdapter
@@ -25,6 +23,7 @@ import name.lmj0011.courierlocker.databinding.FragmentCreateTripBinding
 import name.lmj0011.courierlocker.factories.TripViewModelFactory
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.viewmodels.TripViewModel
+import kotlin.collections.ArrayList
 
 /**
  * A simple [Fragment] subclass.
@@ -46,6 +45,7 @@ class CreateTripFragment : Fragment() {
             inflater, R.layout.fragment_create_trip, container, false)
 
         mainActivity = activity as MainActivity
+        setHasOptionsMenu(true)
 
         val application = requireNotNull(this.activity).application
         val dataSource = CourierLockerDatabase.getInstance(application).tripDao
@@ -54,13 +54,21 @@ class CreateTripFragment : Fragment() {
 
         binding.tripViewModel = this.tripViewModel
 
-        ArrayAdapter.createFromResource(
-            mainActivity,
-            R.array.gigs_array,
-            android.R.layout.simple_spinner_item
-        ).also {
-            it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            binding.gigSpinner.adapter = it
+
+        uiScope.launch {
+            val spinnerValues  = ArrayList<String>()
+
+            withContext(Dispatchers.IO) {
+                val gigs = dataSource.getAllGigsThatAreVisible()
+
+                gigs.forEach {
+                    spinnerValues.add(it.name)
+                }
+            }
+
+            binding.gigSpinner.adapter = ArrayAdapter<String>(mainActivity, android.R.layout.simple_spinner_item, spinnerValues).also {
+                it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            }
         }
 
         binding.createTripSaveCircularProgressButton.setOnClickListener(this::saveButtonOnClickListener)
@@ -85,6 +93,10 @@ class CreateTripFragment : Fragment() {
             }
         })
 
+        tripViewModel.errorMsg.observe(viewLifecycleOwner, Observer {
+            if (it.isNotBlank()) mainActivity.showToastMessage(it)
+        })
+
         mainActivity.hideFab()
 
         this.addStop(binding.root)
@@ -101,6 +113,25 @@ class CreateTripFragment : Fragment() {
         super.onDestroy()
         fragmentJob.cancel()
         addressAutoCompleteJob?.cancel()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.create_trips, menu)
+    }
+
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        return when (item.itemId) {
+            R.id.action_edit_gig_labels -> {
+                this.findNavController().navigate(R.id.action_createTripFragment_to_gigLabelsFragment)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     @Suppress("UNUSED_PARAMETER")

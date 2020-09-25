@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
+import androidx.paging.PagedList
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
@@ -104,25 +105,22 @@ class MapsFragment : Fragment(), SearchableRecyclerView {
 
         binding.lifecycleOwner = this
 
-        apartmentViewModel.apartments.observe(viewLifecycleOwner, Observer {
-            if (!ListLock.isListLocked) {
-                it?.let {
-                    this.submitListToAdapter(it)
-                }
-            }
+        apartmentViewModel.apartmentsPaged.observe(viewLifecycleOwner, Observer {
+            this.submitListToAdapter(it)
         })
 
         LocationHelper.lastLatitude.observe(viewLifecycleOwner, lastLocationListener)
 
         binding.liveLocationUpdatingSwitch.setOnCheckedChangeListener { _, isChecked ->
             ListLock.unlock()
+            apartmentViewModel.isOrderedByNearest.postValue(isChecked)
             sharedPreferences.edit().apply {
                 putBoolean("mapsLocationUpdating", isChecked)
                 commit()
             }
         }
 
-        if(!resources.getBoolean(R.bool.DEBUG_MODE)) {
+        if(!sharedPreferences.getBoolean("enableDebugMode", false)!!) {
             binding.generateMapBtn.visibility = View.GONE
         }
 
@@ -132,17 +130,7 @@ class MapsFragment : Fragment(), SearchableRecyclerView {
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                var list = apartmentViewModel.apartments.value
-
-                list?.let {
-                    uiScope.launch {
-                        val filteredList = withContext(Dispatchers.Default) {
-                            listAdapter.filterBySearchQuery(newText, it)
-                        }
-
-                        this@MapsFragment.submitListToAdapter(filteredList)
-                    }
-                }
+                apartmentViewModel.filterText.postValue(newText)
                 return false
             }
         })
@@ -167,17 +155,6 @@ class MapsFragment : Fragment(), SearchableRecyclerView {
         binding.swipeRefresh.setOnRefreshListener {
             ListLock.unlock()
             this.findNavController().navigate(R.id.mapsFragment)
-
-//            TODO implement some sort of apt merge strategy
-//            apartmentViewModel.apartments.value?.let {
-//                val apts = it.filter {apt -> // gather apts that are from external sources
-//                    !apt.sourceUrl.isNullOrBlank()
-//                }.toMutableList()
-//
-//                apartmentViewModel.deleteAll(apts)
-//            }
-//
-//            this.refreshList()
         }
 
         return binding.root
@@ -239,56 +216,19 @@ class MapsFragment : Fragment(), SearchableRecyclerView {
     }
 
     private fun applyPreferences() {
-        binding.liveLocationUpdatingSwitch.isChecked = sharedPreferences.getBoolean("mapsLocationUpdating", false)
+        val isChecked = sharedPreferences.getBoolean("mapsLocationUpdating", false)
+        binding.liveLocationUpdatingSwitch.isChecked = isChecked
+        apartmentViewModel.isOrderedByNearest.postValue(isChecked)
     }
 
     private fun refreshList() {
-        val apts =  apartmentViewModel.apartments.value
+        val apts =  apartmentViewModel.apartmentsPaged.value
         apts?.let{ this.submitListToAdapter(it) }
         binding.swipeRefresh.isRefreshing = false
-
-//            TODO implement some sort of apt merge strategy
-//        binding.swipeRefresh.isRefreshing = true
-//
-//        val str = sharedPreferences.getString(resources.getString(R.string.sp_key_map_feed_list), "")!!
-//        val feedList = str.lines().filter {
-//            !it.isNullOrBlank()
-//        }
-//
-//        uiScope.launch {
-//            try {
-//                withContext(Dispatchers.IO) {
-//                    val psr = PlexmapsXmlParser()
-//                    val apts = psr.parseFeeds(arrayOf("https://courierlocker.org/plexmaps/feed")).toMutableList()
-//
-//                    withContext(Dispatchers.Main) {
-//                        apartmentViewModel.insertApartments(apts)
-//                        binding.swipeRefresh.isRefreshing = false
-//                    }
-//                }
-//            } catch (ex: Exception) {
-//                mainActivity.showToastMessage("Map Feed Error\n\n${ex.message.toString()}")
-//            } finally {
-//                binding.swipeRefresh.isRefreshing = false
-//            }
-//
-//        }
-
     }
 
-    private fun submitListToAdapter (list: MutableList<Apartment>) {
-        if (binding.liveLocationUpdatingSwitch.isChecked) {
-            uiScope.launch {
-                val filteredList = withContext(Dispatchers.Default) {
-                    listAdapter.filterByClosestLocation(list)
-                }
-
-                listAdapter.submitList(filteredList)
-                binding.mapList.smoothScrollToPosition(0)
-            }
-        } else {
-            listAdapter.submitList(list)
-        }
+    private fun submitListToAdapter (list: PagedList<Apartment>) {
+        listAdapter.submitList(list)
         listAdapter.notifyDataSetChanged()
     }
 

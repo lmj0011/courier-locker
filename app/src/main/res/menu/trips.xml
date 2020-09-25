@@ -11,8 +11,12 @@
             android:icon="@android:drawable/stat_sys_download"
             android:orderInCategory="101"
             app:showAsAction="never"/>
+    <item android:id="@+id/action_edit_gig_labels"
+            android:title="Edit Gig Labels"
+            android:orderInCategory="102"
+            app:showAsAction="never"/>
     <item android:id="@+id/action_trips_clear_all"
             android:title="Clear All"
-            android:orderInCategory="102"
+            android:orderInCategory="103"
             app:showAsAction="never"/>
 </menu>

@@ -1,6 +1,7 @@
 package name.lmj0011.courierlocker.database
 
 import androidx.lifecycle.LiveData
+import androidx.paging.DataSource
 import androidx.room.*
 
 @Dao
@@ -20,6 +21,12 @@ interface ApartmentDao: BaseDao {
 
     @Query("DELETE FROM apartments_table")
     fun clear()
+
+    @Query("SELECT * FROM apartments_table ORDER BY id DESC")
+    fun getAllApartmentsByThePage(): DataSource.Factory<Int, Apartment>
+
+    @Query("SELECT * FROM apartments_table WHERE name LIKE :query OR address LIKE :query ORDER BY id DESC")
+    fun getAllApartmentsByThePageFiltered(query: String): DataSource.Factory<Int, Apartment>
 
     @Query("SELECT * FROM apartments_table ORDER BY id DESC")
     fun getAllApartments(): LiveData<MutableList<Apartment>>

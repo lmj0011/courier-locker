@@ -13,6 +13,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
+import androidx.paging.PagedList
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import kotlinx.coroutines.*
@@ -67,8 +68,8 @@ class CustomersFragment :
             this.findNavController().navigate(CustomersFragmentDirections.actionCustomersFragmentToEditCustomerFragment(customerId.toInt()))
         })
 
-        customerViewModel.customers.observe(viewLifecycleOwner, Observer {
-            listAdapter.submitList(it)
+        customerViewModel.customersPaged.observe(viewLifecycleOwner, Observer {
+            this.submitListToAdapter(it)
         })
 
         binding.customerList.addItemDecoration(DividerItemDecoration(mainActivity, DividerItemDecoration.VERTICAL))
@@ -79,7 +80,7 @@ class CustomersFragment :
 
         binding.lifecycleOwner = this
 
-        if(!resources.getBoolean(R.bool.DEBUG_MODE)) {
+        if(!sharedPreferences.getBoolean("enableDebugMode", false)) {
             binding.generateCustomerBtn.visibility = View.GONE
         }
 
@@ -89,17 +90,7 @@ class CustomersFragment :
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                var list = customerViewModel.customers.value
-
-                list?.let {
-                    uiScope.launch {
-                        val filteredList = withContext(Dispatchers.Default) {
-                            listAdapter.filterBySearchQuery(newText, it)
-                        }
-
-                        this@CustomersFragment.submitListToAdapter(filteredList)
-                    }
-                }
+                customerViewModel.filterText.postValue(newText)
                 return false
             }
         })
@@ -188,7 +179,7 @@ class CustomersFragment :
         )
     }
 
-    private fun submitListToAdapter (list: MutableList<Customer>) {
+    private fun submitListToAdapter (list: PagedList<Customer>) {
         listAdapter.submitList(list)
         listAdapter.notifyDataSetChanged()
     }
