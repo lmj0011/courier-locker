@@ -64,7 +64,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
         aboutPref = findPreference("about")!!
         automaticBackupLocationPref = findPreference("automaticBackupLocation")!!
         boundingCoordinatesDistance = findPreference(application.getString(R.string.pref_key_bounding_coordinates_distance))!!
-        boundingCoordinatesDistance = findPreference(application.getString(R.string.pref_key_bounding_coordinates_distance))!!
         enableCurrentStatusService = findPreference(application.getString(R.string.pref_enable_current_status_service))!!
 
         if(!resources.getBoolean(R.bool.DEBUG_MODE)) {
