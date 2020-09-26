@@ -3,21 +3,21 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'androidx.navigation.safeargs'
-apply plugin: 'io.fabric'
+apply plugin: 'com.google.firebase.crashlytics'
 
 // get the first 8 chars of the latest git commit, and use it as the version build name
 def appBuildPrefix =  ['sh', '-c', 'git rev-parse --short=8 HEAD'].execute().text.trim()
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.0"
+    buildToolsVersion "29.0.2"
 
     defaultConfig {
         applicationId "name.lmj0011.courierlocker"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 29
-        versionCode 49
-        versionName "1"
+        versionCode 70
+        versionName "2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
@@ -32,6 +32,7 @@ android {
     buildTypes {
         release {
             minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             resValue("bool", "DEBUG_MODE", "false")
             resValue("string", "app_build", appBuildPrefix)
@@ -39,6 +40,7 @@ android {
             resValue("string", "google_directions_key", (project.findProperty("GOOGLE_DIRECTIONS_API_KEY_DEBUG") ?: ""))
             manifestPlaceholders = [usesCleartextTraffic:"false"]
         }
+
         debug {
             minifyEnabled false
             resValue("bool", "DEBUG_MODE", "true")
@@ -52,7 +54,7 @@ android {
     productFlavors {
         dev { // active development/testing
             applicationIdSuffix ".dev"
-            versionNameSuffix ".3.0-dev"
+            versionNameSuffix ".0.0-dev"
             resValue("string", "app_name", "Courier Locker (dev)")
             manifestPlaceholders = [
                     appIcon: "@mipmap/ic_launcher_dev",
@@ -62,7 +64,7 @@ android {
         }
         beta { // public testing
             applicationIdSuffix ".beta"
-            versionNameSuffix ".3.0-beta"
+            versionNameSuffix ".0.0-beta"
             resValue("string", "app_name", "Courier Locker (beta)")
             manifestPlaceholders = [
                     appIcon: "@mipmap/ic_launcher_beta",
@@ -72,7 +74,7 @@ android {
         }
         prod { // official release
             applicationIdSuffix ".prod"
-            versionNameSuffix ".3.0"
+            versionNameSuffix ".0.0"
             resValue("string", "app_name", "Courier Locker")
             manifestPlaceholders = [
                     appIcon: "@mipmap/ic_launcher",
@@ -83,8 +85,6 @@ android {
     }
 
     compileOptions {
-        // Flag to enable support for the new language APIs
-        coreLibraryDesugaringEnabled true
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
@@ -93,9 +93,10 @@ android {
         jvmTarget = "1.8"
     }
 
-    dataBinding {
-        enabled = true
+    buildFeatures {
+        dataBinding = true
     }
+
     lintOptions {
         checkReleaseBuilds false
     }
@@ -173,11 +174,9 @@ dependencies {
     // An adaptation of the JSR-310 backport for Android.
     implementation 'com.jakewharton.threetenabp:threetenabp:1.2.1'
 
-    // Add the Firebase SDK for Google Analytics
-    implementation 'com.google.firebase:firebase-analytics:17.2.0'
-
-    // Crashlytics
-    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
+    // Firebase SDK
+    implementation 'com.google.firebase:firebase-crashlytics:17.2.1'
+    implementation 'com.google.firebase:firebase-analytics:17.5.0'
 
     // Shortbread
     implementation 'com.github.matthiasrobbers:shortbread:1.0.2'
@@ -200,9 +199,6 @@ dependencies {
     // Maps SDK for Android Utility Library
     // https://developers.google.com/maps/documentation/android-sdk/v3-client-migration#import-the-beta-compatible-utility-library
     implementation 'com.google.maps.android:android-maps-utils-sdk-v3-compat:0.1'
-
-    // https://developer.android.com/studio/write/java8-support?utm_source=android-studio-4-0&utm_medium=studio-assistant-stable#library-desugaring
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.0.5'
 
     // Flipper https://fbflipper.com/docs/getting-started/android-native
     debugImplementation 'com.facebook.flipper:flipper:0.58.0'

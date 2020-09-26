@@ -22,5 +22,6 @@
 
 ##---------------Begin: proguard configuration for Gson  ----------
 # Application classes that will be serialized/deserialized over Gson
- -keep class name.lmj0011.courierlocker.database.* { <fields>; }
- ##---------------End: proguard configuration for Gson  ----------
+#noinspection ShrinkerUnresolvedReference
+#-keep class name.lmj0011.courierlocker.database.** { *; }
+##---------------End: proguard configuration for Gson  ----------

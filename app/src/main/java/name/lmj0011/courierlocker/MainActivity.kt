@@ -17,10 +17,8 @@ import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.*
 import androidx.preference.PreferenceManager
-import com.crashlytics.android.Crashlytics
-import io.fabric.sdk.android.Fabric
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.android.synthetic.main.app_bar_main.view.*
-import kotlinx.coroutines.*
 import timber.log.Timber
 import name.lmj0011.courierlocker.databinding.ActivityMainBinding
 import name.lmj0011.courierlocker.fragments.TripsFragmentDirections
@@ -56,8 +54,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val sendCrashReports = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("sendCrashReports", true)!!
 
         if(sendCrashReports) {
-            Fabric.with(this, Crashlytics())
-        }
+            FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
+        } else FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false)
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         navController = findNavController(R.id.navHostFragment)

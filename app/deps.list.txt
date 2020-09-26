@@ -19,8 +19,8 @@ com.github.kittinunf.fuel:fuel:2.2.0
 com.github.kittinunf.fuel:fuel-json:2.2.0
 androidx.preference:preference:1.1.0-alpha04
 com.jakewharton.threetenabp:threetenabp:1.2.1
-com.google.firebase:firebase-analytics:17.2.0
-com.crashlytics.sdk.android:crashlytics:2.10.1
+com.google.firebase:firebase-crashlytics:17.2.1
+com.google.firebase:firebase-analytics:17.5.0
 com.github.matthiasrobbers:shortbread:1.0.2
 br.com.simplepass:loading-button-android:2.2.0
 com.google.android.gms:play-services-basement:17.2.1
