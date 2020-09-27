@@ -18,6 +18,16 @@
     <string name="menu_customers">Customers</string>
     <string name="menu_maps">Maps</string>
 
+
+    <string name="v2_update_notice_message">
+        Courier Locker version 2 is set to be released soon (sometime in the next few weeks, exact date TBD).
+        This release will contain a breaking change that will result in some lost
+        of app data (ie. Trip stops, gate codes, and Apartment buildings).
+        This lost of data can be avoided by either not updating to version 2 or by following the
+        steps in the version 2 update guide
+    </string>
+
     <!-- Shared Preference Keys -->
     <string name="sp_key_map_feed_list">mapFeedList</string>
+    <string name="sp_key_v2_update_notice">v2UpdateNotice</string>
 </resources>

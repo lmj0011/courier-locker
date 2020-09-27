@@ -24,6 +24,7 @@ import timber.log.Timber
 import name.lmj0011.courierlocker.databinding.ActivityMainBinding
 import name.lmj0011.courierlocker.fragments.TripsFragmentDirections
 import name.lmj0011.courierlocker.fragments.dialogs.ImportedAppDataDialogFragment
+import name.lmj0011.courierlocker.fragments.dialogs.Version2NoticeDialogFragment
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.PermissionHelper
 import name.lmj0011.courierlocker.services.CurrentStatusForegroundService
@@ -93,6 +94,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onResume() {
         super.onResume()
         Timber.i("onResume Called")
+
+        val showVersion2Notice = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(resources.getString(R.string.sp_key_v2_update_notice), true)!!
+        if (showVersion2Notice) Version2NoticeDialogFragment().show(supportFragmentManager, "Version2NoticeDialogFragment")
 
         // any message that the previous Activity wants to send
         intent.extras?.getString("messageFromCaller")?.let {
@@ -193,6 +197,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.action_settings -> {
                 val intent = Intent(this, SettingsActivity::class.java)
                 startActivity(intent)
+                true
+            }
+            R.id.action_v2_update_notice -> {
+                Version2NoticeDialogFragment().show(supportFragmentManager, "Version2NoticeDialogFragment")
                 true
             }
             else -> super.onOptionsItemSelected(item)

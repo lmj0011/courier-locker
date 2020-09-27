@@ -16,7 +16,7 @@ android {
         applicationId "name.lmj0011.courierlocker"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 48
+        versionCode 50
         versionName "1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -50,7 +50,7 @@ android {
     productFlavors {
         dev { // active development/testing
             applicationIdSuffix ".dev"
-            versionNameSuffix ".2.0-dev"
+            versionNameSuffix ".2.1-dev"
             resValue("string", "app_name", "Courier Locker (dev)")
             manifestPlaceholders = [
                     appIcon: "@mipmap/ic_launcher_dev",
@@ -60,7 +60,7 @@ android {
         }
         beta { // public testing
             applicationIdSuffix ".beta"
-            versionNameSuffix ".2.0-beta"
+            versionNameSuffix ".2.1-beta"
             resValue("string", "app_name", "Courier Locker (beta)")
             manifestPlaceholders = [
                     appIcon: "@mipmap/ic_launcher_beta",
@@ -70,7 +70,7 @@ android {
         }
         prod { // official release
             applicationIdSuffix ".prod"
-            versionNameSuffix ".2.0"
+            versionNameSuffix ".2.1"
             resValue("string", "app_name", "Courier Locker")
             manifestPlaceholders = [
                     appIcon: "@mipmap/ic_launcher",
