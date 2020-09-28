@@ -17,7 +17,7 @@ class SettingsActivity : AppCompatActivity() {
     companion object {
         const val DB_EXPORT_REQUEST_CODE = 105
         const val DB_IMPORT_REQUEST_CODE = 106
-        const val CODE_BACKUP_DIR_REQUEST_CODE = 107
+        const val BACKUP_DIR_REQUEST_CODE = 107
     }
 
     // indeterminate progress indicator

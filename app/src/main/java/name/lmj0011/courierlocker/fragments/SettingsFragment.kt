@@ -5,14 +5,12 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.InputType
-import androidx.core.net.toFile
 import androidx.documentfile.provider.DocumentFile
 import androidx.preference.*
 import androidx.work.*
 import com.github.salomonbrys.kotson.*
 import com.google.gson.Gson
 import com.google.gson.JsonParser
-import kotlinx.android.synthetic.main.list_item_gig_label.view.*
 import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.MainActivity
@@ -126,7 +124,12 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         automaticBackupLocationPref.setOnPreferenceClickListener {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-            startActivityForResult(intent, SettingsActivity.CODE_BACKUP_DIR_REQUEST_CODE)
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                        or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                        or Intent.FLAG_GRANT_PREFIX_URI_PERMISSION
+            )
+            startActivityForResult(intent, SettingsActivity.BACKUP_DIR_REQUEST_CODE)
             true
         }
 
@@ -135,7 +138,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
             try {
                 summary = DocumentFile.fromTreeUri(preferenceManager.context,
-                    Uri.parse(preferences.automaticBackupLocation)
+                    Uri.parse(preferences.automaticBackupLocation())
                 )!!.uri.lastPathSegment
             } catch (ex: IllegalArgumentException) {
                 // this error should only be thrown, if the User hasn't selected a directory yet
@@ -150,7 +153,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
             try {
                 summary = DocumentFile.fromTreeUri(preferenceManager.context,
-                    Uri.parse(preferences.automaticBackupLocation)
+                    Uri.parse(preferences.automaticBackupLocation())
                 )!!.uri.lastPathSegment
             } catch (ex: IllegalArgumentException) {
                 // this error should only be thrown, if the User hasn't selected a directory yet
@@ -184,8 +187,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
+    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
+        super.onActivityResult(requestCode, resultCode, intent)
 
         if (resultCode != Activity.RESULT_OK) {
             Timber.i("Intent failed! [requestCode: $resultCode, resultCode: $resultCode]")
@@ -194,29 +197,28 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         when(requestCode) {
             SettingsActivity.DB_EXPORT_REQUEST_CODE -> {
-                data?.data?.let {
+                intent?.data?.let {
                     // ref: https://developer.android.com/guide/topics/providers/document-provider#edit
                     this.exportAppDataToFile(it)
                 }
             }
             SettingsActivity.DB_IMPORT_REQUEST_CODE -> {
-                data?.data?.let {
+                intent?.data?.let {
                     this.restoreAppDataFromFile(it)
                 }
             }
-            SettingsActivity.CODE_BACKUP_DIR_REQUEST_CODE -> {
-                data?.data?.let {
-                    val activity = activity ?: return
+            SettingsActivity.BACKUP_DIR_REQUEST_CODE -> {
+                intent?.data?.let {
 
                     // Get UriPermission so it's possible to write files
-                    val flags = Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    val flags = intent.flags and (Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
-                    activity.contentResolver.takePersistableUriPermission(it, flags)
+                    requireActivity().contentResolver.takePersistableUriPermission(it, flags)
 
-                    val parentFolder = DocumentFile.fromTreeUri(activity, it)!!
+                    val parentFolder = DocumentFile.fromTreeUri(requireActivity(), it)!!
 
                     // Set backup Uri
-                    preferences.automaticBackupLocation = parentFolder.uri.toString()
+                    preferences.automaticBackupLocation(parentFolder.uri.toString())
 
                     val summary = DocumentFile.fromTreeUri(preferenceManager.context, parentFolder.uri)!!.uri.lastPathSegment
                     automaticBackupLocationPref.summary = summary

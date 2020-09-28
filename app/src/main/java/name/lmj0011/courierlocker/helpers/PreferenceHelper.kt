@@ -17,10 +17,8 @@ class PreferenceHelper(val context: Context) {
         prefs.edit{ remove("advancedDirectionsApiKey") }
     }
 
-    var automaticBackupLocation: String? = prefs.getString("automaticBackupLocation", defaultBackupDir.toString())
-         set(value) {
-             prefs.edit { putString("automaticBackupLocation", value) }
-         }
+    fun automaticBackupLocation(): String = prefs.getString("automaticBackupLocation", defaultBackupDir.toString())!!
+    fun automaticBackupLocation(dir: String) = prefs.edit { putString("automaticBackupLocation", dir) }
 
     var boundingCoordinatesDistance: Double = prefs.getString(context.getString(R.string.pref_key_bounding_coordinates_distance), "25")!!.toDouble()
         set(value) {

@@ -91,7 +91,7 @@ class CreateBackupWorker (private val appContext: Context, parameters: WorkerPar
             targetFile.createNewFile()
 
             try {
-                val tree = DocumentFile.fromTreeUri(appContext, Uri.parse(preferences.automaticBackupLocation))!!
+                val tree = DocumentFile.fromTreeUri(appContext, Uri.parse(preferences.automaticBackupLocation()))!!
                 targetDocFile = tree.createFile("application/json", "${Util.getUniqueFileNamePrefix()}-courierlocker-backup.json")
             } catch (ex: IllegalArgumentException) {
                 // this error should only be thrown, if the User hasn't selected a directory yet
