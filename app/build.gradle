@@ -9,13 +9,13 @@ apply plugin: 'com.google.firebase.crashlytics'
 def appBuildPrefix =  ['sh', '-c', 'git rev-parse --short=8 HEAD'].execute().text.trim()
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
     buildToolsVersion "29.0.2"
 
     defaultConfig {
         applicationId "name.lmj0011.courierlocker"
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode 70
         versionName "2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
