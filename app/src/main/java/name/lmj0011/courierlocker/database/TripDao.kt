@@ -37,10 +37,10 @@ interface TripDao: BaseDao {
     @Query("SELECT payAmount FROM trips_table")
     fun getAllTripPayAmounts(): LiveData<List<String>>
 
-    @Query("SELECT payAmount FROM trips_table WHERE timestamp >= date('now', 'localtime') AND timestamp < date('now', 'localtime', '+1 day')")
+    @Query("SELECT payAmount FROM trips_table WHERE date(timestamp, 'localtime') >= date('now', 'localtime') AND date(timestamp, 'localtime') < date('now', 'localtime', '+1 day')")
     fun getAllTodayTripPayAmounts(): LiveData<List<String>>
 
-    @Query("SELECT payAmount FROM trips_table WHERE strftime('%Y',timestamp) = strftime('%Y',date('now', 'localtime')) AND  strftime('%m',timestamp) = strftime('%m',date('now', 'localtime'))")
+    @Query("SELECT payAmount FROM trips_table WHERE strftime('%Y',date(timestamp, 'localtime')) = strftime('%Y',date('now', 'localtime')) AND  strftime('%m',date(timestamp, 'localtime')) = strftime('%m',date('now', 'localtime'))")
     fun getAllMonthTripPayAmounts(): LiveData<List<String>>
 
     @Query("DELETE from trips_table WHERE id = :key")

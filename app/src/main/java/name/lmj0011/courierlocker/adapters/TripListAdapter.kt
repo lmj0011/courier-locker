@@ -2,13 +2,19 @@ package name.lmj0011.courierlocker.adapters
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
+import androidx.core.view.setMargins
+import androidx.core.view.updateLayoutParams
 import androidx.paging.PagedListAdapter
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.database.Trip
 import name.lmj0011.courierlocker.databinding.ListItemTripBinding
@@ -26,26 +32,45 @@ class TripListAdapter(private val clickListener: TripListener): PagedListAdapter
             trip?.let {
                 binding.trip = trip
                 binding.clickListener = clickListener
-                binding.tripDateTextView.text = HtmlCompat.fromHtml("<b>${Util.getTripDate(trip)}</b>", HtmlCompat.FROM_HTML_MODE_LEGACY)
-                binding.tripPickupAddressTextView.text = HtmlCompat.fromHtml("<b>start:</b> ${trip.pickupAddress}", HtmlCompat.FROM_HTML_MODE_LEGACY)
-                binding.tripDropoffAddressTextView.text = HtmlCompat.fromHtml("<b>end:</b> ${trip.dropOffAddress}", HtmlCompat.FROM_HTML_MODE_LEGACY)
+
+                GlobalScope.launch(Dispatchers.Main) {
+                    binding.tripDateTextView.text = HtmlCompat.fromHtml("<b>${Util.getTripDate(trip)}</b>", HtmlCompat.FROM_HTML_MODE_LEGACY)
+                }
+
+                binding.tripPickupAddressTextView.text = HtmlCompat
+                    .fromHtml(
+                        "<b>start:</b> ${trip.pickupAddress.split(',')[0]}",
+                        HtmlCompat.FROM_HTML_MODE_LEGACY
+                    )
+
+
+                if (trip.stops.size > 2) {
+                    binding.multipleStopTextView.visibility = View.VISIBLE
+                    binding.multipleStopTextView.text = "${(trip.stops.size - 2)}"
+                } else binding.multipleStopTextView.visibility = View.GONE
+
+                binding.tripDropoffAddressTextView.text = HtmlCompat
+                    .fromHtml(
+                        "<b>end:</b> ${trip.dropOffAddress.split(',')[0]}",
+                        HtmlCompat.FROM_HTML_MODE_LEGACY
+                    )
 
                 if(googleApiKey.isNullOrBlank()) {
                     binding.tripDistanceTextView.visibility = TextView.GONE
                 } else {
-                    binding.tripDistanceTextView.text = HtmlCompat.fromHtml("<b>distance:</b> ${Util.metersToMiles(trip.distance)} mi", HtmlCompat.FROM_HTML_MODE_LEGACY)
+                    "${Util.metersToMiles(trip.distance)} mi".also { binding.tripDistanceTextView.text = it }
                 }
 
                 if (trip.payAmount.isNullOrBlank()) {
                     binding.tripPayTextView.visibility = TextView.GONE
                 } else {
-                    binding.tripPayTextView.text = HtmlCompat.fromHtml("<b>pay:</b> ${Util.numberFormatInstance.format(trip.payAmount.toDouble())} ", HtmlCompat.FROM_HTML_MODE_LEGACY)
+                    binding.tripPayTextView.text = Util.numberFormatInstance.format(trip.payAmount.toDouble())
                 }
 
                 if (trip.gigName.isNullOrBlank()) {
                     binding.tripGigTextView.visibility = TextView.GONE
                 } else {
-                    binding.tripGigTextView.text = HtmlCompat.fromHtml("<b>gig:</b> ${trip.gigName}", HtmlCompat.FROM_HTML_MODE_LEGACY)
+                    binding.tripGigTextView.text = trip.gigName
                 }
             }
 

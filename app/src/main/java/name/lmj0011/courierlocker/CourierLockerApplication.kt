@@ -38,15 +38,6 @@ class CourierLockerApplication : Application() {
         NotificationHelper.init(this)
         PermissionHelper.checkPermissionApprovals(this)
 
-        SoLoader.init(this, false)
-        if (BuildConfig.DEBUG && FlipperUtils.shouldEnableFlipper(this)) {
-            val client = AndroidFlipperClient.getInstance(this)
-            client.addPlugin(InspectorFlipperPlugin(this, DescriptorMapping.withDefaults()))
-            client.addPlugin(DatabasesFlipperPlugin(this))
-            client.start()
-        }
-
-
         // initializing this view model here in order to set up some default values in a fresh database
         val gigLabelDataSource = CourierLockerDatabase.getInstance(this).gigLabelDao
         GigLabelViewModel(gigLabelDataSource, this)

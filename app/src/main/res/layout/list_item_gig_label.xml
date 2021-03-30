@@ -12,7 +12,7 @@
             android:id="@+id/gigLabelListContainer"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:padding="@dimen/default_list_item_padding"
+            android:padding="@dimen/default_list_item_padding_8dp"
             android:weightSum="6">
 
         <ImageView

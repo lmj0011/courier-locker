@@ -1,14 +1,17 @@
 package name.lmj0011.courierlocker.database
 
-import android.content.ContentValues
+import android.annotation.SuppressLint
 import android.content.Context
-import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteDatabaseLockedException
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import kotlinx.coroutines.*
+import name.lmj0011.courierlocker.BuildConfig
+import timber.log.Timber
 
 @Database(entities = [GateCode::class, Trip::class, Customer::class, Apartment::class, GigLabel::class], version = 6,  exportSchema = true)
 @TypeConverters(DataConverters::class)
@@ -49,8 +52,8 @@ abstract class CourierLockerDatabase : RoomDatabase() {
         private val MIGRATION_3_4 = object : Migration(3, 4) {
             // alter Trips table; add stops and notes columns
             override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("ALTER TABLE `trips_table` ADD COLUMN `stops` TEXT NOT NULL DEFAULT ''");
-                database.execSQL("ALTER TABLE `trips_table` ADD COLUMN `notes` TEXT NOT NULL DEFAULT ''");
+                database.execSQL("ALTER TABLE `trips_table` ADD COLUMN `stops` TEXT NOT NULL DEFAULT ''")
+                database.execSQL("ALTER TABLE `trips_table` ADD COLUMN `notes` TEXT NOT NULL DEFAULT ''")
 
             }
         }
@@ -76,12 +79,9 @@ abstract class CourierLockerDatabase : RoomDatabase() {
             }
         }
 
-
         @Volatile
         private var INSTANCE: CourierLockerDatabase? = null
 
-        @Volatile
-        lateinit var context: Context
 
         /**
          * about migrations: https://medium.com/androiddevelopers/understanding-migrations-with-room-f01e04b07929
@@ -89,21 +89,52 @@ abstract class CourierLockerDatabase : RoomDatabase() {
          */
         fun getInstance(context: Context): CourierLockerDatabase {
             synchronized(this) {
-                CourierLockerDatabase.context = context
                 var instance = INSTANCE
 
                 if (instance == null) {
-                    instance = Room.databaseBuilder(
+                    val builder = Room.databaseBuilder(
                         context.applicationContext,
                         CourierLockerDatabase::class.java,
                         "courier_locker_database"
                     )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
-                    .build()
+                    .addMigrations(
+                        MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4,
+                        MIGRATION_4_5, MIGRATION_5_6
+                    )
+
+                    if (BuildConfig.DEBUG) {
+                        builder
+                            .fallbackToDestructiveMigration()
+                    }
+
+                    instance = builder.build()
                 }
 
                 return instance
             }
+        }
+
+        /**
+         * Blocks app until Database is not locked or in a transaction.
+         * Should only need to be called once when running a large migration
+         */
+        fun blockUntilDbIsAccessible(context: Context) {
+            Timber.d("Accessing Database...")
+            val dbStartTime = System.currentTimeMillis()
+            runBlocking {
+                val database = getInstance(context)
+                var isLocked = true
+
+                while(isLocked) {
+                    try {
+                        isLocked = database.inTransaction()
+                    } catch(ex: SQLiteDatabaseLockedException) {
+                        delay(500)
+                    }
+                }
+            }
+            val dbEndTime = System.currentTimeMillis()
+            Timber.d("Accessing Database took ${dbEndTime - dbStartTime}ms")
         }
 
     }

@@ -1,11 +1,7 @@
 package name.lmj0011.courierlocker.helpers
 
-import android.os.Build
 import android.text.Html
 import android.text.Spanned
-import androidx.core.text.HtmlCompat
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
 import name.lmj0011.courierlocker.database.GateCode
 import name.lmj0011.courierlocker.database.Trip
 import timber.log.Timber
@@ -44,11 +40,7 @@ object Util {
             }
         }
 
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Html.fromHtml(sb.toString(), Html.FROM_HTML_MODE_LEGACY)
-        } else {
-            HtmlCompat.fromHtml(sb.toString(), HtmlCompat.FROM_HTML_MODE_LEGACY)
-        }
+        return Html.fromHtml(sb.toString(), Html.FROM_HTML_MODE_LEGACY)
     }
 
     fun formatRecentTripMessage(trip: Trip?): Spanned {
@@ -69,11 +61,7 @@ object Util {
             }
         }
 
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Html.fromHtml(sb.toString(), Html.FROM_HTML_MODE_LEGACY)
-        } else {
-            HtmlCompat.fromHtml(sb.toString(), HtmlCompat.FROM_HTML_MODE_LEGACY)
-        }
+        return Html.fromHtml(sb.toString(), Html.FROM_HTML_MODE_LEGACY)
     }
 
 
@@ -81,21 +69,26 @@ object Util {
      * set a Trip.timestamp
      */
     fun setTripTimestamp(trip: Trip) {
-        val iso8061Date = org.threeten.bp.ZonedDateTime.now().toOffsetDateTime().toString()
+        val instant =  org.threeten.bp.ZonedDateTime.now().toInstant()
+
+        val iso8061Date = org.threeten.bp.ZonedDateTime
+            .ofInstant(instant, org.threeten.bp.ZoneId.systemDefault())
+            .format(org.threeten.bp.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+
         trip.timestamp = iso8061Date
     }
 
     /**
-     * return today's date in the format MM/DD/YY
+     * return today's date
      */
     fun getTripDate(trip: Trip): String {
         return try {
-            val now = org.threeten.bp.ZonedDateTime.parse(trip.timestamp)
-            val month = now.month.value
-            val dayOfMonth = now.dayOfMonth
-            val year = now.year.toString().substring(2)
+            val date =  org.threeten.bp.OffsetDateTime.parse(trip.timestamp)
+            val formatter = org.threeten.bp.format.DateTimeFormatter.ofPattern("MM/d/yy h:mma")
 
-            "${month}/${dayOfMonth}/${year}"
+            formatter.format(date)
+                .replace("PM","pm")
+                .replace("AM","am")
         } catch (ex: Exception) {
             Timber.e(ex)
             "n/a"
@@ -104,17 +97,16 @@ object Util {
 
     fun isTripOfToday(trip: Trip): Boolean {
         return try {
-            val now = org.threeten.bp.ZonedDateTime.now()
-            val month = now.month.value
-            val dayOfMonth = now.dayOfMonth
-            val year = now.year.toString().substring(2)
+            val formatter = org.threeten.bp.format.DateTimeFormatter.ofPattern("MM/d/yy")
+            val instant =  org.threeten.bp.ZonedDateTime.now().toInstant()
 
-            val tripNow = org.threeten.bp.ZonedDateTime.parse(trip.timestamp)
-            val tripMonth = tripNow.month.value
-            val tripDayOfMonth = tripNow.dayOfMonth
-            val tripYear = tripNow.year.toString().substring(2)
+            val nowDate = org.threeten.bp.ZonedDateTime
+                .ofInstant(instant, org.threeten.bp.ZoneId.systemDefault())
 
-            ("${month}/${dayOfMonth}/${year}" == "${tripMonth}/${tripDayOfMonth}/${tripYear}")
+            val tripDate = org.threeten.bp.ZonedDateTime.parse(trip.timestamp)
+
+
+            (formatter.format(nowDate) == formatter.format(tripDate))
         } catch (ex: Exception) {
             Timber.e(ex)
             false
@@ -126,7 +118,7 @@ object Util {
      */
     fun getCsvFromTripList(trips: List<Trip>?): String {
         val sb = StringBuilder()
-        sb.appendln("Date,Distance,Job,Origin,Destination,Notes")
+        sb.appendLine("Date,Distance,Job,Origin,Destination,Notes")
 
         if (trips == null) {
             return sb.toString()
@@ -139,7 +131,7 @@ object Util {
                 stopsSb.append("|${stop.address}")
             }
 
-            sb.appendln("${getTripDate(trip)},${metersToMiles(trip.distance)},${trip.gigName},\"${trip.pickupAddress}\",\"${trip.dropOffAddress}\",\"${trip.notes};${stopsSb} \",\"\"")
+            sb.appendLine("${getTripDate(trip)},${metersToMiles(trip.distance)},${trip.gigName},\"${trip.pickupAddress}\",\"${trip.dropOffAddress}\",\"${trip.notes};${stopsSb} \",\"\"")
         }
         return sb.toString()
     }

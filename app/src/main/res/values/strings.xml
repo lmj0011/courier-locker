@@ -53,4 +53,13 @@
 
     <string name="gig_label_visibility">Toggle visibility of this gig label</string>
     <string name="creating_app_backup">Creating App Backup</string>
+    <string name="start_address">start address</string>
+    <string name="end_address">end address</string>
+    <string name="pay">pay</string>
+    <string name="gig">gig</string>
+    <string name="miles">miles</string>
+    <string name="number_of_stops">Number of stops</string>
+    <string name="trip_payment">Trip payment</string>
+    <string name="total_distance">Total distance</string>
+    <string name="trip_start_time">Trip start time</string>
 </resources>

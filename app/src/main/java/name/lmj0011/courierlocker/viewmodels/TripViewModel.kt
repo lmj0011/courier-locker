@@ -26,21 +26,9 @@ class TripViewModel(
     val database: TripDao,
     application: Application
 ) : AndroidViewModel(application) {
-
-    lateinit var todayDate: String
-    lateinit var monthDate: String
-
-    init {
-        val now = org.threeten.bp.ZonedDateTime.now()
-        val month = now.month.value
-        val dayOfMonth = now.dayOfMonth
-        val year = now.year.toString()
-
-        todayDate = "${year}-${month}-${dayOfMonth}"
-    }
     private var viewModelJob = Job()
 
-    private val uiScope = CoroutineScope(Dispatchers.Main +  viewModelJob)
+    private val uiScope = CoroutineScope(Dispatchers.IO +  viewModelJob)
 
     private val googleApiKey = when(PreferenceManager.getDefaultSharedPreferences(application).getBoolean("googleDirectionsKey", false)) {
         true -> application.resources.getString(R.string.google_directions_key)
@@ -148,9 +136,7 @@ class TripViewModel(
     fun setTrip(idx: Int) {
         uiScope.launch {
 
-            val trip = withContext(Dispatchers.IO){
-                this@TripViewModel.database.get(idx.toLong())
-            }
+            val trip = this@TripViewModel.database.get(idx.toLong())
 
             /// backwards compatibility for database v3 and lower
             trip?.let {
@@ -198,11 +184,8 @@ class TripViewModel(
                 this.stops.addAll(stops)
             }
 
-
-            withContext(Dispatchers.IO){
-                trip.distance = this@TripViewModel.calculateTripDistance(trip)
-                this@TripViewModel.database.insert(trip)
-            }
+            trip.distance = this@TripViewModel.calculateTripDistance(trip)
+            this@TripViewModel.database.insert(trip)
         }
 
     }
@@ -216,16 +199,14 @@ class TripViewModel(
         }
 
         uiScope.launch {
-            withContext(Dispatchers.IO){
-                trip?.let {
-                    try {
-                        it.distance = this@TripViewModel.calculateTripDistance(it)
-                        this@TripViewModel.database.update(it)
-                    } catch (ex: Exception) {
-                        this@TripViewModel.errorMsg.postValue("distance calculation error!")
-                        this@TripViewModel.database.update(it)
-                        Timber.e(ex)
-                    }
+            trip?.let {
+                try {
+                    it.distance = this@TripViewModel.calculateTripDistance(it)
+                    this@TripViewModel.database.update(it)
+                } catch (ex: Exception) {
+                    this@TripViewModel.errorMsg.postValue("distance calculation error!")
+                    this@TripViewModel.database.update(it)
+                    Timber.e(ex)
                 }
             }
         }
@@ -234,9 +215,7 @@ class TripViewModel(
 
     fun deleteTrip(idx: Long) {
         uiScope.launch {
-            withContext(Dispatchers.IO){
-                this@TripViewModel.database.deleteByTripId(idx)
-            }
+            this@TripViewModel.database.deleteByTripId(idx)
         }
     }
 
@@ -251,9 +230,7 @@ class TripViewModel(
                 Util.setTripTimestamp(this)
             }
 
-            withContext(Dispatchers.IO){
-                this@TripViewModel.database.insert(trip)
-            }
+            this@TripViewModel.database.insert(trip)
 
         }
     }
@@ -263,9 +240,7 @@ class TripViewModel(
      */
     fun clearAllTrips() {
         uiScope.launch {
-            withContext(Dispatchers.IO){
-                this@TripViewModel.database.clear()
-            }
+            this@TripViewModel.database.clear()
 
         }
     }

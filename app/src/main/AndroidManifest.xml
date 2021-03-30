@@ -3,9 +3,11 @@
         package="name.lmj0011.courierlocker">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <!--  needed because https://developer.android.com/guide/components/foreground-services#access-restrictions  -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <application
             android:name=".CourierLockerApplication"
@@ -55,23 +57,23 @@
 
         <receiver
                 android:name=".services.CurrentStatusForegroundService$SetTripDropoffReceiver"
-                android:exported="false"></receiver>
+                android:exported="false" />
 
         <receiver
                 android:name=".services.CurrentStatusForegroundService$RecentTripNotificationDeleteReceiver"
-                android:exported="false"></receiver>
+                android:exported="false" />
 
         <receiver
                 android:name=".services.CurrentStatusForegroundService$NextRecentTripNotificationReceiver"
-                android:exported="false"></receiver>
+                android:exported="false" />
 
         <receiver
                 android:name=".services.CurrentStatusForegroundService$CloseServicePendingIntentNotificationReceiver"
-                android:exported="false"></receiver>
+                android:exported="false" />
 
         <receiver
                 android:name=".receivers.CancelWorkerByTagReceiver"
-                android:exported="false"></receiver>
+                android:exported="false" />
 
     </application>
 

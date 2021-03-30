@@ -85,6 +85,8 @@ class CurrentStatusForegroundService : LifecycleService() {
         fun recentTripsNotification(context: Context) {
             var trip: Trip?
 
+            if(!::recentTripsListIterator.isInitialized) return
+
             if(!recentTripsListIterator.hasNext()) {
                 resetListOfRecentTripsIterator()
             }

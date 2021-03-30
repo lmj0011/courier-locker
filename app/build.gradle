@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId "name.lmj0011.courierlocker"
-        minSdkVersion 21
+        minSdkVersion 26
         targetSdkVersion 30
         versionCode 75
         versionName "2"
@@ -161,7 +161,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutine"
 
     // WorkManager
-    def work_version = "2.4.0"
+    def work_version = "2.5.0"
     implementation "androidx.work:work-runtime-ktx:$work_version"
 
     // HTTP lib

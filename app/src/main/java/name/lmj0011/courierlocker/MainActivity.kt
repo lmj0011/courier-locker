@@ -2,6 +2,7 @@ package name.lmj0011.courierlocker
 
 import android.content.Context
 import android.content.Intent
+import android.database.sqlite.SQLiteDatabaseLockedException
 import android.os.Bundle
 import android.view.Gravity
 import androidx.core.view.GravityCompat
@@ -19,6 +20,9 @@ import androidx.navigation.ui.*
 import androidx.preference.PreferenceManager
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.android.synthetic.main.app_bar_main.view.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import timber.log.Timber
 import name.lmj0011.courierlocker.databinding.ActivityMainBinding
 import name.lmj0011.courierlocker.fragments.TripsFragmentDirections
@@ -46,6 +50,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        CourierLockerDatabase.blockUntilDbIsAccessible(application)
         setTheme(R.style.AppTheme_NoActionBar)
         super.onCreate(savedInstanceState)
         Timber.i("onCreate Called")

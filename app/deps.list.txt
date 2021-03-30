@@ -10,11 +10,11 @@ com.google.android.material:material:1.3.0-alpha02
 com.jakewharton.timber:timber:4.7.1
 androidx.legacy:legacy-support-v4:1.0.0
 androidx.paging:paging-runtime-ktx:2.1.2
-androidx.room:room-runtime:2.2.5
+androidx.room:room-runtime:2.2.6
 com.google.code.gson:gson:2.8.5
 androidx.lifecycle:lifecycle-extensions:2.0.0
 com.github.moove-it:fakeit:v0.7
-androidx.work:work-runtime-ktx:2.4.0
+androidx.work:work-runtime-ktx:2.5.0
 com.github.kittinunf.fuel:fuel:2.2.0
 com.github.kittinunf.fuel:fuel-json:2.2.0
 androidx.preference:preference:1.1.0-alpha04
@@ -32,8 +32,8 @@ com.google.maps.android:android-maps-utils-sdk-v3-compat:0.1
 org.kodein.di:kodein-di:7.0.0
 androidx.appcompat:appcompat:1.1.0
 androidx.constraintlayout:constraintlayout:2.0.0-beta7
-org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.4
+org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1
 androidx.core:core-ktx:1.1.0
-org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.4
+org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.1
 androidx.test:runner:1.2.0
 androidx.test.espresso:espresso-core:3.2.0
