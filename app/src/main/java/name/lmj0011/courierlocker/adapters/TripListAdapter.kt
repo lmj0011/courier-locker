@@ -39,7 +39,7 @@ class TripListAdapter(private val clickListener: TripListener): PagedListAdapter
 
                 binding.tripPickupAddressTextView.text = HtmlCompat
                     .fromHtml(
-                        "<b>start:</b> ${trip.pickupAddress.split(',')[0]}",
+                        "<b>start:</b> ${Util.addressShortener(trip.pickupAddress)}",
                         HtmlCompat.FROM_HTML_MODE_LEGACY
                     )
 
@@ -51,7 +51,7 @@ class TripListAdapter(private val clickListener: TripListener): PagedListAdapter
 
                 binding.tripDropoffAddressTextView.text = HtmlCompat
                     .fromHtml(
-                        "<b>end:</b> ${trip.dropOffAddress.split(',')[0]}",
+                        "<b>end:</b> ${Util.addressShortener(trip.dropOffAddress)}",
                         HtmlCompat.FROM_HTML_MODE_LEGACY
                     )
 

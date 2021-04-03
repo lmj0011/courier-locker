@@ -172,6 +172,7 @@ class CreateGateCodeFragment : Fragment() {
 
         this.gateCodeViewModel.insertGateCode(address, codes.toTypedArray(), lat, lng)
         mainActivity.showToastMessage("New gate code added")
+        mainActivity.hideKeyBoard(v.rootView)
         this.findNavController().navigate(R.id.gateCodesFragment)
     }
 

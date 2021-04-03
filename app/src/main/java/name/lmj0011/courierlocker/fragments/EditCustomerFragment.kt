@@ -266,6 +266,7 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
 
         this.customerViewModel.updateCustomer(customer)
         mainActivity.showToastMessage("Updated customer")
+        mainActivity.hideKeyBoard(v.rootView)
         this.findNavController().navigate(R.id.customersFragment)
     }
 

@@ -12,6 +12,24 @@ object Util {
     val numberFormatInstance: NumberFormat = NumberFormat.getCurrencyInstance()
 
     /**
+     * Shortens a Postal Address to only the street name if possible
+     *
+     * ex.) "1994 Waddell Dr., Huntsville, AL 35806, USA" -> "1994 Waddell Dr."
+     */
+    fun addressShortener(address: String, min: Int = 5, delimiter: Char = ','): String {
+        val parts = address.split(delimiter)
+        var str = ""
+
+        for (idx in parts.indices) {
+            str = parts.take(idx + 1).joinToString(delimiter.toString())
+
+            if(str.length > min) break
+        }
+
+        return str
+    }
+
+    /**
      * Takes a list of GateCodes and converts and formats it into one string for display.
      *
      * For display in a TextView, we have to supply one string, and styles are per TextView, not

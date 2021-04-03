@@ -233,6 +233,6 @@ class CreateOrEditApartmentMapFragment : Fragment() {
 
         binding.createApartmentMapCircularProgressButton.isEnabled = false
         binding.createApartmentMapCircularProgressButton.startAnimation()
-
+        mainActivity.hideKeyBoard(v.rootView)
     }
 }

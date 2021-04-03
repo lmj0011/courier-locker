@@ -128,6 +128,7 @@ class EditGateCodeFragment : Fragment(), DeleteGateCodeDialogFragment.NoticeDial
 
         this.gateCodeViewModel.updateGateCode(gateCode)
         mainActivity.showToastMessage("Updated gate code")
+        mainActivity.hideKeyBoard(v.rootView)
         this.findNavController().navigate(R.id.gateCodesFragment)
     }
 

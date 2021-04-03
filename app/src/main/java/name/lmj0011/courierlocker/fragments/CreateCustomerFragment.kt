@@ -222,6 +222,7 @@ class CreateCustomerFragment : Fragment() {
             this.customer.note
         )
         mainActivity.showToastMessage("Saved customer")
+        mainActivity.hideKeyBoard(v.rootView)
         this.findNavController().navigate(R.id.customersFragment)
     }
 

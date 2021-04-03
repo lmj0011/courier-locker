@@ -340,6 +340,7 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
                 }
 
                 this.tripViewModel.updateTrip(trip)
+                mainActivity.hideKeyBoard(v.rootView)
             }
         }
 

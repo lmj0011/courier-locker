@@ -252,6 +252,7 @@ class CreateTripFragment : Fragment() {
                     gig,
                     arrayOfStops
                 )
+                mainActivity.hideKeyBoard(v.rootView)
             }
         }
 

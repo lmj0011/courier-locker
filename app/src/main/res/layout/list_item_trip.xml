@@ -56,7 +56,6 @@
                 android:layout_marginTop="8dp"
                 android:drawableStart="@drawable/ic_baseline_timeline_24"
                 android:text="@string/miles"
-                android:tooltipText="@string/total_distance"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tripDropoffAddressTextView" />
 
@@ -68,7 +67,6 @@
                 android:layout_marginTop="8dp"
                 android:drawableStart="@drawable/ic_baseline_attach_money_24"
                 android:text="@string/pay"
-                android:tooltipText="@string/trip_payment"
                 app:layout_constraintStart_toEndOf="@+id/tripDistanceTextView"
                 app:layout_constraintTop_toBottomOf="@+id/tripDropoffAddressTextView" />
 
@@ -80,7 +78,6 @@
                 android:layout_marginTop="8dp"
                 android:drawableStart="@drawable/ic_menu_trips"
                 android:text="@string/gig"
-                android:tooltipText="@string/gig"
                 app:layout_constraintStart_toEndOf="@+id/tripPayTextView"
                 app:layout_constraintTop_toBottomOf="@+id/tripDropoffAddressTextView" />
 
@@ -95,7 +92,6 @@
                 app:layout_constraintStart_toEndOf="@+id/tripGigTextView"
                 app:layout_constraintTop_toBottomOf="@+id/tripDropoffAddressTextView"
                 tools:text="3"
-                android:tooltipText="@string/number_of_stops"
                 tools:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
