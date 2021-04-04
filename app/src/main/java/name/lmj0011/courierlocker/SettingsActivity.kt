@@ -5,8 +5,7 @@ import android.view.Gravity
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.progressindicator.ProgressIndicator
-import timber.log.Timber
+import com.google.android.material.progressindicator.LinearProgressIndicator
 
 /**
  * I guess this is the preferred way of implementing a Settings page
@@ -21,7 +20,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     // indeterminate progress indicator
-    private lateinit var progressIndicator: ProgressIndicator
+    private lateinit var progressIndicator: LinearProgressIndicator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

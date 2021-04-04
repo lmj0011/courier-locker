@@ -213,6 +213,15 @@ class TripViewModel(
 
     }
 
+    /**
+     * returns Trips within a date range.
+     *
+     * [startDate] and [endDate] expected to be Unix timestamps in milliseconds
+     */
+    fun getTripsInDateRange(startDate: Long, endDate: Long): List<Trip> {
+        return this@TripViewModel.database.getAllTripsInDateRange((startDate/1000L), (endDate/1000L))
+    }
+
     fun deleteTrip(idx: Long) {
         uiScope.launch {
             this@TripViewModel.database.deleteByTripId(idx)

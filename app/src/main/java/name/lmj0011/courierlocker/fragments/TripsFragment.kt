@@ -15,6 +15,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.PagedList
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
+import com.google.android.material.datepicker.MaterialDatePicker
 import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
@@ -49,6 +50,7 @@ class TripsFragment : Fragment(),
     private lateinit var tripViewModel: TripViewModel
     private lateinit var listAdapter: TripListAdapter
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var dateRangePair: androidx.core.util.Pair<Long, Long>
     private var fragmentJob: Job = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
 
@@ -157,7 +159,23 @@ class TripsFragment : Fragment(),
                 true
             }
             R.id.action_trips_export -> {
-                this.createFile("text/csv", "trips.csv")
+                val dateRangePicker = MaterialDatePicker.Builder.dateRangePicker()
+                        .setTitleText("Select date range")
+                        .setSelection(
+                            androidx.core.util.Pair(
+                                MaterialDatePicker.thisMonthInUtcMilliseconds(),
+                                MaterialDatePicker.todayInUtcMilliseconds()
+                            )
+                        )
+                        .build()
+
+                dateRangePicker.addOnPositiveButtonClickListener {
+                    dateRangePair = it
+                    val fileName = "${Util.getDateRangeFileNamePrefix(dateRangePair)}_trips.csv"
+                    this.createTripsCsvFile(fileName)
+                }
+
+                dateRangePicker.show(childFragmentManager, this::class.simpleName)
                 true
             }
             R.id.action_edit_gig_labels -> {
@@ -182,14 +200,20 @@ class TripsFragment : Fragment(),
 
         when(requestCode) {
             MainActivity.TRIPS_WRITE_REQUEST_CODE -> {
-                val trips = this.tripViewModel.trips.value?.toMutableList()
-                val str = Util.getCsvFromTripList(trips?.reversed())
+                data?.let { intent ->
+                    uiScope.launch(Dispatchers.IO) {
+                        val trips = tripViewModel.getTripsInDateRange(dateRangePair.first!!, dateRangePair.second!!)
+                        val str = Util.getCsvFromTripList(trips)
 
-                data?.data?.let {
-                    // ref: https://developer.android.com/guide/topics/providers/document-provider#edit
-                    mainActivity.contentResolver.openFileDescriptor(it, "w")?.use { p ->
-                        FileOutputStream(p.fileDescriptor).use { outputStream ->
-                            outputStream.write(str.toByteArray())
+                        withContext(Dispatchers.Main) {
+                            intent.data?.let {
+                                // ref: https://developer.android.com/guide/topics/providers/document-provider#edit
+                                mainActivity.contentResolver.openFileDescriptor(it, "w")?.use { p ->
+                                    FileOutputStream(p.fileDescriptor).use { outputStream ->
+                                        outputStream.write(str.toByteArray())
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -226,14 +250,14 @@ class TripsFragment : Fragment(),
     }
 
     // ref: https://developer.android.com/guide/topics/providers/document-provider#create
-    private fun createFile(mimeType: String, fileName: String) {
+    private fun createTripsCsvFile(fileName: String) {
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
             // Filter to only show results that can be "opened", such as
             // a file (as opposed to a list of contacts or timezones).
             addCategory(Intent.CATEGORY_OPENABLE)
 
             // Create a file with the requested MIME type.
-            type = mimeType
+            type = "text/csv"
             putExtra(Intent.EXTRA_TITLE, fileName)
         }
 

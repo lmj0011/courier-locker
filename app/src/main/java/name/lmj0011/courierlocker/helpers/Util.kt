@@ -4,6 +4,11 @@ import android.text.Html
 import android.text.Spanned
 import name.lmj0011.courierlocker.database.GateCode
 import name.lmj0011.courierlocker.database.Trip
+import org.threeten.bp.Instant
+import org.threeten.bp.OffsetDateTime
+import org.threeten.bp.ZoneId
+import org.threeten.bp.format.DateTimeFormatter
+import org.threeten.bp.ZonedDateTime
 import timber.log.Timber
 import java.math.RoundingMode
 import java.text.NumberFormat
@@ -71,10 +76,10 @@ object Util {
 
                 if (trip.distance > 0) {
                     append("<br>")
-                    append("${metersToMiles(trip.distance)} mi | ${Util.numberFormatInstance.format(it.payAmount.toDouble())} | ${it.gigName}")
+                    append("${metersToMiles(trip.distance)} mi | ${numberFormatInstance.format(it.payAmount.toDouble())} | ${it.gigName}")
                 } else {
                     append("<br>")
-                    append("pay: ${Util.numberFormatInstance.format(it.payAmount.toDouble())} | ${it.gigName}")
+                    append("pay: ${numberFormatInstance.format(it.payAmount.toDouble())} | ${it.gigName}")
                 }
             }
         }
@@ -87,11 +92,11 @@ object Util {
      * set a Trip.timestamp
      */
     fun setTripTimestamp(trip: Trip) {
-        val instant =  org.threeten.bp.ZonedDateTime.now().toInstant()
+        val instant =  ZonedDateTime.now().toInstant()
 
-        val iso8061Date = org.threeten.bp.ZonedDateTime
-            .ofInstant(instant, org.threeten.bp.ZoneId.systemDefault())
-            .format(org.threeten.bp.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+        val iso8061Date = ZonedDateTime
+            .ofInstant(instant, ZoneId.systemDefault())
+            .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
 
         trip.timestamp = iso8061Date
     }
@@ -101,8 +106,8 @@ object Util {
      */
     fun getTripDate(trip: Trip): String {
         return try {
-            val date =  org.threeten.bp.OffsetDateTime.parse(trip.timestamp)
-            val formatter = org.threeten.bp.format.DateTimeFormatter.ofPattern("MM/d/yy h:mma")
+            val date =  OffsetDateTime.parse(trip.timestamp)
+            val formatter = DateTimeFormatter.ofPattern("MM/d/yy h:mma")
 
             formatter.format(date)
                 .replace("PM","pm")
@@ -115,13 +120,13 @@ object Util {
 
     fun isTripOfToday(trip: Trip): Boolean {
         return try {
-            val formatter = org.threeten.bp.format.DateTimeFormatter.ofPattern("MM/d/yy")
-            val instant =  org.threeten.bp.ZonedDateTime.now().toInstant()
+            val formatter = DateTimeFormatter.ofPattern("MM/d/yy")
+            val instant =  ZonedDateTime.now().toInstant()
 
-            val nowDate = org.threeten.bp.ZonedDateTime
-                .ofInstant(instant, org.threeten.bp.ZoneId.systemDefault())
+            val nowDate = ZonedDateTime
+                .ofInstant(instant, ZoneId.systemDefault())
 
-            val tripDate = org.threeten.bp.ZonedDateTime.parse(trip.timestamp)
+            val tripDate = ZonedDateTime.parse(trip.timestamp)
 
 
             (formatter.format(nowDate) == formatter.format(tripDate))
@@ -174,10 +179,25 @@ object Util {
      * ref: https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html
      */
     fun getUniqueFileNamePrefix(): String {
-        val dt = org.threeten.bp.ZonedDateTime.now()
-        val milliOfDay = org.threeten.bp.format.DateTimeFormatter.ofPattern("A").format(dt).takeLast(4)
+        val dt = ZonedDateTime.now()
+        val milliOfDay = DateTimeFormatter.ofPattern("A").format(dt).takeLast(4)
         
-        return org.threeten.bp.format.DateTimeFormatter.ofPattern("yyyy-MM-dd").format(dt) + "-$milliOfDay"
+        return DateTimeFormatter.ofPattern("yyyy-MM-dd").format(dt) + "-$milliOfDay"
+    }
+
+    /**
+     * returns a string that can be prepended to a filename, it uses 2 unix epochs
+     * example output: "20200712_20201025"
+     *
+     */
+    fun getDateRangeFileNamePrefix(range: androidx.core.util.Pair<Long, Long>): String {
+        val dateStr1 = DateTimeFormatter.ofPattern("yyyyMMdd")
+            .format(Instant.ofEpochMilli(range.first!!).atZone(ZoneId.of("UTC")))
+
+        val dateStr2 = DateTimeFormatter.ofPattern("yyyyMMdd")
+            .format(Instant.ofEpochMilli(range.second!!).atZone(ZoneId.of("UTC")))
+
+        return "${dateStr1}_${dateStr2}"
     }
 }
 

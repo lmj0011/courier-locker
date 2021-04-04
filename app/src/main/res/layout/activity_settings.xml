@@ -10,11 +10,11 @@
     <com.google.android.material.appbar.AppBarLayout
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            android:theme="@style/AppTheme.AppBarOverlay">
+            android:theme="@style/AppTheme">
 
-    <com.google.android.material.progressindicator.ProgressIndicator
+    <com.google.android.material.progressindicator.LinearProgressIndicator
             android:id="@+id/progress_indicator"
-            style="@style/Widget.MaterialComponents.ProgressIndicator.Linear.Indeterminate"
+            style="@style/Widget.MaterialComponents.LinearProgressIndicator"
             app:indicatorColor="@color/colorAccent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
