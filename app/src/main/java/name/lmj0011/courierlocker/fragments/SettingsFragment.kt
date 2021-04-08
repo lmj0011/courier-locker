@@ -20,7 +20,6 @@ import name.lmj0011.courierlocker.database.*
 import name.lmj0011.courierlocker.fragments.dialogs.AboutDialogFragment
 import name.lmj0011.courierlocker.helpers.AppDataImportExportHelper
 import name.lmj0011.courierlocker.helpers.PreferenceHelper
-import name.lmj0011.courierlocker.services.CurrentStatusForegroundService
 import name.lmj0011.courierlocker.workers.CalculateAllTripDistanceWorker
 import name.lmj0011.courierlocker.workers.CreateBackupWorker
 import org.kodein.di.instance
@@ -177,10 +176,10 @@ class SettingsFragment : PreferenceFragmentCompat() {
         enableCurrentStatusService.setOnPreferenceChangeListener { _, newValue ->
             when (newValue) {
                 true -> {
-                    CurrentStatusForegroundService.startService(preferences.context)
+                    application.showCurrentStatusServiceNotification(true)
                 }
                 else -> {
-                    CurrentStatusForegroundService.stopService(preferences.context)
+                    application.showCurrentStatusServiceNotification(false)
                 }
             }
             true

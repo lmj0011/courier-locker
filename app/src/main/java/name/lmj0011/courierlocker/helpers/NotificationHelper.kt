@@ -4,7 +4,6 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.GROUP_ALERT_SUMMARY
 import androidx.core.content.ContextCompat
@@ -20,10 +19,9 @@ object NotificationHelper {
     const val CALCULATE_ALL_TRIP_DISTANCE_CHANNEL_ID = "name.lmj0011.courierlocker.helpers.NotificationHelper#calculateAllTripDistance"
     const val APP_BACKUP_CHANNEL_ID = "name.lmj0011.courierlocker.helpers.NotificationHelper#appBackup"
     const val ACTION_UPDATE_DROP_OFF = "name.lmj0011.courierlocker.services.ACTION_UPDATE_DROP_OFF"
-    const val ACTION_DELETE_DROP_OFF = "name.lmj0011.courierlocker.services.ACTION_DELETE_DROP_OFF"
     const val ACTION_NEXT_RECENT_TRIP = "name.lmj0011.courierlocker.services.ACTION_NEXT_RECENT_TRIP"
     const val NOTIFICATION_GROUP_KEY_FOREGROUND = "name.lmj0011.courierlocker.NOTIFICATION_GROUP_KEY_FOREGROUND"
-    const val RUNNING_FOREGROUND_SERVICES_NOTIFICATION_ID = 1000
+    const val CURRENT_STATUS_NOTIFICATION_ID = 1000
     const val NEARBY_GATECODES_NOTIFICATION_ID = 1002
     const val TRIPS_TODAY_NOTIFICATION_ID = 1003
     const val RECENT_TRIP_NOTIFICATION_ID = 1004
@@ -35,20 +33,18 @@ object NotificationHelper {
      * create all necessary Notification channels here
      */
     fun init(application: Application) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val serviceChannel1 = NotificationChannel(CURRENT_STATUS_CHANNEL_ID, "Current Status", NotificationManager.IMPORTANCE_DEFAULT)
-            serviceChannel1.setSound(null, null)
+        val serviceChannel1 = NotificationChannel(CURRENT_STATUS_CHANNEL_ID, "Current Status", NotificationManager.IMPORTANCE_DEFAULT)
+        serviceChannel1.setSound(null, null)
 
-            val serviceChannel2 = NotificationChannel(CALCULATE_ALL_TRIP_DISTANCE_CHANNEL_ID, "Calculate all Trip Distances", NotificationManager.IMPORTANCE_DEFAULT)
-            serviceChannel2.setSound(null, null)
+        val serviceChannel2 = NotificationChannel(CALCULATE_ALL_TRIP_DISTANCE_CHANNEL_ID, "Calculate all Trip Distances", NotificationManager.IMPORTANCE_DEFAULT)
+        serviceChannel2.setSound(null, null)
 
-            val serviceChannel3 = NotificationChannel(APP_BACKUP_CHANNEL_ID, "Backups", NotificationManager.IMPORTANCE_DEFAULT)
-            serviceChannel3.setSound(null, null)
+        val serviceChannel3 = NotificationChannel(APP_BACKUP_CHANNEL_ID, "Backups", NotificationManager.IMPORTANCE_DEFAULT)
+        serviceChannel3.setSound(null, null)
 
-            val manager = application.getSystemService(NotificationManager::class.java)
+        val manager = application.getSystemService(NotificationManager::class.java)
 
-            manager!!.createNotificationChannels(mutableListOf(serviceChannel1, serviceChannel2, serviceChannel3))
-        }
+        manager!!.createNotificationChannels(mutableListOf(serviceChannel1, serviceChannel2, serviceChannel3))
     }
 
     fun getRecentTripNotificationBuilder(context: Context): NotificationCompat.Builder {

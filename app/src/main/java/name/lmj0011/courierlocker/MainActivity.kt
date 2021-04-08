@@ -2,7 +2,6 @@ package name.lmj0011.courierlocker
 
 import android.content.Context
 import android.content.Intent
-import android.database.sqlite.SQLiteDatabaseLockedException
 import android.os.Bundle
 import android.view.Gravity
 import androidx.core.view.GravityCompat
@@ -20,17 +19,13 @@ import androidx.navigation.ui.*
 import androidx.preference.PreferenceManager
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.android.synthetic.main.app_bar_main.view.*
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import timber.log.Timber
 import name.lmj0011.courierlocker.databinding.ActivityMainBinding
 import name.lmj0011.courierlocker.fragments.TripsFragmentDirections
-import name.lmj0011.courierlocker.fragments.dialogs.ImportedAppDataDialogFragment
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.PermissionHelper
 import name.lmj0011.courierlocker.helpers.PreferenceHelper
-import name.lmj0011.courierlocker.services.CurrentStatusForegroundService
 import org.kodein.di.instance
 import shortbread.Shortcut
 
@@ -43,11 +38,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var appBarConfiguration : AppBarConfiguration
     private lateinit var topLevelDestinations: Set<Int>
     private lateinit var preferences: PreferenceHelper
-
-
-    companion object {
-        const val TRIPS_WRITE_REQUEST_CODE = 104
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         CourierLockerDatabase.blockUntilDbIsAccessible(application)
@@ -83,7 +73,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onRestart() {
         super.onRestart()
         Timber.i("onRestart Called")
-        CurrentStatusForegroundService.stopService(this)
     }
 
     override fun onStart() {
@@ -100,32 +89,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onResume() {
         super.onResume()
         Timber.i("onResume Called")
-
-        // any message that the previous Activity wants to send
-        intent.extras?.getString("messageFromCaller")?.let {
-            this.showToastMessage(it, Toast.LENGTH_LONG)
-        }
-
-        intent.extras?.getInt("menuItemId")?.let {
-            this.navigateTo(it)
-        }
-
-        intent.extras?.getInt("editTripId")?.let {
-            when {
-                it > 0 -> navController.navigate(TripsFragmentDirections.actionTripsFragmentToEditTripFragment(it))
-            }
-        }
-
-        intent.extras?.getBoolean("importedAppData")?.let {
-            if(!it) return
-
-            val dialog = ImportedAppDataDialogFragment()
-            dialog.show(supportFragmentManager, "ImportedAppDataDialogFragment")
-        }
+        (application as CourierLockerApplication).showCurrentStatusServiceNotification(false)
 
         if(!PermissionHelper.permissionAccessFineLocationApproved) {
             this.showToastMessage("Location permission is required for some features to work.", Toast.LENGTH_LONG)
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        if(!handleIntentAction(intent)) super.onNewIntent(intent)
     }
 
     override fun onPause() {
@@ -133,7 +105,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         Timber.i("onPause Called")
 
         if(preferences.enableCurrentStatusService() && PermissionHelper.permissionAccessFineLocationApproved) {
-            CurrentStatusForegroundService.startService(this)
+            (application as CourierLockerApplication).showCurrentStatusServiceNotification(true)
         }
     }
 
@@ -145,10 +117,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onDestroy() {
         super.onDestroy()
         Timber.i("onDestroy Called")
-        CurrentStatusForegroundService.stopService(this)
+        (application as CourierLockerApplication).showCurrentStatusServiceNotification(false)
     }
 
     override fun onSupportNavigateUp(): Boolean {
+        hideKeyBoard(binding.root)
+
         when(navController.currentDestination?.id) {
             R.id.editTripFragment -> {
                 // resets the recyclerview to original state
@@ -228,6 +202,24 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
+    private fun handleIntentAction(intent: Intent):Boolean {
+        when (intent.action) {
+            INTENT_EDIT_TRIP -> {
+                navController.navigate(
+                    TripsFragmentDirections.actionTripsFragmentToEditTripFragment(
+                        intent.getIntExtra("editTripId", 0)
+                    )
+                )
+            }
+            INTENT_SHOW_TRIPS, INTENT_SHOW_MAPS,
+            INTENT_SHOW_GATE_CODES, INTENT_SHOW_CUSTOMERS-> {
+                this.navigateTo(intent.getIntExtra("menuItemId", -1))
+            }
+            else -> return false
+        }
+        return true
+    }
+
     fun showToastMessage(message: String, duration: Int = Toast.LENGTH_SHORT, position: Int = Gravity.TOP) {
         val toast = Toast.makeText(this, message, duration)
         toast.setGravity(position, 0, 150)
@@ -301,5 +293,25 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 startActivity(intent)
             }
         }
+    }
+
+    companion object {
+        const val TRIPS_WRITE_REQUEST_CODE = 104
+
+        /**
+         * Intent actions
+         */
+        // Show
+        const val INTENT_SHOW_TRIPS = "name.lmj0011.courierlocker.SHOW_TRIPS"
+        const val INTENT_SHOW_MAPS = "name.lmj0011.courierlocker.SHOW_MAPS"
+        const val INTENT_SHOW_GATE_CODES = "name.lmj0011.courierlocker.SHOW_GATE_CODES"
+        const val INTENT_SHOW_CUSTOMERS = "name.lmj0011.courierlocker.SHOW_CUSTOMERS"
+        // View
+        const val INTENT_VIEW_MAP = "name.lmj0011.courierlocker.VIEW_MAP"
+        // Edit
+        const val INTENT_EDIT_TRIP = "name.lmj0011.courierlocker.EDIT_TRIP"
+        const val INTENT_EDIT_MAP = "name.lmj0011.courierlocker.EDIT_MAP"
+        const val INTENT_EDIT_GATE_CODE = "name.lmj0011.courierlocker.EDIT_GATE_CODE"
+        const val INTENT_EDIT_CUSTOMER = "name.lmj0011.courierlocker.EDIT_CUSTOMER"
     }
 }

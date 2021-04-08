@@ -56,7 +56,7 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
         val application = requireNotNull(this.activity).application
         val dataSource = CourierLockerDatabase.getInstance(application).tripDao
         val viewModelFactory = TripViewModelFactory(dataSource, application)
-        val args = EditTripFragmentArgs.fromBundle(arguments!!)
+        val args = EditTripFragmentArgs.fromBundle(requireArguments())
         this.tripViewModel = ViewModelProviders.of(this, viewModelFactory).get(TripViewModel::class.java)
 
         binding.tripViewModel = this.tripViewModel

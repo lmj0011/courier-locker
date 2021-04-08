@@ -151,10 +151,9 @@ class TripViewModel(
                         it.stops.addAll(arrayOf(pickup, dropOff))
                     }
                 }
+                this@TripViewModel.trip.postValue(it)
             }
             ///
-
-            this@TripViewModel.trip.postValue(trip)
         }
     }
 
