@@ -20,7 +20,7 @@ object NotificationHelper {
     const val APP_BACKUP_CHANNEL_ID = "name.lmj0011.courierlocker.helpers.NotificationHelper#appBackup"
     const val ACTION_UPDATE_DROP_OFF = "name.lmj0011.courierlocker.services.ACTION_UPDATE_DROP_OFF"
     const val ACTION_NEXT_RECENT_TRIP = "name.lmj0011.courierlocker.services.ACTION_NEXT_RECENT_TRIP"
-    const val NOTIFICATION_GROUP_KEY_FOREGROUND = "name.lmj0011.courierlocker.NOTIFICATION_GROUP_KEY_FOREGROUND"
+    const val NOTIFICATION_CURRENT_STATUS_GROUP_KEY = "name.lmj0011.courierlocker.NOTIFICATION_CURRENT_STATUS_GROUP_KEY"
     const val CURRENT_STATUS_NOTIFICATION_ID = 1000
     const val NEARBY_GATECODES_NOTIFICATION_ID = 1002
     const val TRIPS_TODAY_NOTIFICATION_ID = 1003
@@ -52,10 +52,10 @@ object NotificationHelper {
             .setSmallIcon(R.drawable.ic_action_name)
             .setShowWhen(false)
             .setContentTitle("recent trips")
-            .setGroup(NOTIFICATION_GROUP_KEY_FOREGROUND)
+            .setGroup(NOTIFICATION_CURRENT_STATUS_GROUP_KEY)
             .setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
             .setOnlyAlertOnce(true)
-            .setSortKey("b")
+            .setSortKey("a")
             .setColor(ContextCompat.getColor(context, R.color.colorPrimary))
     }
 }

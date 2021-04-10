@@ -87,19 +87,18 @@ class CurrentStatusForegroundService : LifecycleService() {
             .setContentTitle("Current Status")
             .setContentText("Running Foreground service.")
             .setContentIntent(pendingIntent)
-            .setGroup(NotificationHelper.NOTIFICATION_GROUP_KEY_FOREGROUND)
+            .setGroup(NotificationHelper.NOTIFICATION_CURRENT_STATUS_GROUP_KEY)
             .setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
             .setGroupSummary(true)
-            .setSortKey("a")
             .setColor(ContextCompat.getColor(this,R.color.colorPrimary))
             .build()
 
         startForeground(NotificationHelper.CURRENT_STATUS_NOTIFICATION_ID, notification)
 
+        this.startTripsTodayNotification()
         tripViewModel.trips.observeOnce {
             recentTripsNotification(this)
         }
-        this.startTripsTodayNotification()
         this.startNearbyGatecodesNotification()
     }
 
@@ -111,6 +110,14 @@ class CurrentStatusForegroundService : LifecycleService() {
         LocationHelper.lastLatitude.removeObservers(this)
         gateCodeViewModel.gateCodes.removeObservers(this)
         stopForeground(true)
+
+        GlobalScope.launch(Dispatchers.Main) {
+            delay(2000)
+            NotificationManagerCompat.from(this@CurrentStatusForegroundService).apply {
+                // in case this notification is still around because of late observer cancellation
+                cancel(NotificationHelper.NEARBY_GATECODES_NOTIFICATION_ID)
+            }
+        }
     }
 
     private fun resetListOfRecentTripsIterator() {
@@ -198,7 +205,7 @@ class CurrentStatusForegroundService : LifecycleService() {
                     .setContentText("earnings: ${tripViewModel.todayTotalMoney} | trips: ${tripViewModel.todayCompletedTrips}")
                     .setSmallIcon(R.drawable.ic_action_name)
                     .setContentIntent(pendingIntent)
-                    .setGroup(NotificationHelper.NOTIFICATION_GROUP_KEY_FOREGROUND)
+                    .setGroup(NotificationHelper.NOTIFICATION_CURRENT_STATUS_GROUP_KEY)
                     .setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
                     .setOnlyAlertOnce(true)
                     .setSortKey("c")
@@ -251,10 +258,10 @@ class CurrentStatusForegroundService : LifecycleService() {
                     .setStyle(NotificationCompat.BigTextStyle().bigText(Util.formatGateCodes(list)))
                     .setSmallIcon(R.drawable.ic_action_name)
                     .setContentIntent(pendingIntent)
-                    .setGroup(NotificationHelper.NOTIFICATION_GROUP_KEY_FOREGROUND)
+                    .setGroup(NotificationHelper.NOTIFICATION_CURRENT_STATUS_GROUP_KEY)
                     .setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
                     .setOnlyAlertOnce(true)
-                    .setSortKey("d")
+                    .setSortKey("b")
                     .setColor(ContextCompat.getColor(this,R.color.colorPrimary))
                     .build()
 
