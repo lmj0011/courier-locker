@@ -1,23 +1,18 @@
 package name.lmj0011.courierlocker.helpers
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.pm.PackageManager
 import android.location.Address
 import android.location.Geocoder
-import android.os.Handler
 import android.view.Gravity
 import android.view.View
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.location.*
 import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.adapters.AddressAutoSuggestAdapter
 import org.kodein.di.instance
-import timber.log.Timber
 import java.io.IOException
 import java.lang.Math.toRadians
 import java.util.*
@@ -31,6 +26,7 @@ object LocationHelper {
     private val locationRequest: LocationRequest = LocationRequest()
     private const val AVERAGE_RADIUS_OF_EARTH_KM = 6371.0 // km
     private const val AVERAGE_RADIUS_OF_EARTH_MILES = 3958.8 // mi
+    private var textWatcherJob: Job = Job()
 
     var lastLatitude = MutableLiveData<Double>().apply { value = 0.0 }
         private set
@@ -44,18 +40,17 @@ object LocationHelper {
         locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
-    fun performAddressAutoComplete(addressStr: String, adapter: AddressAutoSuggestAdapter, job_: Job?, scope: CoroutineScope) {
-        var job = job_
+    fun performAddressAutoComplete(addressStr: String, adapter: AddressAutoSuggestAdapter) {
         // ref: https://stackoverflow.com/a/58282972/2445763
-        job?.cancel()
-        job = scope.launch {
+        textWatcherJob.cancel()
+        textWatcherJob = launchUI {
             delay(500)
             if (addressStr.isNullOrEmpty().not()){
-                val geolocation = GeoLocation.fromDegrees(LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!)
+                val geolocation = GeoLocation.fromDegrees(lastLatitude.value!!, lastLongitude.value!!)
                 val boundingBox = geolocation.boundingCoordinates(preferences.boundingCoordinatesDistance, AVERAGE_RADIUS_OF_EARTH_MILES) // numbers are in miles
 
                 try {
-                    var addresses = withContext(Dispatchers.IO) {
+                    val addresses = withIOContext {
                         getGeocoder().getFromLocationName(
                             addressStr,
                             3,
@@ -72,7 +67,7 @@ object LocationHelper {
                 } catch (e: IOException) {
                     when (e.message) {
                         "grpc failed" -> {
-                            LocationHelper.showNoGpsMessage(adapter.context)
+                            showNoGpsMessage(adapter.context)
                         }
                         else -> throw e
                     }

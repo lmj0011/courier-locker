@@ -1,5 +1,6 @@
 package name.lmj0011.courierlocker.fragments
 
+import android.content.Intent
 import android.location.Address
 import android.os.Bundle
 import android.text.Editable
@@ -15,6 +16,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import br.com.simplepass.loadingbutton.presentation.State
 import kotlinx.coroutines.*
+import name.lmj0011.courierlocker.CurrentStatusBubbleActivity
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.AddressAutoSuggestAdapter
@@ -83,7 +85,7 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
         tripViewModel.payAmountValidated.observe(viewLifecycleOwner, Observer {
             it?.let {
                 if(!it){
-                    mainActivity.showToastMessage("invalid or no amount was entered")
+                    mainActivity.showToastMessage("No amount was entered.")
                 }
             }
         })
@@ -94,7 +96,7 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
             // revert button animation and navigate back to Trips
             if (btnState == State.MORPHING || btnState == State.PROGRESS) {
                 binding.editTripSaveCircularProgressButton.revertAnimation()
-                this.findNavController().navigate(R.id.tripsFragment)
+                findNavController().navigateUp()
             }
         })
 
@@ -141,7 +143,7 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
         // User touched the dialog's positive button
         tripViewModel.deleteTrip(this.trip!!.id)
         mainActivity.showToastMessage("deleted Trip")
-        this.findNavController().navigate(R.id.tripsFragment)
+        findNavController().navigateUp()
     }
 
     override fun onDialogNegativeClick(dialog: DialogFragment) {
@@ -186,7 +188,7 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
                     override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
                     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                        LocationHelper.performAddressAutoComplete(s.toString(), adapter, addressAutoCompleteJob, uiScope)
+                        LocationHelper.performAddressAutoComplete(s.toString(), adapter)
                     }
                 })
 
@@ -269,7 +271,7 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
             override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                LocationHelper.performAddressAutoComplete(s.toString(), adapter, addressAutoCompleteJob, uiScope)
+                LocationHelper.performAddressAutoComplete(s.toString(), adapter)
             }
         })
 

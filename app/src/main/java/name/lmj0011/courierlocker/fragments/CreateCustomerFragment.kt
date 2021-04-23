@@ -116,7 +116,7 @@ class CreateCustomerFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                LocationHelper.performAddressAutoComplete(s.toString(), adapter, addressAutoCompleteJob, uiScope)
+                LocationHelper.performAddressAutoComplete(s.toString(), adapter)
             }
         })
 

@@ -34,7 +34,7 @@
 
     <!-- Preference Summaries -->
     <string name="pref_bounding_coordinates_distance_summary">Increase or decrease the radius (in miles) of the bounding box used for address suggestions</string>
-    <string name="pref_enable_current_status_service_summary">Enable the Foreground Service that display today\'s earnings, recent trips, and nearby gate codes</string>
+    <string name="pref_enable_current_status_service_summary">Launches a Notification group that displays today\'s earnings, recent trips, and nearby gate codes whenever app is in the background.</string>
 
     <!-- Preference Titles -->
     <string name="pref_bounding_coordinates_distance_title">Bounding Box Radius (%1$s)</string>

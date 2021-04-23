@@ -22,12 +22,12 @@ import kotlinx.android.synthetic.main.app_bar_main.view.*
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import timber.log.Timber
 import name.lmj0011.courierlocker.databinding.ActivityMainBinding
+import name.lmj0011.courierlocker.fragments.MapsFragmentDirections
 import name.lmj0011.courierlocker.fragments.TripsFragmentDirections
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.PermissionHelper
 import name.lmj0011.courierlocker.helpers.PreferenceHelper
 import org.kodein.di.instance
-import shortbread.Shortcut
 
 
 
@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // AppBar Navigation configuration
         topLevelDestinations = setOf(R.id.tripsFragment, R.id.gateCodesFragment, R.id.customersFragment, R.id.mapsFragment)
         appBarConfiguration = AppBarConfiguration.Builder(topLevelDestinations)
-            .setDrawerLayout(binding.drawerLayout)
+            .setOpenableLayout(binding.drawerLayout)
             .build()
 
         setSupportActionBar(binding.drawerLayout.toolbar)
@@ -204,10 +204,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun handleIntentAction(intent: Intent):Boolean {
         when (intent.action) {
+            INTENT_CREATE_TRIP -> navController.navigate(R.id.createTripFragment)
             INTENT_EDIT_TRIP -> {
                 navController.navigate(
                     TripsFragmentDirections.actionTripsFragmentToEditTripFragment(
                         intent.getIntExtra("editTripId", 0)
+                    )
+                )
+            }
+            INTENT_EDIT_APARTMENT_MAP -> {
+                navController.navigate(R.id.mapsFragment)
+                navController.navigate(
+                    MapsFragmentDirections.actionMapsFragmentToEditAptBuildingsMapsFragment(
+                        intent.getLongExtra("aptId", 0L)
                     )
                 )
             }
@@ -254,26 +263,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         imm?.hideSoftInputFromWindow(v.windowToken, 0)
     }
 
-    @Shortcut(id = "shortcut_trips", rank = 4, icon = R.mipmap.ic_trips_shortcut, shortLabel = "Trips")
-    fun shortCutToTrips() {
-        navController.navigate(R.id.tripsFragment)
-    }
-
-    @Shortcut(id = "shortcut_maps", rank = 3, icon = R.mipmap.ic_maps_shortcut, shortLabel = "Maps")
-    fun shortCutToMaps() {
-        navController.navigate(R.id.mapsFragment)
-    }
-
-    @Shortcut(id = "shortcut_gatecodes", rank = 2, icon = R.mipmap.ic_gatecodes_shortcut, shortLabel = "Gate Codes")
-    fun shortCutToGatecodes() {
-        navController.navigate(R.id.gateCodesFragment)
-    }
-
-    @Shortcut(id = "shortcut_customers", rank = 1, icon = R.mipmap.ic_customers_shortcut, shortLabel = "Customers")
-    fun shortCutToCustomers() {
-        navController.navigate(R.id.customersFragment)
-    }
-
     private fun navigateTo(id: Int) {
         when (id) {
             R.id.nav_gate_codes -> {
@@ -306,12 +295,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         const val INTENT_SHOW_MAPS = "name.lmj0011.courierlocker.SHOW_MAPS"
         const val INTENT_SHOW_GATE_CODES = "name.lmj0011.courierlocker.SHOW_GATE_CODES"
         const val INTENT_SHOW_CUSTOMERS = "name.lmj0011.courierlocker.SHOW_CUSTOMERS"
-        // View
-        const val INTENT_VIEW_MAP = "name.lmj0011.courierlocker.VIEW_MAP"
+        // Create
+        const val INTENT_CREATE_TRIP = "name.lmj0011.courierlocker.CREATE_TRIP"
+
         // Edit
         const val INTENT_EDIT_TRIP = "name.lmj0011.courierlocker.EDIT_TRIP"
-        const val INTENT_EDIT_MAP = "name.lmj0011.courierlocker.EDIT_MAP"
-        const val INTENT_EDIT_GATE_CODE = "name.lmj0011.courierlocker.EDIT_GATE_CODE"
-        const val INTENT_EDIT_CUSTOMER = "name.lmj0011.courierlocker.EDIT_CUSTOMER"
+        const val INTENT_EDIT_APARTMENT_MAP = "name.lmj0011.courierlocker.INTENT_EDIT_APARTMENT_MAP"
+
     }
 }

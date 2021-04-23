@@ -39,19 +39,16 @@ class TripViewModel(
 
     var errorMsg = MutableLiveData("")
 
-    var tripPayAmountsForToday = database.getAllTodayTripPayAmounts()
-
-    var tripPayAmountsForMonth = database.getAllMonthTripPayAmounts()
-
-    var tripPayAmounts: LiveData<List<String>> = database.getAllTripPayAmounts()
-
-    var tripsPaged: LiveData<PagedList<Trip>> = Transformations.switchMap(filterText) { query ->
-        return@switchMap if (query.isNullOrEmpty()) {
-            database.getAllTripsByThePage().toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
-        } else {
-            database.getAllTripsByThePageFiltered("%$query%").toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
+    val tripsPaged: LiveData<PagedList<Trip>>
+        get() {
+            return Transformations.switchMap(filterText) { query ->
+                return@switchMap if (query.isNullOrEmpty()) {
+                    database.getAllTripsByThePage().toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
+                } else {
+                    database.getAllTripsByThePageFiltered("%$query%").toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
+                }
+            }
         }
-    }
 
     val trip = MutableLiveData<Trip?>()
 
@@ -59,73 +56,48 @@ class TripViewModel(
 
     var trips: LiveData<MutableList<Trip>> = database.getAllTrips()
 
-    val totalMoney: String
-        get() {
-            val result = tripPayAmounts.value?.fold(0.0) { sum, pa ->
-                val toAdd = pa.toDoubleOrNull()
-                if (toAdd == null){
-                    sum
-                } else {
-                    sum + toAdd
-                }
+    fun totalMoney(): String {
+        val result = database.getAllTripPayAmounts().fold(0.0) { sum, pa ->
+            val toAdd = pa.toDoubleOrNull()
+            if (toAdd == null){
+                sum
+            } else {
+                sum + toAdd
             }
-
-            result?.let{
-                return Util.numberFormatInstance.format(it)
-            }
-
-            return Util.numberFormatInstance.format(0.0)
         }
 
-    val todayTotalMoney: String
-        get() {
-            val result = tripPayAmountsForToday.value?.fold(0.0) { sum, pa ->
-                val toAdd = pa.toDoubleOrNull()
-                if (toAdd == null){
-                    sum
-                } else {
-                    sum + toAdd
-                }
-            }
+        return Util.numberFormatInstance.format(result)
+    }
 
-            result?.let{
-                return Util.numberFormatInstance.format(it)
+    fun todayTotalMoney(): String {
+        val result = database.getAllTodayTripPayAmounts().fold(0.0) { sum, pa ->
+            val toAdd = pa.toDoubleOrNull()
+            if (toAdd == null){
+                sum
+            } else {
+                sum + toAdd
             }
-
-            return Util.numberFormatInstance.format(0.0)
         }
 
-    val todayCompletedTrips: String
-        get() {
-            val result = trips.value?.fold(0) { sum, trip ->
-                if (trip == null || !Util.isTripOfToday(trip) || trip.pickupAddress.isEmpty() || trip.dropOffAddress.isEmpty()){
-                    sum
-                } else {
-                    sum + 1
-                }
+        return Util.numberFormatInstance.format(result)
+    }
 
+    fun todayCompletedTrips(): String {
+        return database.getAllTodayTrips().size.toString()
+    }
+
+    fun monthTotalMoney(): String {
+        val result = database.getAllMonthTripPayAmounts().fold(0.0) { sum, pa ->
+            val toAdd = pa.toDoubleOrNull()
+            if (toAdd == null){
+                sum
+            } else {
+                sum + toAdd
             }
-
-            return result.toString()
         }
 
-    val monthTotalMoney: String
-        get() {
-            val result = tripPayAmountsForMonth.value?.fold(0.0) { sum, pa ->
-                val toAdd = pa.toDoubleOrNull()
-                if (toAdd == null){
-                    sum
-                } else {
-                    sum + toAdd
-                }
-            }
-
-            result?.let{
-                return Util.numberFormatInstance.format(it)
-            }
-
-            return Util.numberFormatInstance.format(0.0)
-        }
+        return Util.numberFormatInstance.format(result)
+    }
 
 
     override fun onCleared() {
@@ -154,6 +126,17 @@ class TripViewModel(
                 this@TripViewModel.trip.postValue(it)
             }
             ///
+        }
+    }
+
+    fun insertTrip(trip: Trip) {
+        launchIO {
+            trip.apply {
+                Util.setTripTimestamp(this)
+                distance = calculateTripDistance(this)
+            }
+
+            database.insert(trip)
         }
     }
 

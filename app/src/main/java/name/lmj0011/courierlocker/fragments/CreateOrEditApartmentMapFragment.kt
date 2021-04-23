@@ -126,9 +126,7 @@ class CreateOrEditApartmentMapFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 LocationHelper.performAddressAutoComplete(
                     s.toString(),
-                    adapter,
-                    addressAutoCompleteJob,
-                    uiScope
+                    adapter
                 )
             }
         })

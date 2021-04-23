@@ -1,40 +1,21 @@
 package name.lmj0011.courierlocker.fragments.dialogs
 
-import android.app.Activity
 import android.app.Dialog
-import android.content.Context
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.ViewModelProviders
 import name.lmj0011.courierlocker.R
+import name.lmj0011.courierlocker.database.CourierLockerDatabase
+import name.lmj0011.courierlocker.factories.TripViewModelFactory
+import name.lmj0011.courierlocker.helpers.launchIO
+import name.lmj0011.courierlocker.helpers.withUIContext
+import name.lmj0011.courierlocker.viewmodels.TripViewModel
 
 class TripsStatsDialogFragment : DialogFragment() {
-    // Use this instance of the interface to deliver action events
-    private lateinit var listener: TripsStatsDialogListener
-
-    /* The activity that creates an instance of this dialog fragment must
-     * implement this interface in order to receive event callbacks.
-     * Each method passes the DialogFragment in case the host needs to query it. */
-    interface TripsStatsDialogListener {
-        fun getTripTotals(dialog: DialogFragment): Map<String, String>
-    }
-
-    // Override the Fragment.onAttach() method to instantiate the TripsStatsDialogListener
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        // Verify that the host activity implements the callback interface
-        try {
-            // Instantiate the TripsStatsDialogListener so we can send events to the host
-            listener = parentFragment as TripsStatsDialogListener
-        } catch (e: ClassCastException) {
-            // The activity doesn't implement the interface, throw exception
-            throw ClassCastException(("$parentFragment must implement TripsStatsDialogListener"))
-        }
-    }
-
+    lateinit var dialogView: View
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let{
@@ -44,14 +25,29 @@ class TripsStatsDialogFragment : DialogFragment() {
             val inflater = requireActivity().layoutInflater
             val view = inflater.inflate(R.layout.dialog_trips_stats, null)
 
-            view.findViewById<TextView>(R.id.todayTotalPayTextView).text = "Today: ${listener.getTripTotals(this)["today"]}"
-            view.findViewById<TextView>(R.id.monthTotalPayTextView).text = "This Month: ${listener.getTripTotals(this)["month"]}"
-            view.findViewById<TextView>(R.id.toDateTotalPayTextView).text = "To Date: ${listener.getTripTotals(this)["toDate"]}"
-
-            builder.setView(view)
-
+            dialogView = view
+            builder.setView(dialogView)
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val dataSource = CourierLockerDatabase.getInstance(requireActivity().application).tripDao
+        val viewModelFactory = TripViewModelFactory(dataSource, requireActivity().application)
+        val tripViewModel = ViewModelProviders.of(this, viewModelFactory).get(TripViewModel::class.java)
+
+        launchIO {
+            val totalToday = tripViewModel.todayTotalMoney()
+            val totalMonth = tripViewModel.monthTotalMoney()
+            val totalToDate = tripViewModel.totalMoney()
+
+            withUIContext {
+                dialogView.findViewById<TextView>(R.id.todayTotalPayTextView).text = totalToday
+                dialogView.findViewById<TextView>(R.id.monthTotalPayTextView).text = totalMonth
+                dialogView.findViewById<TextView>(R.id.toDateTotalPayTextView).text = totalToDate
+            }
+        }
     }
 
 }

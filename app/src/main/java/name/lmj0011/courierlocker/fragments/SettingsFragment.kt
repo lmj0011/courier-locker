@@ -3,6 +3,7 @@ package name.lmj0011.courierlocker.fragments
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.text.InputType
 import androidx.documentfile.provider.DocumentFile
@@ -20,6 +21,8 @@ import name.lmj0011.courierlocker.database.*
 import name.lmj0011.courierlocker.fragments.dialogs.AboutDialogFragment
 import name.lmj0011.courierlocker.helpers.AppDataImportExportHelper
 import name.lmj0011.courierlocker.helpers.PreferenceHelper
+import name.lmj0011.courierlocker.helpers.launchNow
+import name.lmj0011.courierlocker.helpers.launchUI
 import name.lmj0011.courierlocker.workers.CalculateAllTripDistanceWorker
 import name.lmj0011.courierlocker.workers.CreateBackupWorker
 import org.kodein.di.instance
@@ -44,6 +47,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
     private lateinit var automaticBackupLocationPref: Preference
     private lateinit var boundingCoordinatesDistance: EditTextPreference
     private lateinit var enableCurrentStatusService: SwitchPreferenceCompat
+    private lateinit var showCurrentStatusAsBubble: SwitchPreferenceCompat
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         settingsActivity = activity as SettingsActivity
@@ -62,6 +66,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         automaticBackupLocationPref = findPreference("automaticBackupLocation")!!
         boundingCoordinatesDistance = findPreference(application.getString(R.string.pref_key_bounding_coordinates_distance))!!
         enableCurrentStatusService = findPreference(application.getString(R.string.pref_enable_current_status_service))!!
+        showCurrentStatusAsBubble = findPreference("showCurrentStatusAsBubble")!!
 
         if(!resources.getBoolean(R.bool.DEBUG_MODE)) {
             val prfScreen = findPreference<PreferenceScreen>("preferenceScreen")
@@ -84,6 +89,13 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     true
                 }
             }
+        }
+
+        /**
+         * Show some Preferences only on devices running Android 11 or higher
+         */
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            showCurrentStatusAsBubble.isVisible = true
         }
 
         googleDirectionsKeyPref.setOnPreferenceChangeListener { _, newValue ->
@@ -177,10 +189,22 @@ class SettingsFragment : PreferenceFragmentCompat() {
             when (newValue) {
                 true -> {
                     application.showCurrentStatusServiceNotification(true)
+                    showCurrentStatusAsBubble.isEnabled = true
                 }
                 else -> {
                     application.showCurrentStatusServiceNotification(false)
+                    showCurrentStatusAsBubble.isEnabled = false
                 }
+            }
+            true
+        }
+
+        showCurrentStatusAsBubble.setOnPreferenceChangeListener { _, newValue ->
+            application.showCurrentStatusServiceNotification(false)
+
+            launchUI {
+                delay(3000L)
+                application.showCurrentStatusServiceNotification(true)
             }
             true
         }

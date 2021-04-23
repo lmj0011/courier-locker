@@ -53,6 +53,18 @@
         </activity>
 
         <activity
+                android:name=".CurrentStatusBubbleActivity"
+                android:theme="@style/AppTheme.NoActionBar"
+                android:allowEmbedded="true"
+                android:documentLaunchMode="always"
+                android:resizeableActivity="true">
+            <intent-filter>
+                <action android:name="name.lmj0011.courierlocker.CurrentStatusBubbleActivity.VIEW" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name=".SettingsActivity"
                 android:theme="@style/AppTheme" />
 

@@ -18,7 +18,6 @@ import name.lmj0011.courierlocker.viewmodels.GigLabelViewModel
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.singleton
-import shortbread.Shortbread
 import timber.log.Timber
 
 
@@ -52,7 +51,6 @@ class CourierLockerApplication : Application() {
         Timber.plant(Timber.DebugTree())
         Fakeit.init()
         AndroidThreeTen.init(this)
-        Shortbread.create(this)
         NotificationHelper.init(this)
         PermissionHelper.checkPermissionApprovals(this)
 

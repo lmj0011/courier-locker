@@ -34,7 +34,6 @@ class CreateTripFragment : Fragment() {
     private lateinit var mainActivity: MainActivity
     private lateinit var tripViewModel: TripViewModel
     private var fragmentJob = Job()
-    private var addressAutoCompleteJob: Job? = null
     private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
 
     override fun onCreateView(
@@ -78,7 +77,7 @@ class CreateTripFragment : Fragment() {
         tripViewModel.payAmountValidated.observe(viewLifecycleOwner, Observer {
             it?.let {
                 if(!it){
-                    mainActivity.showToastMessage("invalid or no amount was entered")
+                    mainActivity.showToastMessage("No amount was entered.")
                 }
             }
         })
@@ -89,7 +88,7 @@ class CreateTripFragment : Fragment() {
             // revert button animation and navigate back to Trips
             if (btnState == State.MORPHING || btnState == State.PROGRESS) {
                 binding.createTripSaveCircularProgressButton.revertAnimation()
-                this.findNavController().navigate(R.id.tripsFragment)
+                findNavController().navigateUp()
             }
         })
 
@@ -112,7 +111,6 @@ class CreateTripFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         fragmentJob.cancel()
-        addressAutoCompleteJob?.cancel()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -179,7 +177,7 @@ class CreateTripFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                LocationHelper.performAddressAutoComplete(s.toString(), adapter, addressAutoCompleteJob, uiScope)
+                LocationHelper.performAddressAutoComplete(s.toString(), adapter)
             }
         })
 

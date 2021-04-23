@@ -6,13 +6,10 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.SearchView
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
-import androidx.paging.PagedList
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -21,27 +18,22 @@ import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.TripListAdapter
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
-import name.lmj0011.courierlocker.database.Trip
 import name.lmj0011.courierlocker.databinding.FragmentTripsBinding
-import name.lmj0011.courierlocker.factories.GigLabelViewModelFactory
 import name.lmj0011.courierlocker.factories.TripViewModelFactory
 import name.lmj0011.courierlocker.fragments.dialogs.ClearAllTripsDialogFragment
 import name.lmj0011.courierlocker.fragments.dialogs.TripsStatsDialogFragment
-import name.lmj0011.courierlocker.helpers.Util
+import name.lmj0011.courierlocker.helpers.*
 import name.lmj0011.courierlocker.helpers.interfaces.SearchableRecyclerView
-import name.lmj0011.courierlocker.viewmodels.GigLabelViewModel
 import name.lmj0011.courierlocker.viewmodels.TripViewModel
 import timber.log.Timber
 import java.io.FileOutputStream
-import java.time.ZoneId
 
 /**
  * A simple [Fragment] subclass.
  *
  */
-class TripsFragment : Fragment(),
+class TripsFragment : Fragment(R.layout.fragment_trips),
     ClearAllTripsDialogFragment.NoticeDialogListener,
-    TripsStatsDialogFragment.TripsStatsDialogListener,
     SearchableRecyclerView
 {
     private lateinit var binding: FragmentTripsBinding
@@ -54,14 +46,9 @@ class TripsFragment : Fragment(),
     private var fragmentJob: Job = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        binding = DataBindingUtil.inflate(
-            inflater, R.layout.fragment_trips, container, false)
-
-        mainActivity = activity as MainActivity
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        mainActivity = requireActivity() as MainActivity
         setHasOptionsMenu(true)
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity)
@@ -70,78 +57,34 @@ class TripsFragment : Fragment(),
         viewModelFactory = TripViewModelFactory(dataSource, application)
         tripViewModel = ViewModelProviders.of(this, viewModelFactory).get(TripViewModel::class.java)
 
-        listAdapter = TripListAdapter(TripListAdapter.TripListener { tripId ->
-            this.findNavController().navigate(TripsFragmentDirections.actionTripsFragmentToEditTripFragment(tripId.toInt()))
-        })
+        mainActivity.showFabAndSetListener({
+            findNavController()
+                .navigate(TripsFragmentDirections.actionTripsFragmentToCreateTripFragment())
+        }, R.drawable.ic_fab_add)
+        mainActivity.supportActionBar?.subtitle = null
 
-        binding.tripList.addItemDecoration(DividerItemDecoration(mainActivity, DividerItemDecoration.VERTICAL))
-
-        binding.tripList.adapter = listAdapter
-
-        binding.tripViewModel = tripViewModel
-
-        binding.lifecycleOwner = this
-
-        tripViewModel.tripsPaged.observe(viewLifecycleOwner, Observer {
-            listAdapter.submitList(it)
-            listAdapter.notifyDataSetChanged()
-        })
-
-        tripViewModel.trips.observe(viewLifecycleOwner, Observer {})
-        tripViewModel.tripPayAmounts.observe(viewLifecycleOwner, Observer {})
-
-        tripViewModel.tripPayAmountsForToday.observe(viewLifecycleOwner, Observer {
-            binding.totalPayTextView.text = tripViewModel.todayTotalMoney
-        })
-
-        tripViewModel.tripPayAmountsForMonth.observe(viewLifecycleOwner, Observer {})
-
-        binding.swipeRefresh.setOnRefreshListener {
-            this.findNavController().navigate(R.id.tripsFragment)
-        }
-
-        binding.totalPayTextView.setOnClickListener {
-            val dialog = TripsStatsDialogFragment()
-            dialog.show(childFragmentManager, "TripsStatsDialogFragment")
-        }
-
-
-        if(!sharedPreferences.getBoolean("enableDebugMode", false)) {
-            binding.generateCustomerBtn.visibility = View.GONE
-        }
-
-        binding.tripsSearchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                return false
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                tripViewModel.filterText.postValue(newText)
-                return false
-            }
-        })
-
-        binding.tripsSearchView.setOnCloseListener {
-            this@TripsFragment.toggleSearch(mainActivity, binding.tripsSearchView, false)
-            false
-        }
-
-        binding.tripsSearchView.setOnQueryTextFocusChangeListener { view, hasFocus ->
-            if (hasFocus) { } else{
-                binding.tripsSearchView.setQuery("", true)
-                this@TripsFragment.toggleSearch(mainActivity, binding.tripsSearchView, false)
-            }
-        }
-
-        return binding.root
+        setupBinding(view)
+        setupObservers()
     }
 
     override fun onResume() {
         super.onResume()
-        mainActivity.showFabAndSetListener(this::fabOnClickListenerCallback, R.drawable.ic_fab_add)
-        mainActivity.supportActionBar?.subtitle = null
-        this.refreshList()
+
+        val application = mainActivity.application
+        val dataSource = CourierLockerDatabase.getInstance(application).tripDao
+        viewModelFactory = TripViewModelFactory(dataSource, application)
+        tripViewModel = ViewModelProviders.of(this, viewModelFactory).get(TripViewModel::class.java)
+
+        setupObservers()
+
+        launchIO {
+            val total = tripViewModel.todayTotalMoney()
+            withUIContext {
+                binding.totalPayTextView.text = total
+            }
+        }
     }
+
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
@@ -230,13 +173,78 @@ class TripsFragment : Fragment(),
         // User touched the dialog's negative button
     }
 
-    override fun getTripTotals(dialog: DialogFragment): Map<String, String> {
-        val map = mutableMapOf<String, String>()
-        map["today"] = tripViewModel.todayTotalMoney
-        map["month"] = tripViewModel.monthTotalMoney
-        map["toDate"] = tripViewModel.totalMoney
+    private fun setupBinding(view: View) {
+        binding = FragmentTripsBinding.bind(view)
 
-        return map
+        binding.swipeRefresh.setOnRefreshListener { observeTrips() }
+
+        listAdapter = TripListAdapter(TripListAdapter.TripListener { tripId ->
+            this.findNavController().navigate(TripsFragmentDirections.actionTripsFragmentToEditTripFragment(tripId.toInt()))
+        })
+
+        binding.tripList.addItemDecoration(DividerItemDecoration(mainActivity, DividerItemDecoration.VERTICAL))
+
+        binding.tripList.adapter = listAdapter
+
+        binding.tripViewModel = tripViewModel
+
+        binding.lifecycleOwner = this
+
+
+        binding.totalPayTextView.setOnClickListener {
+            val dialog = TripsStatsDialogFragment()
+            dialog.show(childFragmentManager, "TripsStatsDialogFragment")
+        }
+
+
+        if(!sharedPreferences.getBoolean("enableDebugMode", false)) {
+            binding.generateCustomerBtn.visibility = View.GONE
+        }
+
+        binding.tripsSearchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                tripViewModel.filterText.postValue(newText)
+                return false
+            }
+        })
+
+        binding.tripsSearchView.setOnCloseListener {
+            this@TripsFragment.toggleSearch(mainActivity, binding.tripsSearchView, false)
+            false
+        }
+
+        binding.tripsSearchView.setOnQueryTextFocusChangeListener { view, hasFocus ->
+            if (hasFocus) { } else{
+                binding.tripsSearchView.setQuery("", true)
+                this@TripsFragment.toggleSearch(mainActivity, binding.tripsSearchView, false)
+            }
+        }
+    }
+
+    private fun setupObservers() {
+        observeTrips()
+    }
+
+    /**
+     * starts a new Trips observer
+     */
+    private fun observeTrips () {
+        tripViewModel.tripsPaged.removeObservers(viewLifecycleOwner)
+
+        tripViewModel.tripsPaged.observe(viewLifecycleOwner, {
+            listAdapter.submitList(it)
+            listAdapter.notifyItemRangeChanged(0, Const.DEFAULT_PAGE_COUNT)
+            launchUI {
+                delay(500L)
+                binding.tripList.scrollToPosition(0)
+            }
+        })
+
+        binding.swipeRefresh.isRefreshing = false
     }
 
     private fun showClearAllTripsDialog() {
@@ -245,9 +253,6 @@ class TripsFragment : Fragment(),
         dialog.show(childFragmentManager, "ClearAllTripsDialogFragment")
     }
 
-    private fun fabOnClickListenerCallback() {
-        this.findNavController().navigate(TripsFragmentDirections.actionTripsFragmentToCreateTripFragment())
-    }
 
     // ref: https://developer.android.com/guide/topics/providers/document-provider#create
     private fun createTripsCsvFile(fileName: String) {
@@ -262,17 +267,5 @@ class TripsFragment : Fragment(),
         }
 
         startActivityForResult(intent, MainActivity.TRIPS_WRITE_REQUEST_CODE)
-    }
-
-    private fun refreshList() {
-        val trips = tripViewModel.tripsPaged.value
-        trips?.let { this.submitListToAdapter(it) }
-        binding.swipeRefresh.isRefreshing = false
-    }
-
-
-    private fun submitListToAdapter (list: PagedList<Trip>) {
-        listAdapter.submitList(list)
-        listAdapter.notifyDataSetChanged()
     }
 }

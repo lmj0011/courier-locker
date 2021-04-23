@@ -27,4 +27,6 @@ class PreferenceHelper(val context: Context) {
         }
 
     fun enableCurrentStatusService() = prefs.getBoolean(context.getString(R.string.pref_enable_current_status_service), true)
+
+    fun showCurrentStatusAsBubble() = prefs.getBoolean("showCurrentStatusAsBubble", false)
 }

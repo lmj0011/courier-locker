@@ -31,17 +31,20 @@ interface TripDao: BaseDao {
     @Query("SELECT * FROM trips_table ORDER BY id DESC")
     fun getAllTrips(): LiveData<MutableList<Trip>>
 
+    @Query("SELECT * FROM trips_table WHERE strftime('%Y-%m-%d',date(timestamp, 'localtime')) = strftime('%Y-%m-%d',date('now', 'localtime'))")
+    fun getAllTodayTrips(): List<Trip>
+
     @Query("SELECT * FROM trips_table WHERE distance <= 0.0")
     fun getAllNoDistanceTrips(): List<Trip>
 
     @Query("SELECT payAmount FROM trips_table")
-    fun getAllTripPayAmounts(): LiveData<List<String>>
+    fun getAllTripPayAmounts(): List<String>
 
     @Query("SELECT payAmount FROM trips_table WHERE date(timestamp, 'localtime') >= date('now', 'localtime') AND date(timestamp, 'localtime') < date('now', 'localtime', '+1 day')")
-    fun getAllTodayTripPayAmounts(): LiveData<List<String>>
+    fun getAllTodayTripPayAmounts(): List<String>
 
-    @Query("SELECT payAmount FROM trips_table WHERE strftime('%Y',date(timestamp, 'localtime')) = strftime('%Y',date('now', 'localtime')) AND  strftime('%m',date(timestamp, 'localtime')) = strftime('%m',date('now', 'localtime'))")
-    fun getAllMonthTripPayAmounts(): LiveData<List<String>>
+    @Query("SELECT payAmount FROM trips_table WHERE strftime('%Y-%m',date(timestamp, 'localtime')) = strftime('%Y-%m',date('now', 'localtime'))")
+    fun getAllMonthTripPayAmounts(): List<String>
 
     @Query("SELECT * FROM trips_table WHERE date(timestamp, 'localtime') >= date(:startDate, 'unixepoch') AND date(timestamp, 'localtime') <= date(:endDate, 'unixepoch')")
     fun getAllTripsInDateRange(startDate: Long, endDate: Long): List<Trip>

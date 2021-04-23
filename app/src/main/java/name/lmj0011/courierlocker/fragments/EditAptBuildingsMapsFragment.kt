@@ -80,7 +80,7 @@ class EditAptBuildingsMapsFragment : Fragment(){
         val application = requireNotNull(this.activity).application
         val dataSource = CourierLockerDatabase.getInstance(application).apartmentDao
         viewModelFactory = ApartmentViewModelFactory(dataSource, application)
-        val args = EditAptBuildingsMapsFragmentArgs.fromBundle(arguments!!)
+        val args = EditAptBuildingsMapsFragmentArgs.fromBundle(requireArguments())
         apartmentViewModel = ViewModelProviders.of(this, viewModelFactory).get(ApartmentViewModel::class.java)
         mapFragment = childFragmentManager.findFragmentById(R.id.editAptBuildingsMapFragment) as SupportMapFragment
 
