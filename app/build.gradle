@@ -16,7 +16,7 @@ android {
         applicationId "name.lmj0011.courierlocker"
         minSdkVersion 26
         targetSdkVersion 30
-        versionCode 75
+        versionCode 76
         versionName "2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -54,7 +54,7 @@ android {
     productFlavors {
         dev { // active development/testing
             applicationIdSuffix ".dev"
-            versionNameSuffix ".1.0-dev"
+            versionNameSuffix ".2.0-beta01"
             resValue("string", "app_name", "Courier Locker (dev)")
             manifestPlaceholders = [
                     appIcon: "@mipmap/ic_launcher_dev",
@@ -64,7 +64,7 @@ android {
         }
         beta { // public testing
             applicationIdSuffix ".beta"
-            versionNameSuffix ".1.0-beta"
+            versionNameSuffix ".2.0-beta01"
             resValue("string", "app_name", "Courier Locker (beta)")
             manifestPlaceholders = [
                     appIcon: "@mipmap/ic_launcher_beta",
@@ -74,7 +74,7 @@ android {
         }
         prod { // official release
             applicationIdSuffix ".prod"
-            versionNameSuffix ".1.0"
+            versionNameSuffix ".2.0-beta01"
             resValue("string", "app_name", "Courier Locker")
             manifestPlaceholders = [
                     appIcon: "@mipmap/ic_launcher",
@@ -198,6 +198,9 @@ dependencies {
 
     // dependency injection
     implementation 'org.kodein.di:kodein-di:7.0.0'
+
+    // sqlite
+    implementation 'com.github.requery:sqlite-android:3.35.4'
 }
 
 

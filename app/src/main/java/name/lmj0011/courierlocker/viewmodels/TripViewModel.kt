@@ -8,6 +8,7 @@ import androidx.lifecycle.Transformations
 import androidx.paging.PagedList
 import androidx.paging.toLiveData
 import androidx.preference.PreferenceManager
+import androidx.sqlite.db.SimpleSQLiteQuery
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.json.responseJson
 import com.github.kittinunf.result.Result
@@ -41,11 +42,12 @@ class TripViewModel(
 
     val tripsPaged: LiveData<PagedList<Trip>>
         get() {
-            return Transformations.switchMap(filterText) { query ->
-                return@switchMap if (query.isNullOrEmpty()) {
+            return Transformations.switchMap(filterText) { mQuery ->
+                return@switchMap if (mQuery.isNullOrEmpty()) {
                     database.getAllTripsByThePage().toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
                 } else {
-                    database.getAllTripsByThePageFiltered("%$query%").toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
+                    val query = SimpleSQLiteQuery("SELECT * FROM trips_table, json_each(stops) WHERE pickupAddress LIKE '%$mQuery%' OR dropOffAddress LIKE '%$mQuery%' OR payAmount LIKE '%$mQuery%' OR gigName LIKE '%$mQuery%' OR json_extract(json_each.value, '\$.address') LIKE '%$mQuery%' ORDER BY id DESC")
+                    database.getAllTripsByThePageFiltered(query).toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
                 }
             }
         }
@@ -259,7 +261,7 @@ class TripViewModel(
             is Result.Failure -> {
                 val ex = result.getException()
                 Timber.e("Result.Failure: ${ex.message}")
-                return defaultValue
+                defaultValue
             }
             is Result.Success -> {
                 var totalDistance = defaultValue
@@ -272,7 +274,7 @@ class TripViewModel(
                     totalDistance += leg.getJSONObject("distance").getDouble("value")
                 }
 
-                return totalDistance
+                totalDistance
             }
         }
     }

@@ -34,12 +34,12 @@
 
     <!-- Preference Summaries -->
     <string name="pref_bounding_coordinates_distance_summary">Increase or decrease the radius (in miles) of the bounding box used for address suggestions</string>
-    <string name="pref_enable_current_status_service_summary">Launches a Notification group that displays today\'s earnings, recent trips, and nearby gate codes whenever app is in the background.</string>
+    <string name="pref_enable_current_status_service_summary">Launch a Notification group that displays today\'s earnings, recent trips, and nearby gate codes whenever the app goes into the background.</string>
 
     <!-- Preference Titles -->
     <string name="pref_bounding_coordinates_distance_title">Bounding Box Radius (%1$s)</string>
     <string name="pref_bounding_coordinates_distance_dialog_title">Enter New Value</string>
-    <string name="pref_enable_current_status_service_title">Current Status</string>
+    <string name="pref_enable_current_status_service_title">Current Status Service</string>
 
     <!-- Intent Extra Keys-->
     <string name="intent_extra_key_worker_tags">WORKER_TAGS</string>

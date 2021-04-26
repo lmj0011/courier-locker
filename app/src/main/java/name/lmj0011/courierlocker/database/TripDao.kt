@@ -2,10 +2,8 @@ package name.lmj0011.courierlocker.database
 
 import androidx.lifecycle.LiveData
 import androidx.paging.DataSource
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
+import androidx.sqlite.db.SupportSQLiteQuery
 
 @Dao
 interface TripDao: BaseDao {
@@ -25,8 +23,8 @@ interface TripDao: BaseDao {
     @Query("SELECT * FROM trips_table ORDER BY id DESC")
     fun getAllTripsByThePage(): DataSource.Factory<Int, Trip>
 
-    @Query("SELECT * FROM trips_table WHERE pickupAddress LIKE :query OR dropOffAddress LIKE :query OR payAmount LIKE :query OR gigName LIKE :query ORDER BY id DESC")
-    fun getAllTripsByThePageFiltered(query: String): DataSource.Factory<Int, Trip>
+    @RawQuery(observedEntities = [Trip::class])
+    fun getAllTripsByThePageFiltered(query: SupportSQLiteQuery): DataSource.Factory<Int, Trip>
 
     @Query("SELECT * FROM trips_table ORDER BY id DESC")
     fun getAllTrips(): LiveData<MutableList<Trip>>

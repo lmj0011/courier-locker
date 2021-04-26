@@ -1,6 +1,5 @@
 package name.lmj0011.courierlocker.database
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.database.sqlite.SQLiteDatabaseLockedException
 import androidx.room.Database
@@ -12,6 +11,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.BuildConfig
 import timber.log.Timber
+import io.requery.android.database.sqlite.RequerySQLiteOpenHelperFactory
 
 @Database(entities = [GateCode::class, Trip::class, Customer::class, Apartment::class, GigLabel::class], version = 6,  exportSchema = true)
 @TypeConverters(DataConverters::class)
@@ -107,7 +107,9 @@ abstract class CourierLockerDatabase : RoomDatabase() {
                             .fallbackToDestructiveMigration()
                     }
 
-                    instance = builder.build()
+                    instance = builder
+                        .openHelperFactory(RequerySQLiteOpenHelperFactory())
+                        .build()
                 }
 
                 return instance
