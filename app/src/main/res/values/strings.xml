@@ -31,6 +31,7 @@
     <string name="pref_key_map_feed_list">pref_key_map_feed_list</string>
     <string name="pref_key_bounding_coordinates_distance">pref_key_bounding_coordinates_distance</string>
     <string name="pref_enable_current_status_service">pref_enable_current_status_service</string>
+    <string name="pref_google_map_type">pref_google_map_type</string>
 
     <!-- Preference Summaries -->
     <string name="pref_bounding_coordinates_distance_summary">Increase or decrease the radius (in miles) of the bounding box used for address suggestions</string>

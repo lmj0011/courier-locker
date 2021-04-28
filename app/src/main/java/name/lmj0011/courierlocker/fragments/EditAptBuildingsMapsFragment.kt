@@ -1,17 +1,18 @@
 package name.lmj0011.courierlocker.fragments
 
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.*
+import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import com.google.android.libraries.maps.CameraUpdateFactory
@@ -21,8 +22,8 @@ import com.google.android.libraries.maps.model.*
 import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
 import com.google.maps.android.ui.IconGenerator
-import com.google.maps.android.ui.IconGenerator.STYLE_PURPLE
 import kotlinx.coroutines.*
+import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.database.Apartment
@@ -32,7 +33,9 @@ import name.lmj0011.courierlocker.databinding.FragmentCreateOrEditApartmentMapBi
 import name.lmj0011.courierlocker.databinding.FragmentEditAptBuildingsMapBinding
 import name.lmj0011.courierlocker.factories.ApartmentViewModelFactory
 import name.lmj0011.courierlocker.helpers.AptBldgClusterItem
+import name.lmj0011.courierlocker.helpers.PreferenceHelper
 import name.lmj0011.courierlocker.viewmodels.ApartmentViewModel
+import org.kodein.di.instance
 import java.lang.Exception
 
 
@@ -50,16 +53,20 @@ class EditAptBuildingsMapsFragment : Fragment(){
     private lateinit var gMap: GoogleMap
     private lateinit var clusterManager: ClusterManager<AptBldgClusterItem>
     private lateinit var pinDropMarker: Marker
+    private lateinit var preferences: PreferenceHelper
     private var selectedApt = MutableLiveData<Apartment>()
     private var selectedBldg: Building? = null
     private var fragmentJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
 
+    @SuppressLint("MissingPermission")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         mainActivity = activity as MainActivity
+        preferences = (mainActivity.application as CourierLockerApplication).kodein.instance()
+        setHasOptionsMenu(true)
 
         try {
             binding = DataBindingUtil.inflate(
@@ -102,13 +109,14 @@ class EditAptBuildingsMapsFragment : Fragment(){
 
         mapFragment.getMapAsync { map ->
             gMap = map
+            applyPreferences()
             clusterManager = ClusterManager(mainActivity, gMap)
 
             val renderer = object: DefaultClusterRenderer<AptBldgClusterItem>(mainActivity, gMap, clusterManager) {
                 private val ig = IconGenerator(mainActivity)
 
                 init {
-                    ig.setStyle(STYLE_PURPLE)
+                    ig.setStyle(IconGenerator.STYLE_PURPLE)
                 }
 
                 override fun onBeforeClusterItemRendered(item: AptBldgClusterItem, markerOptions: MarkerOptions) {
@@ -123,8 +131,7 @@ class EditAptBuildingsMapsFragment : Fragment(){
 
             clusterManager.renderer = renderer
 
-            gMap.isMyLocationEnabled = true
-            gMap.uiSettings.isMapToolbarEnabled = true /* doesn't seem to work with map clustering */
+            gMap.isMyLocationEnabled = false
 
             gMap.setOnCameraIdleListener(clusterManager)
             gMap.setOnMarkerClickListener(clusterManager)
@@ -228,7 +235,6 @@ class EditAptBuildingsMapsFragment : Fragment(){
         super.onResume()
         mainActivity.hideFab()
         mainActivity.supportActionBar?.subtitle = "Long press to start marking building(s)"
-        this.applyPreferences()
     }
 
     override fun onDestroy() {
@@ -236,7 +242,51 @@ class EditAptBuildingsMapsFragment : Fragment(){
         fragmentJob.cancel()
     }
 
-    private fun applyPreferences() { }
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.edit_apt_building_maps, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        return when (item.itemId) {
+            R.id.action_change_map_type -> {
+                // https://stackoverflow.com/a/27178343/2445763
+                val builder = AlertDialog.Builder(requireContext())
+                val checkedItem = gMap.mapType - 1
+
+                builder.setTitle("Change Map Type")
+                builder.setSingleChoiceItems(
+                    arrayOf("Default", "Satellite", "Terrain", "Hybrid"),
+                    checkedItem
+                ) { dialog, position ->
+                    val mapType = when(position) {
+                        0 -> GoogleMap.MAP_TYPE_NORMAL
+                        1 -> GoogleMap.MAP_TYPE_SATELLITE
+                        2 -> GoogleMap.MAP_TYPE_TERRAIN
+                        3 -> GoogleMap.MAP_TYPE_HYBRID
+                        else -> GoogleMap.MAP_TYPE_NORMAL
+                    }
+
+                    gMap.mapType = mapType
+                    preferences.googleMapType = mapType
+
+                    dialog.dismiss()
+                }
+
+                builder.create().show()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun applyPreferences() {
+        val mapType = preferences.googleMapType
+        gMap.mapType = mapType
+    }
 
 
     private fun refreshMap() {
