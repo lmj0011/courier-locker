@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.SearchView
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
@@ -46,6 +47,24 @@ class TripsFragment : Fragment(R.layout.fragment_trips),
     private var fragmentJob: Job = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
 
+    private val drawerLayoutListener = object: DrawerLayout.DrawerListener {
+        override fun onDrawerOpened(drawerView: View) {}
+
+        override fun onDrawerClosed(drawerView: View) {
+            Timber.d("onDrawerClosed")
+            launchIO {
+                withUIContext { updateTodaysTotalMoneyUI() }
+                delay(500L)
+                withUIContext { observeTrips() }
+            }
+        }
+
+        override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
+
+        override fun onDrawerStateChanged(newState: Int) {}
+
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mainActivity = requireActivity() as MainActivity
@@ -75,14 +94,19 @@ class TripsFragment : Fragment(R.layout.fragment_trips),
         viewModelFactory = TripViewModelFactory(dataSource, application)
         tripViewModel = ViewModelProviders.of(this, viewModelFactory).get(TripViewModel::class.java)
 
-        setupObservers()
+        mainActivity.binding.drawerLayout.addDrawerListener(drawerLayoutListener)
 
-        launchIO {
-            val total = tripViewModel.todayTotalMoney()
-            withUIContext {
-                binding.totalPayTextView.text = total
-            }
+        if(mainActivity.binding.drawerLayout.isOpen) {
+            // let drawerLayoutListener handle UI changes
+        } else {
+            updateTodaysTotalMoneyUI()
+            observeTrips()
         }
+    }
+
+    override fun onPause() {
+        mainActivity.binding.drawerLayout.removeDrawerListener(drawerLayoutListener)
+        super.onPause()
     }
 
 
@@ -229,8 +253,17 @@ class TripsFragment : Fragment(R.layout.fragment_trips),
         observeTrips()
     }
 
+    private fun updateTodaysTotalMoneyUI() {
+        launchIO {
+            val total = tripViewModel.todayTotalMoney()
+            withUIContext {
+                binding.totalPayTextView.text = total
+            }
+        }
+    }
+
     /**
-     * starts a new Trips observer
+     * starts a new Trips observer, ie. Refreshes the recyclerview
      */
     private fun observeTrips () {
         tripViewModel.tripsPaged.removeObservers(viewLifecycleOwner)
@@ -238,10 +271,7 @@ class TripsFragment : Fragment(R.layout.fragment_trips),
         tripViewModel.tripsPaged.observe(viewLifecycleOwner, {
             listAdapter.submitList(it)
             listAdapter.notifyItemRangeChanged(0, Const.DEFAULT_PAGE_COUNT)
-            launchUI {
-                delay(500L)
-                binding.tripList.scrollToPosition(0)
-            }
+            binding.tripList.scrollToPosition(0)
         })
 
         binding.swipeRefresh.isRefreshing = false

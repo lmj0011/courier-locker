@@ -24,4 +24,6 @@
 # Application classes that will be serialized/deserialized over Gson
 #noinspection ShrinkerUnresolvedReference
 -keep class name.lmj0011.courierlocker.database.** { *; }
+-keep class com.google.android.libraries.maps.** { *; }
+-keep interface com.google.android.libraries.maps.** { *; }
 ##---------------End: proguard configuration for Gson  ----------
