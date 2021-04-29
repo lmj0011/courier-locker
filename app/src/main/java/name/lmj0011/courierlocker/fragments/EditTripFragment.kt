@@ -1,6 +1,5 @@
 package name.lmj0011.courierlocker.fragments
 
-import android.content.Intent
 import android.location.Address
 import android.os.Bundle
 import android.text.Editable
@@ -16,7 +15,6 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import br.com.simplepass.loadingbutton.presentation.State
 import kotlinx.coroutines.*
-import name.lmj0011.courierlocker.CurrentStatusBubbleActivity
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.AddressAutoSuggestAdapter
@@ -29,7 +27,6 @@ import name.lmj0011.courierlocker.fragments.dialogs.DeleteTripDialogFragment
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.Util
 import name.lmj0011.courierlocker.viewmodels.TripViewModel
-import timber.log.Timber
 
 /**
  * A simple [Fragment] subclass.
@@ -72,8 +69,9 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
         this.tripViewModel.setTrip(args.tripId)
 
         binding.editTripSaveCircularProgressButton.setOnClickListener(this::saveButtonOnClickListener)
-        binding.editTripAddStopButton.setOnClickListener(this::addStop)
-        binding.editTripRemoveLastStopButton.setOnClickListener(this::removeLastStop)
+        binding.editTripAddStopButton.setOnClickListener{
+            addStop()
+        }
 
         binding.editTripDeleteCircularProgressButton.setOnClickListener {
             val dialog = DeleteTripDialogFragment()
@@ -158,44 +156,7 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
             val layout: LinearLayout = binding.editTripFragmentLinearLayout
             layout.removeAllViewsInLayout()
             trip.stops.forEach { stop ->
-                val view = AutoCompleteTextView(context)
-                val adapter = AddressAutoSuggestAdapter(
-                    mainActivity, // Context
-                    android.R.layout.simple_dropdown_item_1line
-                )
-
-                view.id = View.generateViewId()
-                view.setAdapter(adapter)
-                view.threshold = 1
-
-                view.onItemClickListener = AdapterView.OnItemClickListener{
-                        parent,_view,position,id ->
-                    val address: Address? = adapter.getItem(position)
-
-                    address?.let { address ->
-                        view.setText(address.getAddressLine(0))
-                        val stop = Stop(address.getAddressLine(0), address.latitude, address.longitude)
-                        view.tag = stop
-                    }
-
-                }
-
-                view.addTextChangedListener(object: TextWatcher {
-                    override fun afterTextChanged(s: Editable?) {
-                        adapter.notifyDataSetChanged()
-                    }
-
-                    override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
-                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                        LocationHelper.performAddressAutoComplete(s.toString(), adapter)
-                    }
-                })
-
-                view.setText(stop.address)
-                view.tag = stop
-
-                layout.addView(view)
+                addStop(stop)
             }
 
             binding.payAmountEditText.setText(it.payAmount)
@@ -229,41 +190,50 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
 
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    private fun removeLastStop(v: View) {
-        val layout: LinearLayout = binding.editTripFragmentLinearLayout
+    private fun addStop(stop: Stop? = null) {
+        val containerLayout: LinearLayout = binding.editTripFragmentLinearLayout
+        val horizontalLinearLayout = LinearLayout(context)
+        val addressTextView = AutoCompleteTextView(context)
+        val cancelImageButton = ImageButton(context)
 
-        val lastChild = layout.children.last()
-        layout.removeView(lastChild)
-    }
+        horizontalLinearLayout.id = View.generateViewId()
+        horizontalLinearLayout.orientation = LinearLayout.HORIZONTAL
+        horizontalLinearLayout.weightSum = 4f
 
-    @Suppress("UNUSED_PARAMETER")
-    private fun addStop(v: View) {
-        val layout: LinearLayout = binding.editTripFragmentLinearLayout
-        val view = AutoCompleteTextView(context)
+        cancelImageButton.id = View.generateViewId()
+        cancelImageButton.setImageResource(R.drawable.ic_baseline_cancel_24)
+        cancelImageButton.setBackgroundColor(requireContext().getColor(android.R.color.transparent))
+        cancelImageButton.setOnClickListener {
+            containerLayout.removeView(horizontalLinearLayout)
+        }
+        cancelImageButton.layoutParams =
+            LinearLayout.LayoutParams(0,LinearLayout.LayoutParams.WRAP_CONTENT, 0.5f)
+
         val adapter = AddressAutoSuggestAdapter(
             mainActivity, // Context
             android.R.layout.simple_dropdown_item_1line
         )
 
-        view.id = View.generateViewId()
-        view.hint = "enter address"
-        view.setAdapter(adapter)
-        view.threshold = 1
+        addressTextView.id = View.generateViewId()
+        addressTextView.layoutParams =
+            LinearLayout.LayoutParams(0,LinearLayout.LayoutParams.WRAP_CONTENT, 3.5f)
+        addressTextView.hint = "enter address"
+        addressTextView.setAdapter(adapter)
+        addressTextView.threshold = 1
 
-        view.onItemClickListener = AdapterView.OnItemClickListener{
+        addressTextView.onItemClickListener = AdapterView.OnItemClickListener{
                 parent,_view,position,id ->
             val address: Address? = adapter.getItem(position)
 
             address?.let {
-                view.setText(it.getAddressLine(0))
+                addressTextView.setText(it.getAddressLine(0))
                 val stop = Stop(it.getAddressLine(0), it.latitude, it.longitude)
-                view.tag = stop
+                horizontalLinearLayout.tag = stop
             }
 
         }
 
-        view.addTextChangedListener(object: TextWatcher {
+        addressTextView.addTextChangedListener(object: TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 adapter.notifyDataSetChanged()
             }
@@ -275,26 +245,32 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
             }
         })
 
-        layout.addView(view)
+        horizontalLinearLayout.addView(addressTextView)
+        horizontalLinearLayout.addView(cancelImageButton)
+        containerLayout.addView(horizontalLinearLayout)
 
         binding.editTripFragmentScrollView.post {
             // inserting the current location address into this AutoCompleteTextView
             val address = LocationHelper.getFromLocation(binding.root, LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
 
             when{
+                stop != null -> {
+                    addressTextView.setText(stop.address)
+                    horizontalLinearLayout.tag = stop
+                }
                 address.isNotEmpty() -> {
-                    view.setText(address[0].getAddressLine(0))
-                    val stop = Stop(address[0].getAddressLine(0), address[0].latitude, address[0].longitude)
-                    view.tag = stop
-
-                    val scroll = binding.editTripFragmentScrollView
-                    scroll.scrollTo(0, scroll.height)
+                    val newStop = Stop(address[0].getAddressLine(0), address[0].latitude, address[0].longitude)
+                    addressTextView.setText(newStop.address)
+                    horizontalLinearLayout.tag = newStop
                 }
                 else -> {
-                    layout.removeView(view)
+                    containerLayout.removeView(view)
                     mainActivity.showToastMessage("Unable to resolve an Address from current location")
                 }
             }
+
+            val scroll = binding.editTripFragmentScrollView
+            scroll.scrollTo(0, scroll.height)
         }
     }
 

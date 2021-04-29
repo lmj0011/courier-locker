@@ -2,12 +2,12 @@ package name.lmj0011.courierlocker.fragments
 
 
 import android.os.Bundle
+import android.text.InputType
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.LinearLayout
+import android.widget.*
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
@@ -37,7 +37,7 @@ class EditGateCodeFragment : Fragment(), DeleteGateCodeDialogFragment.NoticeDial
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = DataBindingUtil.inflate(
             inflater, R.layout.fragment_edit_gate_code, container, false)
 
@@ -46,7 +46,7 @@ class EditGateCodeFragment : Fragment(), DeleteGateCodeDialogFragment.NoticeDial
         val application = requireNotNull(this.activity).application
         val dataSource = CourierLockerDatabase.getInstance(application).gateCodeDao
         val viewModelFactory = GateCodeViewModelFactory(dataSource, application)
-        val args = EditGateCodeFragmentArgs.fromBundle(arguments!!)
+        val args = EditGateCodeFragmentArgs.fromBundle(requireArguments())
         this.gateCodeViewModel = ViewModelProviders.of(this, viewModelFactory).get(GateCodeViewModel::class.java)
 
         binding.gateCodeViewModel = this.gateCodeViewModel
@@ -86,31 +86,72 @@ class EditGateCodeFragment : Fragment(), DeleteGateCodeDialogFragment.NoticeDial
     private fun injectGateCodeIntoView(gc: GateCode?) {
         gc?.let {
             binding.addressTextView.text = it.address
-
-            val codesContainer: LinearLayout = binding.createGateCodeFragmentLinearLayout
-            for (idx in 0..codesContainer.childCount) {
-                val et = codesContainer.getChildAt(idx)
-
-                if (et is EditText && it.codes.getOrNull(idx).isNullOrEmpty().not()) {
-                    et.setText(it.codes[idx])
-                }
+            addGateCode()
+            it.codes.forEach { code ->
+                addGateCode(code)
             }
         }
 
     }
 
+    private fun addGateCode(code: String? = null) {
+        val containerLayout: LinearLayout = binding.editGateCodeFragmentLinearLayout
+        val horizontalLinearLayout = LinearLayout(context)
+        val editText = EditText(context)
+        val cancelImageButton = ImageButton(context)
+
+        horizontalLinearLayout.id = View.generateViewId()
+        horizontalLinearLayout.orientation = LinearLayout.HORIZONTAL
+        horizontalLinearLayout.weightSum = 4f
+
+        cancelImageButton.id = View.generateViewId()
+        cancelImageButton.setImageResource(R.drawable.ic_baseline_cancel_24)
+        cancelImageButton.setBackgroundColor(requireContext().getColor(android.R.color.transparent))
+        cancelImageButton.setOnClickListener {
+            containerLayout.removeView(horizontalLinearLayout)
+        }
+        cancelImageButton.layoutParams =
+            LinearLayout.LayoutParams(0,LinearLayout.LayoutParams.WRAP_CONTENT, 0.5f)
+
+        editText.id = View.generateViewId()
+        editText.layoutParams =
+            LinearLayout.LayoutParams(0,LinearLayout.LayoutParams.WRAP_CONTENT, 3.5f)
+        editText.hint = "0000"
+        editText.setEms(10)
+        editText.inputType = InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE
+
+        if(code != null) {
+            editText.setText(code)
+
+            horizontalLinearLayout.addView(editText)
+            horizontalLinearLayout.addView(cancelImageButton)
+            containerLayout.addView(horizontalLinearLayout)
+        } else {
+            horizontalLinearLayout.addView(editText)
+            containerLayout.addView(horizontalLinearLayout)
+        }
+
+        val scroll = binding.editGateCodeFragmentScrollView
+        scroll.scrollTo(0, scroll.height)
+    }
+
     @Suppress("UNUSED_PARAMETER")
     private fun saveButtonOnClickListener(v: View) {
-        val codesContainer: LinearLayout = binding.createGateCodeFragmentLinearLayout
+        val codesContainer: LinearLayout = binding.editGateCodeFragmentLinearLayout
         val address: String = binding.addressTextView.text.toString()
         val codes: ArrayList<String> = arrayListOf()
 
         for (idx in 0..codesContainer.childCount) {
-            val et = codesContainer.getChildAt(idx)
+            val horizontalLayout = codesContainer.getChildAt(idx)
 
-            if (et is EditText && et.text.toString().isNotBlank()) {
-                codes.add(et.text.toString())
+            if (horizontalLayout is LinearLayout) {
+                val editText = horizontalLayout.getChildAt(0)
+                if (editText is EditText && editText.text.toString().isNotBlank()) {
+                    codes.add(editText.text.toString())
+                }
             }
+
+
         }
 
         if (address.isBlank() || codes.size < 1) {
@@ -127,7 +168,7 @@ class EditGateCodeFragment : Fragment(), DeleteGateCodeDialogFragment.NoticeDial
         this.gateCodeViewModel.updateGateCode(gateCode)
         mainActivity.showToastMessage("Updated gate code")
         mainActivity.hideKeyBoard(v.rootView)
-        this.findNavController().navigate(R.id.gateCodesFragment)
+        findNavController().navigate(R.id.gateCodesFragment)
     }
 
 

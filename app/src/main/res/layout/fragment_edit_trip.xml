@@ -38,7 +38,7 @@
             <LinearLayout
                     android:id="@+id/editTripFragmentLinearLayout"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical">
 
             </LinearLayout>
@@ -91,13 +91,15 @@
                 app:layout_constraintTop_toBottomOf="@+id/editTripAddStopButton" />
 
         <Button
-                android:id="@+id/editTripAddStopButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="Add Stop"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/guideline2"
-                app:layout_constraintTop_toBottomOf="@+id/tripDateTextView" />
+            android:id="@+id/editTripAddStopButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp"
+            android:text="Add Stop"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tripDateTextView" />
 
         <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/guideline2"
@@ -112,16 +114,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 app:layout_constraintGuide_begin="375dp" />
-
-        <Button
-                android:id="@+id/editTripRemoveLastStopButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="Remove Last Stop"
-                app:layout_constraintEnd_toStartOf="@+id/guideline2"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tripDateTextView" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

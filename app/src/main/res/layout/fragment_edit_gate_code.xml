@@ -28,66 +28,26 @@
                 app:layout_constraintVertical_bias="0.25"
                 tools:text="TextView" />
 
-        <LinearLayout
-                android:id="@+id/createGateCodeFragmentLinearLayout"
-                android:layout_width="wrap_content"
+        <ScrollView
+            android:id="@+id/editGateCodeFragmentScrollView"
+            android:layout_width="0dp"
+            android:layout_height="250dp"
+            android:paddingStart="50dp"
+            android:paddingEnd="50dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/addressTextView">
+
+            <LinearLayout
+                android:id="@+id/editGateCodeFragmentLinearLayout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/addressTextView">
+                android:orientation="vertical">
+            </LinearLayout>
 
-            <EditText
-                    android:id="@+id/gateCode1EditText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:hint="0000"
-                    android:inputType="textShortMessage" />
+        </ScrollView>
 
-            <EditText
-                    android:id="@+id/gateCode2EditText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:hint="0000"
-                    android:inputType="textShortMessage" />
 
-            <EditText
-                    android:id="@+id/gateCode3EditText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:hint="0000"
-                    android:inputType="textShortMessage" />
-
-            <EditText
-                    android:id="@+id/gateCode4EditText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="0dp"
-                    android:ems="10"
-                    android:hint="0000"
-                    android:inputType="textShortMessage" />
-
-            <EditText
-                    android:id="@+id/gateCode5EditText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="0dp"
-                    android:ems="10"
-                    android:hint="0000"
-                    android:inputType="textShortMessage" />
-
-            <EditText
-                    android:id="@+id/gateCode6EditText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="0dp"
-                    android:ems="10"
-                    android:hint="0000"
-                    android:inputType="textShortMessage" />
-        </LinearLayout>
 
         <Button
                 android:id="@+id/editGateCodeSaveButton"
@@ -96,7 +56,7 @@
                 android:text="Save"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/editGateCodeDeleteButton"
-                app:layout_constraintTop_toBottomOf="@+id/createGateCodeFragmentLinearLayout" />
+                app:layout_constraintTop_toBottomOf="@+id/editGateCodeFragmentScrollView" />
 
         <Button
                 android:id="@+id/editGateCodeDeleteButton"
@@ -105,7 +65,7 @@
                 android:text="Delete"
                 app:layout_constraintEnd_toStartOf="@+id/editGateCodeSaveButton"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/createGateCodeFragmentLinearLayout" />
+                app:layout_constraintTop_toBottomOf="@+id/editGateCodeFragmentScrollView" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
