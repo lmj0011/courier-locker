@@ -53,6 +53,7 @@ class CurrentStatusForegroundService : LifecycleService() {
     private lateinit var recentTripsListIterator: MutableListIterator<Trip>
     lateinit var listOfRecentTrips: MutableList<Trip>
         private set
+    private lateinit var locationHelper: LocationHelper
 
     inner class CurrentStatusServiceBinder : Binder() {
         fun getService(): CurrentStatusForegroundService {
@@ -70,6 +71,7 @@ class CurrentStatusForegroundService : LifecycleService() {
         tripViewModel = TripViewModel(CourierLockerDatabase.getInstance(application).tripDao, application)
 
         val preferences: PreferenceHelper = application.kodein.instance()
+        locationHelper = application.kodein.instance()
 
         recentTripsObserver = Observer { pagedList ->
             listOfRecentTrips = pagedList.take(3).toMutableList()
@@ -123,12 +125,11 @@ class CurrentStatusForegroundService : LifecycleService() {
      * stops this foreground service
      */
     fun stop() {
-        if(::tripViewModel.isInitialized && ::gateCodeViewModel.isInitialized) {
-            tripViewModel.tripsPaged.removeObserver(recentTripsObserver)
-            gateCodeViewModel.gateCodes.removeObservers(this)
-        }
+        if(::tripViewModel.isInitialized) tripViewModel.tripsPaged.removeObserver(recentTripsObserver)
+        if(::gateCodeViewModel.isInitialized) gateCodeViewModel.gateCodes.removeObservers(this)
+        if(::locationHelper.isInitialized) locationHelper.lastLatitude.removeObservers(this)
 
-        LocationHelper.lastLatitude.removeObservers(this)
+
         stopForeground(true)
 
         GlobalScope.launch(Dispatchers.Main) {
@@ -266,9 +267,9 @@ class CurrentStatusForegroundService : LifecycleService() {
 
                 val list = mutableListOfGateCodes.let { list ->
                     list.sortedBy {
-                        LocationHelper.calculateApproxDistanceBetweenMapPoints(
-                            LocationHelper.lastLatitude.value!!,
-                            LocationHelper.lastLongitude.value!!,
+                        locationHelper.calculateApproxDistanceBetweenMapPoints(
+                            locationHelper.lastLatitude.value!!,
+                            locationHelper.lastLongitude.value!!,
                             it.latitude,
                             it.longitude
                         )
@@ -295,7 +296,7 @@ class CurrentStatusForegroundService : LifecycleService() {
 
         }
 
-        LocationHelper.lastLatitude.observe(this, latitudeObserver)
+        locationHelper.lastLatitude.observe(this, latitudeObserver)
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
@@ -350,16 +351,17 @@ class CurrentStatusForegroundService : LifecycleService() {
      class SetTripDropoffReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val isBounded = (context.applicationContext as CourierLockerApplication).isCurrentStatusServiceBounded
+            val locationHelper: LocationHelper = (context.applicationContext as CourierLockerApplication).kodein.instance()
 
             if (isBounded) {
                 val service = (context.applicationContext as CourierLockerApplication).currentStatusService
 
                 service.tripViewModel.tripsPaged.observeOnce { pagedList ->
                     val tripId = intent.extras?.getLong("TripId")
-                    val address = LocationHelper.getFromLocation(
+                    val address = locationHelper.getFromLocation(
                         null,
-                        LocationHelper.lastLatitude.value!!,
-                        LocationHelper.lastLongitude.value!!,
+                        locationHelper.lastLatitude.value!!,
+                        locationHelper.lastLongitude.value!!,
                         1
                     )
 

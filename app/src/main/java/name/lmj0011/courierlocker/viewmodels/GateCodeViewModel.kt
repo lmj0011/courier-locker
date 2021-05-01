@@ -11,8 +11,10 @@ import name.lmj0011.courierlocker.database.GateCode
 import name.lmj0011.courierlocker.database.GateCodeDao
 import kotlin.random.Random
 import kotlinx.coroutines.*
+import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.helpers.Const
 import name.lmj0011.courierlocker.helpers.LocationHelper
+import org.kodein.di.instance
 
 
 class GateCodeViewModel(
@@ -23,6 +25,8 @@ class GateCodeViewModel(
     private var viewModelJob = Job()
 
     private val uiScope = CoroutineScope(Dispatchers.Main +  viewModelJob)
+
+    private val locationHelper: LocationHelper = (application as CourierLockerApplication).kodein.instance()
 
     var isOrderedByNearest = MutableLiveData<Boolean>().apply { postValue(false) }
 
@@ -52,9 +56,9 @@ class GateCodeViewModel(
                     when(filterByLocation) {
                         true -> {
                             list.sortedBy {
-                                LocationHelper.calculateApproxDistanceBetweenMapPoints(
-                                    LocationHelper.lastLatitude.value!!,
-                                    LocationHelper.lastLongitude.value!!,
+                                locationHelper.calculateApproxDistanceBetweenMapPoints(
+                                    locationHelper.lastLatitude.value!!,
+                                    locationHelper.lastLongitude.value!!,
                                     it.latitude,
                                     it.longitude
                                 )
@@ -70,9 +74,9 @@ class GateCodeViewModel(
                     when(filterByLocation) {
                         true -> {
                             list.sortedBy {
-                                LocationHelper.calculateApproxDistanceBetweenMapPoints(
-                                    LocationHelper.lastLatitude.value!!,
-                                    LocationHelper.lastLongitude.value!!,
+                                locationHelper.calculateApproxDistanceBetweenMapPoints(
+                                    locationHelper.lastLatitude.value!!,
+                                    locationHelper.lastLongitude.value!!,
                                     it.latitude,
                                     it.longitude
                                 )

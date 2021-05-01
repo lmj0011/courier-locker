@@ -10,10 +10,9 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commitNow
 import androidx.lifecycle.ViewModelProviders
-import kotlinx.coroutines.Job
+import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.CurrentStatusBubbleActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.AddressAutoSuggestAdapter
@@ -24,14 +23,15 @@ import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.launchIO
 import name.lmj0011.courierlocker.helpers.withUIContext
 import name.lmj0011.courierlocker.viewmodels.TripViewModel
+import org.kodein.di.instance
 
 class CreateTripBubbleFragment : Fragment(R.layout.fragment_bubble_create_trip) {
     private lateinit var activity: CurrentStatusBubbleActivity
     private lateinit var binding: FragmentBubbleCreateTripBinding
+    private lateinit var locationHelper: LocationHelper
     private var mTrip: Trip? = null
     lateinit var dataSource: TripDao
     lateinit var tripViewModel: TripViewModel
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -39,6 +39,7 @@ class CreateTripBubbleFragment : Fragment(R.layout.fragment_bubble_create_trip) 
         val viewModelFactory = TripViewModelFactory(dataSource, requireActivity().application)
         this.tripViewModel = ViewModelProviders.of(this, viewModelFactory).get(TripViewModel::class.java)
         activity = requireActivity() as CurrentStatusBubbleActivity
+        locationHelper = (requireContext().applicationContext as CourierLockerApplication).kodein.instance()
 
         refreshDataSources()
         setupBinding(view)
@@ -97,7 +98,7 @@ class CreateTripBubbleFragment : Fragment(R.layout.fragment_bubble_create_trip) 
             override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                LocationHelper.performAddressAutoComplete(
+                locationHelper.performAddressAutoComplete(
                     s.toString(),
                     (binding.autoCompleteTextView.adapter as AddressAutoSuggestAdapter)
                 )
@@ -108,7 +109,7 @@ class CreateTripBubbleFragment : Fragment(R.layout.fragment_bubble_create_trip) 
             launchIO {
                 try {
                     // inserting the current location address into this AutoCompleteTextView
-                    val address = LocationHelper.getFromLocation(binding.root, LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
+                    val address = locationHelper.getFromLocation(binding.root, locationHelper.lastLatitude.value!!, locationHelper.lastLongitude.value!!, 1)
 
                     withUIContext {
                         if (address.isNotEmpty()) {

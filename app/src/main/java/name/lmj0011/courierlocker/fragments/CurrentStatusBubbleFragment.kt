@@ -3,7 +3,6 @@ package name.lmj0011.courierlocker.fragments
 import android.app.Application
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
 import android.view.View
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
@@ -12,10 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.commitNow
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import name.lmj0011.courierlocker.CurrentStatusBubbleActivity
-import name.lmj0011.courierlocker.DeepLinkActivity
-import name.lmj0011.courierlocker.MainActivity
-import name.lmj0011.courierlocker.R
+import name.lmj0011.courierlocker.*
 import name.lmj0011.courierlocker.database.*
 import name.lmj0011.courierlocker.databinding.FragmentBubbleCurrentStatusBinding
 import name.lmj0011.courierlocker.helpers.LocationHelper
@@ -25,10 +21,12 @@ import name.lmj0011.courierlocker.helpers.withUIContext
 import name.lmj0011.courierlocker.viewmodels.ApartmentViewModel
 import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
 import name.lmj0011.courierlocker.viewmodels.TripViewModel
+import org.kodein.di.instance
 
 class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_status) {
     private lateinit var activity: CurrentStatusBubbleActivity
     private lateinit var binding: FragmentBubbleCurrentStatusBinding
+    private lateinit var locationHelper: LocationHelper
     lateinit var gateCodeViewModel: GateCodeViewModel
     lateinit var tripViewModel: TripViewModel
     lateinit var apartmentViewModel: ApartmentViewModel
@@ -46,9 +44,9 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
         }
 
         listOfRecentGateCodes = listOfRecentGateCodes.sortedBy { gc ->
-            LocationHelper.calculateApproxDistanceBetweenMapPoints(
-                LocationHelper.lastLatitude.value!!,
-                LocationHelper.lastLongitude.value!!,
+            locationHelper.calculateApproxDistanceBetweenMapPoints(
+                locationHelper.lastLatitude.value!!,
+                locationHelper.lastLongitude.value!!,
                 gc.latitude,
                 gc.longitude
             )
@@ -69,6 +67,7 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
         gateCodeViewModel = GateCodeViewModel(CourierLockerDatabase.getInstance(application).gateCodeDao, application)
         tripViewModel = TripViewModel(CourierLockerDatabase.getInstance(application).tripDao, application)
         apartmentViewModel = ApartmentViewModel(CourierLockerDatabase.getInstance(application).apartmentDao, application)
+        locationHelper = (requireContext().applicationContext as CourierLockerApplication).kodein.instance()
 
         activity = requireActivity() as CurrentStatusBubbleActivity
         mTrip.postValue(null)
@@ -125,7 +124,7 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
 
                 launchIO {
                     try {
-                        val address = LocationHelper.getFromLocation(null, LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
+                        val address = locationHelper.getFromLocation(null, locationHelper.lastLatitude.value!!, locationHelper.lastLongitude.value!!, 1)
                         if(address.isNotEmpty()) {
                             val stop = Stop(address[0].getAddressLine(0), address[0].latitude, address[0].longitude)
 
@@ -160,7 +159,7 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
         }
 
         binding.nearestGateCodesContainer.setOnClickListener {
-            LocationHelper.lastLatitude.observe(viewLifecycleOwner, latitudeObserver)
+            locationHelper.lastLatitude.observe(viewLifecycleOwner, latitudeObserver)
         }
 
         binding.openMapButton.setOnClickListener {
@@ -181,7 +180,7 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
              * disable this observer for undisturbed navigating, user can tap the current gatecode
              * to start observing nearby gatecodes again
              */
-            LocationHelper.lastLatitude.removeObserver(latitudeObserver)
+            locationHelper.lastLatitude.removeObserver(latitudeObserver)
 
             if(::recentGateCodesListIterator.isInitialized
                 && recentGateCodesListIterator.hasNext()) {
@@ -221,7 +220,7 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
             listOfRecentGateCodes = list
         })
 
-        LocationHelper.lastLatitude.observe(viewLifecycleOwner, latitudeObserver)
+        locationHelper.lastLatitude.observe(viewLifecycleOwner, latitudeObserver)
 
         apartmentViewModel.apartments.observe(viewLifecycleOwner, { list ->
             listOfApartments = list

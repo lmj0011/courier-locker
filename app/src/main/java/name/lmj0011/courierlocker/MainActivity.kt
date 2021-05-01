@@ -38,6 +38,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var appBarConfiguration : AppBarConfiguration
     private lateinit var topLevelDestinations: Set<Int>
     private lateinit var preferences: PreferenceHelper
+    private lateinit var locationHelper: LocationHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         CourierLockerDatabase.blockUntilDbIsAccessible(application)
@@ -46,6 +47,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         Timber.i("onCreate Called")
 
         preferences = (applicationContext as CourierLockerApplication).kodein.instance()
+        locationHelper = (applicationContext as CourierLockerApplication).kodein.instance()
         val sendCrashReports = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("sendCrashReports", true)!!
 
         if(sendCrashReports) {
@@ -75,16 +77,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         Timber.i("onRestart Called")
     }
 
-    override fun onStart() {
-        super.onStart()
-        Timber.i("onStart Called")
-
-        if(!PermissionHelper.permissionAccessFineLocationApproved) {
-            PermissionHelper.requestFineLocationAccess(this)
-        } else {
-            LocationHelper.startLocationUpdates()
-        }
-    }
 
     override fun onResume() {
         super.onResume()
@@ -92,6 +84,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         (application as CourierLockerApplication).showCurrentStatusServiceNotification(false)
 
         if(!PermissionHelper.permissionAccessFineLocationApproved) {
+            PermissionHelper.requestFineLocationAccess(this)
             this.showToastMessage("Location permission is required for some features to work.", Toast.LENGTH_LONG)
         }
     }
@@ -193,13 +186,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
         PermissionHelper.checkPermissionApprovals(this)
 
         if(PermissionHelper.permissionAccessFineLocationApproved) {
-            LocationHelper.startLocationUpdates()
+            locationHelper.startLocationUpdates()
         }
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     private fun handleIntentAction(intent: Intent):Boolean {

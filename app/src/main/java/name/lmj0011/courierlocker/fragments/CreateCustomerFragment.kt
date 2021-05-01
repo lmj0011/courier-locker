@@ -20,6 +20,7 @@ import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.MainActivity
 
 import name.lmj0011.courierlocker.R
@@ -30,6 +31,7 @@ import name.lmj0011.courierlocker.databinding.FragmentCreateCustomerBinding
 import name.lmj0011.courierlocker.factories.CustomerViewModelFactory
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.viewmodels.CustomerViewModel
+import org.kodein.di.instance
 
 
 /**
@@ -41,6 +43,7 @@ class CreateCustomerFragment : Fragment() {
     private lateinit var binding: FragmentCreateCustomerBinding
     private lateinit var mainActivity: MainActivity
     private lateinit var customerViewModel: CustomerViewModel
+    private lateinit var locationHelper: LocationHelper
     private var customer = Customer()
     private var fragmentJob = Job()
     private var addressAutoCompleteJob: Job? = null
@@ -49,7 +52,7 @@ class CreateCustomerFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = DataBindingUtil.inflate(
             inflater, R.layout.fragment_create_customer, container, false)
 
@@ -59,6 +62,7 @@ class CreateCustomerFragment : Fragment() {
         val dataSource = CourierLockerDatabase.getInstance(application).customerDao
         val viewModelFactory = CustomerViewModelFactory(dataSource, application)
         this.customerViewModel = ViewModelProviders.of(this, viewModelFactory).get(CustomerViewModel::class.java)
+        locationHelper = (requireContext().applicationContext as CourierLockerApplication).kodein.instance()
 
         binding.customerViewModel = this.customerViewModel
 
@@ -69,12 +73,12 @@ class CreateCustomerFragment : Fragment() {
 
         binding.createCustomerGoodImpressionImageView.setOnClickListener {
             colorHappyFace()
-            this.customer?.impression = 0
+            this.customer.impression = 0
         }
 
         binding.createCustomerBadImpressionImageView.setOnClickListener {
             colorSadFace()
-            this.customer?.impression = 1
+            this.customer.impression = 1
         }
 
         binding.createCustomerSaveButton.setOnClickListener(this::saveButtonOnClickListener)
@@ -116,7 +120,7 @@ class CreateCustomerFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                LocationHelper.performAddressAutoComplete(s.toString(), adapter)
+                locationHelper.performAddressAutoComplete(s.toString(), adapter)
             }
         })
 
@@ -135,7 +139,7 @@ class CreateCustomerFragment : Fragment() {
 
         /// setting current location's address into the address textview
         binding.createCustomerInsertMyLocationButton.setOnClickListener {
-            val address = LocationHelper.getFromLocation(binding.root, LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
+            val address = locationHelper.getFromLocation(binding.root, locationHelper.lastLatitude.value!!, locationHelper.lastLongitude.value!!, 1)
 
             when{
                 address.isNotEmpty() -> {

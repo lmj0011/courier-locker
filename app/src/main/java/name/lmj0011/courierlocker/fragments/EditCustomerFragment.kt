@@ -22,6 +22,7 @@ import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.MainActivity
 
 import name.lmj0011.courierlocker.R
@@ -33,6 +34,7 @@ import name.lmj0011.courierlocker.factories.CustomerViewModelFactory
 import name.lmj0011.courierlocker.fragments.dialogs.DeleteCustomerDialogFragment
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.viewmodels.CustomerViewModel
+import org.kodein.di.instance
 
 
 /**
@@ -43,10 +45,11 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
 
     private lateinit var binding: FragmentEditCustomerBinding
     private lateinit var mainActivity: MainActivity
-    private var customer: Customer? = null
     private lateinit var customerViewModel: CustomerViewModel
+    private lateinit var locationHelper: LocationHelper
     private var fragmentJob = Job()
     private var addressAutoCompleteJob: Job? = null
+    private var customer: Customer? = null
     private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
     private var customerAddressLatitude = 0.0
     private var customerAddressLongitude = 0.0
@@ -63,8 +66,9 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
         val application = requireNotNull(this.activity).application
         val dataSource = CourierLockerDatabase.getInstance(application).customerDao
         val viewModelFactory = CustomerViewModelFactory(dataSource, application)
-        val args = EditCustomerFragmentArgs.fromBundle(arguments!!)
+        val args = EditCustomerFragmentArgs.fromBundle(requireArguments())
         this.customerViewModel = ViewModelProviders.of(this, viewModelFactory).get(CustomerViewModel::class.java)
+        locationHelper = (requireContext().applicationContext as CourierLockerApplication).kodein.instance()
 
         binding.customerViewModel = this.customerViewModel
 
@@ -137,7 +141,7 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
             override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                LocationHelper.performAddressAutoComplete(s.toString(), adapter)
+                locationHelper.performAddressAutoComplete(s.toString(), adapter)
             }
         })
 
@@ -156,7 +160,7 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
 
         /// setting current location's address into the address textview
         binding.editCustomerInsertMyLocationButton.setOnClickListener {
-            val address = LocationHelper.getFromLocation(binding.root, LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
+            val address = locationHelper.getFromLocation(binding.root, locationHelper.lastLatitude.value!!, locationHelper.lastLongitude.value!!, 1)
 
             when{
                 address.isNotEmpty() -> {

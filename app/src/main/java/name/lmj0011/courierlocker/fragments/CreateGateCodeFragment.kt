@@ -17,6 +17,7 @@ import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.databinding.FragmentCreateGateCodeBinding
 import name.lmj0011.courierlocker.R
@@ -25,6 +26,7 @@ import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.factories.GateCodeViewModelFactory
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
+import org.kodein.di.instance
 import kotlin.collections.ArrayList
 
 
@@ -37,6 +39,7 @@ class CreateGateCodeFragment : Fragment() {
     private lateinit var binding: FragmentCreateGateCodeBinding
     private lateinit var mainActivity: MainActivity
     private lateinit var gateCodeViewModel: GateCodeViewModel
+    private lateinit var locationHelper: LocationHelper
     private var fragmentJob = Job()
     private var addressAutoCompleteJob: Job? = null
     private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
@@ -57,6 +60,7 @@ class CreateGateCodeFragment : Fragment() {
         val dataSource = CourierLockerDatabase.getInstance(application).gateCodeDao
         val viewModelFactory = GateCodeViewModelFactory(dataSource, application)
         this.gateCodeViewModel = ViewModelProviders.of(this, viewModelFactory).get(GateCodeViewModel::class.java)
+        locationHelper = (requireContext().applicationContext as CourierLockerApplication).kodein.instance()
 
         binding.gateCodeViewModel = this.gateCodeViewModel
 
@@ -101,7 +105,7 @@ class CreateGateCodeFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                LocationHelper.performAddressAutoComplete(s.toString(), adapter)
+                locationHelper.performAddressAutoComplete(s.toString(), adapter)
             }
         })
 
@@ -120,7 +124,7 @@ class CreateGateCodeFragment : Fragment() {
 
         /// setting current location's address into the address textview
         binding.createGateCodeInsertMyLocationButton.setOnClickListener {
-            val address = LocationHelper.getFromLocation(binding.root, LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
+            val address = locationHelper.getFromLocation(binding.root, locationHelper.lastLatitude.value!!, locationHelper.lastLongitude.value!!, 1)
 
             when{
                 address.isNotEmpty() -> {

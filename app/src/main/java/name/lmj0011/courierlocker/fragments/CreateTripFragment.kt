@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import br.com.simplepass.loadingbutton.presentation.State
 import kotlinx.coroutines.*
+import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.AddressAutoSuggestAdapter
@@ -23,6 +24,7 @@ import name.lmj0011.courierlocker.databinding.FragmentCreateTripBinding
 import name.lmj0011.courierlocker.factories.TripViewModelFactory
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.viewmodels.TripViewModel
+import org.kodein.di.instance
 import kotlin.collections.ArrayList
 
 /**
@@ -33,6 +35,7 @@ class CreateTripFragment : Fragment() {
     private lateinit var binding: FragmentCreateTripBinding
     private lateinit var mainActivity: MainActivity
     private lateinit var tripViewModel: TripViewModel
+    private lateinit var locationHelper: LocationHelper
     private var fragmentJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
 
@@ -50,6 +53,7 @@ class CreateTripFragment : Fragment() {
         val dataSource = CourierLockerDatabase.getInstance(application).tripDao
         val viewModelFactory = TripViewModelFactory(dataSource, application)
         this.tripViewModel = ViewModelProviders.of(this, viewModelFactory).get(TripViewModel::class.java)
+        locationHelper = (requireContext().applicationContext as CourierLockerApplication).kodein.instance()
 
         binding.tripViewModel = this.tripViewModel
 
@@ -184,7 +188,7 @@ class CreateTripFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                LocationHelper.performAddressAutoComplete(s.toString(), adapter)
+                locationHelper.performAddressAutoComplete(s.toString(), adapter)
             }
         })
 
@@ -194,7 +198,7 @@ class CreateTripFragment : Fragment() {
 
         binding.createTripFragmentScrollView.post {
             // inserting the current location address into this AutoCompleteTextView
-            val address = LocationHelper.getFromLocation(binding.root, LocationHelper.lastLatitude.value!!, LocationHelper.lastLongitude.value!!, 1)
+            val address = locationHelper.getFromLocation(binding.root, locationHelper.lastLatitude.value!!, locationHelper.lastLongitude.value!!, 1)
 
             when{
                 stop != null -> {

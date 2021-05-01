@@ -15,6 +15,7 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.*
+import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.MapListAdapter
@@ -27,6 +28,7 @@ import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.PermissionHelper
 import name.lmj0011.courierlocker.helpers.interfaces.SearchableRecyclerView
 import name.lmj0011.courierlocker.viewmodels.ApartmentViewModel
+import org.kodein.di.instance
 import timber.log.Timber
 
 
@@ -42,6 +44,7 @@ class MapsFragment : Fragment(), SearchableRecyclerView {
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var viewModelFactory: ApartmentViewModelFactory
     private lateinit var apartmentViewModel: ApartmentViewModel
+    private lateinit var locationHelper: LocationHelper
     private var fragmentJob: Job = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
 
@@ -84,6 +87,7 @@ class MapsFragment : Fragment(), SearchableRecyclerView {
         val dataSource = CourierLockerDatabase.getInstance(application).apartmentDao
         viewModelFactory = ApartmentViewModelFactory(dataSource, application)
         apartmentViewModel = ViewModelProviders.of(this, viewModelFactory).get(ApartmentViewModel::class.java)
+        locationHelper = (requireContext().applicationContext as CourierLockerApplication).kodein.instance()
 
         listAdapter = MapListAdapter( MapListAdapter.MapListener(
             {aptId ->
@@ -109,7 +113,7 @@ class MapsFragment : Fragment(), SearchableRecyclerView {
             this.submitListToAdapter(it)
         })
 
-        LocationHelper.lastLatitude.observe(viewLifecycleOwner, lastLocationListener)
+        locationHelper.lastLatitude.observe(viewLifecycleOwner, lastLocationListener)
 
         binding.liveLocationUpdatingSwitch.setOnCheckedChangeListener { _, isChecked ->
             ListLock.unlock()

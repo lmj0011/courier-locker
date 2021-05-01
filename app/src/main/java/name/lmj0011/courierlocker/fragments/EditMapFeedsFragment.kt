@@ -1,38 +1,17 @@
 package name.lmj0011.courierlocker.fragments
 
 import android.content.SharedPreferences
-import android.location.Address
 import android.os.Bundle
-import android.os.Handler
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
-import androidx.core.view.children
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
-import br.com.simplepass.loadingbutton.presentation.State
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
-import name.lmj0011.courierlocker.adapters.AddressAutoSuggestAdapter
-import name.lmj0011.courierlocker.database.CourierLockerDatabase
-import name.lmj0011.courierlocker.database.Stop
-import name.lmj0011.courierlocker.database.Trip
 import name.lmj0011.courierlocker.databinding.FragmentEditMapFeedsBinding
-import name.lmj0011.courierlocker.databinding.FragmentEditTripBinding
-import name.lmj0011.courierlocker.factories.TripViewModelFactory
-import name.lmj0011.courierlocker.fragments.dialogs.DeleteTripDialogFragment
-import name.lmj0011.courierlocker.helpers.LocationHelper
-import name.lmj0011.courierlocker.viewmodels.TripViewModel
-import name.lmj0011.courierlocker.helpers.Util
-import timber.log.Timber
 
 /**
  * A simple [Fragment] subclass.

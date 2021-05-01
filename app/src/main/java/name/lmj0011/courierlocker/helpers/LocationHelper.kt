@@ -18,26 +18,26 @@ import java.lang.Math.toRadians
 import java.util.*
 import kotlin.math.*
 
-object LocationHelper {
+const val AVERAGE_RADIUS_OF_EARTH_KM = 6371.0 // km
+const val AVERAGE_RADIUS_OF_EARTH_MILES = 3958.8 // mi
 
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var geocoder: Geocoder
-    private lateinit var preferences: PreferenceHelper
+class LocationHelper(val context: Context) {
+
+    private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+    private val preferences: PreferenceHelper = (context.applicationContext as CourierLockerApplication).kodein.instance()
+    private val geocoder = Geocoder(context, Locale.getDefault())
     private val locationRequest: LocationRequest = LocationRequest()
-    private const val AVERAGE_RADIUS_OF_EARTH_KM = 6371.0 // km
-    private const val AVERAGE_RADIUS_OF_EARTH_MILES = 3958.8 // mi
     private var textWatcherJob: Job = Job()
 
-    var lastLatitude = MutableLiveData<Double>().apply { value = 0.0 }
-        private set
-
-    var lastLongitude = MutableLiveData<Double>().apply { value = 0.0 }
-        private set
+    val lastLatitude = MutableLiveData<Double>().apply { value = 0.0 }
+    val lastLongitude = MutableLiveData<Double>().apply { value = 0.0 }
 
     init {
         locationRequest.interval = 2000 // milliseconds
         locationRequest.fastestInterval = 2000
         locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+
+        startLocationUpdates()
     }
 
     fun performAddressAutoComplete(addressStr: String, adapter: AddressAutoSuggestAdapter) {
@@ -51,7 +51,7 @@ object LocationHelper {
 
                 try {
                     val addresses = withIOContext {
-                        getGeocoder().getFromLocationName(
+                        geocoder.getFromLocationName(
                             addressStr,
                             3,
                             boundingBox[0].latitudeInDegrees,
@@ -76,26 +76,12 @@ object LocationHelper {
         }
     }
 
-    /*
-     Can only be set once
-    */
-    fun setFusedLocationClient(context: Context){
-        if(this::fusedLocationClient.isInitialized) return
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-        preferences = (context.applicationContext as CourierLockerApplication).kodein.instance()
-        geocoder = Geocoder(context, Locale.getDefault())
-    }
-
     private fun showNoGpsMessage(c: Context) {
         val toast = Toast.makeText(c,"GPS signal lost",Toast.LENGTH_LONG)
         toast.setGravity(Gravity.TOP, 0, 0)
         toast.show()
     }
 
-    private fun getGeocoder(): Geocoder {
-        isFusedLocationClientSet()
-        return geocoder
-    }
 
     fun getFromLocation(v: View?, latitude: Double, longitude: Double, results: Int): List<Address> {
         return try {
@@ -113,12 +99,17 @@ object LocationHelper {
 
     @SuppressLint("MissingPermission")
     fun startLocationUpdates() {
-        isFusedLocationClientSet()
-
         if (PermissionHelper.permissionAccessFineLocationApproved) {
             fusedLocationClient.requestLocationUpdates(
                 locationRequest,
-                locationCallback,
+                object : LocationCallback() {
+                    override fun onLocationResult(locationResult: LocationResult?) {
+                        locationResult?.lastLocation?.let { location ->
+                            lastLatitude.postValue(location.latitude)
+                            lastLongitude.postValue(location.longitude)
+                        }
+                    }
+                },
                 null /* Looper */
             )
         }
@@ -143,22 +134,4 @@ object LocationHelper {
 
         return round(AVERAGE_RADIUS_OF_EARTH_KM * c) * milesMultiplier
     }
-
-    private fun isFusedLocationClientSet() {
-        if (!this::fusedLocationClient.isInitialized) throw Exception("fusedLocationClient is not initialized!")
-    }
-
-    object locationCallback : LocationCallback() {
-        override fun onLocationResult(locationResult: LocationResult?) {
-            locationResult ?: return
-
-            if (locationResult.locations.isNotEmpty()) {
-                // get latest location info
-                lastLatitude.postValue(locationResult.lastLocation.latitude)
-                lastLongitude.postValue(locationResult.lastLocation.longitude)
-            }
-
-        }
-    }
-
 }

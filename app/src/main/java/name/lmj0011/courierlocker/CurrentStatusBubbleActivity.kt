@@ -9,17 +9,33 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.commitNow
 import name.lmj0011.courierlocker.fragments.CurrentStatusBubbleFragment
+import name.lmj0011.courierlocker.helpers.LocationHelper
+import name.lmj0011.courierlocker.helpers.PermissionHelper
+import org.kodein.di.instance
 
 class CurrentStatusBubbleActivity: AppCompatActivity(R.layout.activity_current_status_bubble) {
     val currentStatusFragment = CurrentStatusBubbleFragment()
+    private lateinit var locationHelper: LocationHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        locationHelper = (applicationContext as CourierLockerApplication).kodein.instance()
+
         if (savedInstanceState == null) {
             supportFragmentManager.commitNow {
                 // The home fragment for this Bubble
                 replace(R.id.container, currentStatusFragment, CURRENT_STATUS_BUBBLE_FRAGMENT_TAG)
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (application as CourierLockerApplication).showCurrentStatusServiceNotification(false)
+
+        if(!PermissionHelper.permissionAccessFineLocationApproved) {
+            PermissionHelper.requestFineLocationAccess(this)
+            this.showToastMessage("Location permission is required for some features to work.", Toast.LENGTH_LONG)
         }
     }
 
@@ -51,6 +67,20 @@ class CurrentStatusBubbleActivity: AppCompatActivity(R.layout.activity_current_s
                 show(currentStatusFragment)
             }
         } else super.onBackPressed()
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        PermissionHelper.checkPermissionApprovals(this)
+
+        if(PermissionHelper.permissionAccessFineLocationApproved) {
+            locationHelper.startLocationUpdates()
+        }
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     fun showToastMessage(message: String, duration: Int = Toast.LENGTH_SHORT, position: Int = Gravity.TOP) {

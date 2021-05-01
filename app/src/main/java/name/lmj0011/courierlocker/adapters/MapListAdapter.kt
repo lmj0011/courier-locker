@@ -10,16 +10,13 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.PagedListAdapter
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.database.Apartment
 import name.lmj0011.courierlocker.databinding.ListItemMapBinding
 import name.lmj0011.courierlocker.fragments.MapsFragmentDirections
 import name.lmj0011.courierlocker.fragments.dialogs.DeleteApartmentDialogFragment
 import name.lmj0011.courierlocker.fragments.dialogs.NavigateToAptBuildingDialogFragment
 import name.lmj0011.courierlocker.helpers.ListLock
-import name.lmj0011.courierlocker.helpers.LocationHelper
 
 
 class MapListAdapter(private val clickListener: MapListener, private val parentFragment: Fragment): PagedListAdapter<Apartment, MapListAdapter.ViewHolder>(MapDiffCallback())
@@ -129,15 +126,5 @@ class MapListAdapter(private val clickListener: MapListener, private val parentF
         return ViewHolder.from(parent, this.parentFragment)
     }
 
-    fun filterByClosestLocation(list: MutableList<Apartment>): MutableList<Apartment> {
-        return list.sortedBy {
-            LocationHelper.calculateApproxDistanceBetweenMapPoints(
-                LocationHelper.lastLatitude.value!!,
-                LocationHelper.lastLongitude.value!!,
-                it.latitude,
-                it.longitude
-            )
-        }.toMutableList()
-    }
 }
 

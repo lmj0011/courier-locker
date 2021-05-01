@@ -14,23 +14,20 @@ import androidx.paging.PagedList
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.*
+import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.GateCodeListAdapter
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.database.GateCode
-import name.lmj0011.courierlocker.database.Stop
 import name.lmj0011.courierlocker.databinding.FragmentGateCodesBinding
 import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
 import name.lmj0011.courierlocker.factories.GateCodeViewModelFactory
 import name.lmj0011.courierlocker.helpers.ListLock
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.interfaces.SearchableRecyclerView
-import timber.log.Timber
-
+import org.kodein.di.instance
 
 /**
  * A simple [Fragment] subclass.
@@ -44,6 +41,7 @@ class GateCodesFragment : Fragment(), SearchableRecyclerView {
     private lateinit var listAdapter: GateCodeListAdapter
     private lateinit var gateCodeViewModel: GateCodeViewModel
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var locationHelper: LocationHelper
     private var fragmentJob: Job = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
 
@@ -84,6 +82,7 @@ class GateCodesFragment : Fragment(), SearchableRecyclerView {
         val dataSource = CourierLockerDatabase.getInstance(application).gateCodeDao
         viewModelFactory = GateCodeViewModelFactory(dataSource, application)
         gateCodeViewModel = ViewModelProviders.of(this, viewModelFactory).get(GateCodeViewModel::class.java)
+        locationHelper = (requireContext().applicationContext as CourierLockerApplication).kodein.instance()
 
         listAdapter = GateCodeListAdapter( GateCodeListAdapter.GateCodeListener { gateCodeId ->
             this.findNavController().navigate(GateCodesFragmentDirections.actionGateCodesFragmentToEditGateCodeFragment(gateCodeId.toInt()))
@@ -93,7 +92,7 @@ class GateCodesFragment : Fragment(), SearchableRecyclerView {
             this.submitListToAdapter(it)
         })
 
-        LocationHelper.lastLatitude.observe(viewLifecycleOwner, lastLocationListener)
+        locationHelper.lastLatitude.observe(viewLifecycleOwner, lastLocationListener)
 
         binding.gateCodesList.addItemDecoration(DividerItemDecoration(mainActivity, DividerItemDecoration.VERTICAL))
 

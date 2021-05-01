@@ -5,10 +5,11 @@ import androidx.lifecycle.*
 import androidx.paging.PagedList
 import androidx.paging.toLiveData
 import kotlinx.coroutines.*
+import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.database.*
 import name.lmj0011.courierlocker.helpers.Const
 import name.lmj0011.courierlocker.helpers.LocationHelper
-import timber.log.Timber
+import org.kodein.di.instance
 
 class ApartmentViewModel(
     val database: ApartmentDao,
@@ -18,6 +19,8 @@ class ApartmentViewModel(
     private var viewModelJob = Job()
 
     private val uiScope = CoroutineScope(Dispatchers.Main +  viewModelJob)
+
+    private val locationHelper: LocationHelper = (application as CourierLockerApplication).kodein.instance()
 
     var isOrderedByNearest = MutableLiveData<Boolean>().apply { postValue(false) }
 
@@ -45,9 +48,9 @@ class ApartmentViewModel(
                     when(filterByLocation) {
                         true -> {
                             list.sortedBy {
-                                LocationHelper.calculateApproxDistanceBetweenMapPoints(
-                                    LocationHelper.lastLatitude.value!!,
-                                    LocationHelper.lastLongitude.value!!,
+                                locationHelper.calculateApproxDistanceBetweenMapPoints(
+                                    locationHelper.lastLatitude.value!!,
+                                    locationHelper.lastLongitude.value!!,
                                     it.latitude,
                                     it.longitude
                                 )
@@ -63,9 +66,9 @@ class ApartmentViewModel(
                     when(filterByLocation) {
                         true -> {
                             list.sortedBy {
-                                LocationHelper.calculateApproxDistanceBetweenMapPoints(
-                                    LocationHelper.lastLatitude.value!!,
-                                    LocationHelper.lastLongitude.value!!,
+                                locationHelper.calculateApproxDistanceBetweenMapPoints(
+                                    locationHelper.lastLatitude.value!!,
+                                    locationHelper.lastLongitude.value!!,
                                     it.latitude,
                                     it.longitude
                                 )

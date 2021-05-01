@@ -18,6 +18,7 @@ import androidx.navigation.fragment.findNavController
 import br.com.simplepass.loadingbutton.presentation.State
 import kotlinx.android.synthetic.main.fragment_create_or_edit_apartment_map.view.*
 import kotlinx.coroutines.*
+import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.AddressAutoSuggestAdapter
@@ -27,6 +28,7 @@ import name.lmj0011.courierlocker.databinding.FragmentCreateOrEditApartmentMapBi
 import name.lmj0011.courierlocker.factories.ApartmentViewModelFactory
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.viewmodels.ApartmentViewModel
+import org.kodein.di.instance
 
 
 /**
@@ -39,6 +41,7 @@ class CreateOrEditApartmentMapFragment : Fragment() {
     private lateinit var mainActivity: MainActivity
     private lateinit var viewModelFactory: ApartmentViewModelFactory
     private lateinit var apartmentViewModel: ApartmentViewModel
+    private lateinit var locationHelper: LocationHelper
     private var selectedApt = MutableLiveData<Apartment>()
     private var fragmentJob = Job()
     private var addressAutoCompleteJob: Job? = null
@@ -51,7 +54,7 @@ class CreateOrEditApartmentMapFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = DataBindingUtil.inflate(
             inflater, R.layout.fragment_create_or_edit_apartment_map, container, false
         )
@@ -61,8 +64,9 @@ class CreateOrEditApartmentMapFragment : Fragment() {
         val application = requireNotNull(this.activity).application
         val dataSource = CourierLockerDatabase.getInstance(application).apartmentDao
         viewModelFactory = ApartmentViewModelFactory(dataSource, application)
-        val args = CreateOrEditApartmentMapFragmentArgs.fromBundle(arguments!!)
+        val args = CreateOrEditApartmentMapFragmentArgs.fromBundle(requireArguments())
         apartmentViewModel = ViewModelProviders.of(this, viewModelFactory).get(ApartmentViewModel::class.java)
+        locationHelper = (requireContext().applicationContext as CourierLockerApplication).kodein.instance()
 
         selectedApt.observe(viewLifecycleOwner, Observer {
             mainActivity.supportActionBar?.title = "Edit Place"
@@ -124,7 +128,7 @@ class CreateOrEditApartmentMapFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                LocationHelper.performAddressAutoComplete(
+                locationHelper.performAddressAutoComplete(
                     s.toString(),
                     adapter
                 )
@@ -147,10 +151,10 @@ class CreateOrEditApartmentMapFragment : Fragment() {
 
         /// setting current location's address into the address textview
         binding.createApartmentMapInsertMyLocationButton.setOnClickListener {
-            val address = LocationHelper.getFromLocation(
+            val address = locationHelper.getFromLocation(
                 binding.root,
-                LocationHelper.lastLatitude.value!!,
-                LocationHelper.lastLongitude.value!!,
+                locationHelper.lastLatitude.value!!,
+                locationHelper.lastLongitude.value!!,
                 1
             )
 
