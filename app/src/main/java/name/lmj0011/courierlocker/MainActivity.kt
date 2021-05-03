@@ -81,25 +81,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onResume() {
         super.onResume()
         Timber.i("onResume Called")
-        (application as CourierLockerApplication).showCurrentStatusServiceNotification(false)
-
         if(!PermissionHelper.permissionAccessFineLocationApproved) {
             PermissionHelper.requestFineLocationAccess(this)
             this.showToastMessage("Location permission is required for some features to work.", Toast.LENGTH_LONG)
         }
     }
 
-    override fun onNewIntent(intent: Intent) {
-        if(!handleIntentAction(intent)) super.onNewIntent(intent)
+    override fun onPause() {
+        if (preferences.enableCurrentStatusService()) {
+            (applicationContext as CourierLockerApplication).startCurrentStatusService()
+        }
+        super.onPause()
     }
 
-    override fun onPause() {
-        super.onPause()
-        Timber.i("onPause Called")
-
-        if(preferences.enableCurrentStatusService() && PermissionHelper.permissionAccessFineLocationApproved) {
-            (application as CourierLockerApplication).showCurrentStatusServiceNotification(true)
-        }
+    override fun onNewIntent(intent: Intent) {
+        if(!handleIntentAction(intent)) super.onNewIntent(intent)
     }
 
     override fun onStop() {
@@ -108,9 +104,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onDestroy() {
+        if (preferences.enableCurrentStatusService()) {
+            (applicationContext as CourierLockerApplication).stopCurrentStatusService()
+        }
+
         super.onDestroy()
         Timber.i("onDestroy Called")
-        (application as CourierLockerApplication).showCurrentStatusServiceNotification(false)
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -199,6 +198,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         when (intent.action) {
             INTENT_CREATE_TRIP -> navController.navigate(R.id.createTripFragment)
             INTENT_EDIT_TRIP -> {
+                navController.navigate(R.id.tripsFragment)
                 navController.navigate(
                     TripsFragmentDirections.actionTripsFragmentToEditTripFragment(
                         intent.getIntExtra("editTripId", 0)

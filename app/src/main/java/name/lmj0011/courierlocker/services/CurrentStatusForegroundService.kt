@@ -14,7 +14,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.graphics.drawable.IconCompat
-import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -101,9 +100,11 @@ class CurrentStatusForegroundService : LifecycleService() {
                 .style = Notification.MessagingStyle(bubbleData.second).setGroupConversation(false)
 
             val notification = notificationBuilder.build()
+
             NotificationManagerCompat.from(context).apply {
                 notify(NotificationHelper.CURRENT_STATUS_NOTIFICATION_ID, notification)
             }
+
         } else {
             notificationBuilder
                 .setGroup(NotificationHelper.NOTIFICATION_CURRENT_STATUS_GROUP_KEY)
@@ -311,13 +312,14 @@ class CurrentStatusForegroundService : LifecycleService() {
         // now create dynamic shortcut
        val shortcutManager: ShortcutManager = getSystemService() ?: throw IllegalStateException()
 
-        val shortIcon = IconCompat.createWithAdaptiveBitmap(
-            ContextCompat.getDrawable(this, R.mipmap.ic_launcher_foreground)?.toBitmap()
-        )
+        val shortIcon = IconCompat.createWithResource(this, R.mipmap.ic_launcher_round)
+            .toIcon(this)
 
         val person = Person.Builder()
             .setName("Courier Locker")
-            .setIcon(shortIcon.toIcon(this))
+            .setKey(CurrentStatusBubbleActivity.PERSON_ID)
+            .setIcon(shortIcon)
+            .setBot(true)
             .setImportant(true)
             .build()
 
@@ -325,7 +327,7 @@ class CurrentStatusForegroundService : LifecycleService() {
                 .setLocusId(LocusId(CurrentStatusBubbleActivity.CONTACT_ID))
                 .setActivity(ComponentName(this, CurrentStatusBubbleActivity::class.java))
                 .setShortLabel("Current Status")
-                .setIcon(shortIcon.toIcon(this))
+                .setIcon(shortIcon)
                 .setLongLived(true)
                 .setIntent(
                     Intent(this, CurrentStatusBubbleActivity::class.java).apply {
@@ -336,10 +338,10 @@ class CurrentStatusForegroundService : LifecycleService() {
                 .build()
 
         val bubbleBuilder = Notification.BubbleMetadata
-            .Builder(bubbleIntent, shortIcon.toIcon(this)).apply {
+            .Builder(bubbleIntent, shortIcon).apply {
             setDesiredHeight(resources.getDimensionPixelSize(R.dimen.bubble_height))
             setAutoExpandBubble(false)
-            setSuppressNotification(true)
+            setSuppressNotification(false)
         }
 
         shortcutManager.pushDynamicShortcut(shortcutInfo)

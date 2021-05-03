@@ -113,13 +113,10 @@ class EditAptBuildingsMapsFragment : Fragment(){
             clusterManager = ClusterManager(mainActivity, gMap)
 
             val renderer = object: DefaultClusterRenderer<AptBldgClusterItem>(mainActivity, gMap, clusterManager) {
-                private val ig = IconGenerator(mainActivity)
-
-                init {
-                    ig.setStyle(IconGenerator.STYLE_PURPLE)
-                }
-
                 override fun onBeforeClusterItemRendered(item: AptBldgClusterItem, markerOptions: MarkerOptions) {
+                    val ig = IconGenerator(requireContext()).apply {
+                        setStyle(IconGenerator.STYLE_PURPLE)
+                    }
                     val iconBitmap = ig.makeIcon(item.bldg.number)
 
                     markerOptions.position(item.position)
@@ -131,7 +128,7 @@ class EditAptBuildingsMapsFragment : Fragment(){
 
             clusterManager.renderer = renderer
 
-            gMap.isMyLocationEnabled = false
+            gMap.isMyLocationEnabled = true
 
             gMap.setOnCameraIdleListener(clusterManager)
             gMap.setOnMarkerClickListener(clusterManager)

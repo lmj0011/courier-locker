@@ -20,7 +20,6 @@ class CurrentStatusBubbleActivity: AppCompatActivity(R.layout.activity_current_s
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         locationHelper = (applicationContext as CourierLockerApplication).kodein.instance()
-
         if (savedInstanceState == null) {
             supportFragmentManager.commitNow {
                 // The home fragment for this Bubble
@@ -31,8 +30,6 @@ class CurrentStatusBubbleActivity: AppCompatActivity(R.layout.activity_current_s
 
     override fun onResume() {
         super.onResume()
-        (application as CourierLockerApplication).showCurrentStatusServiceNotification(false)
-
         if(!PermissionHelper.permissionAccessFineLocationApproved) {
             PermissionHelper.requestFineLocationAccess(this)
             this.showToastMessage("Location permission is required for some features to work.", Toast.LENGTH_LONG)
@@ -106,6 +103,7 @@ class CurrentStatusBubbleActivity: AppCompatActivity(R.layout.activity_current_s
         // View
         const val INTENT_VIEW = "name.lmj0011.courierlocker.CurrentStatusBubbleActivity.VIEW"
 
+        const val PERSON_ID = "name.lmj0011.courierlocker.CurrentStatusBubbleActivity.PERSON_1"
         // contact id
         const val CONTACT_ID = "name.lmj0011.courierlocker.CurrentStatusBubbleActivity.CONTACT_1"
 

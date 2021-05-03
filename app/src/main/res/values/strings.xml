@@ -49,6 +49,11 @@
     <string name="calculate_all_trip_distance_one_time_worker_tag">CALCULATE_ALL_TRIP_DISTANCE_ONE_TIME_WORKER_TAG</string>
     <string name="create_app_backup_one_time_worker_tag">CREATE_APP_BACKUP_ONE_TIME_WORKER_TAG</string>
     <string name="create_app_backup_one_time_worker">CREATE_APP_BACKUP_ONE_TIME_WORKER</string>
+    
+    <string name="shortcut_trips">name.lmj0011.courierlocker.shortcut_trips</string>
+    <string name="shortcut_maps">name.lmj0011.courierlocker.shortcut_maps</string>
+    <string name="shortcut_gatecodes">name.lmj0011.courierlocker.shortcut_gatecodes</string>
+    <string name="shortcut_customers">name.lmj0011.courierlocker.shortcut_customers</string>
 
 
 
@@ -63,4 +68,6 @@
     <string name="trip_payment">Trip payment</string>
     <string name="total_distance">Total distance</string>
     <string name="trip_start_time">Trip start time</string>
+    <string name="add_to_home_screen">Add to Home Screen</string>
+    <string name="cant_pinned_shortcuts">The current Launcher does not support pinned Shortcuts</string>
 </resources>

@@ -1,13 +1,17 @@
 package name.lmj0011.courierlocker.fragments
 
 
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.core.content.ContextCompat
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.graphics.drawable.IconCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
@@ -17,6 +21,7 @@ import androidx.paging.PagedList
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import kotlinx.coroutines.*
+import name.lmj0011.courierlocker.DeepLinkActivity
 import name.lmj0011.courierlocker.MainActivity
 
 import name.lmj0011.courierlocker.databinding.FragmentCustomersBinding
@@ -140,6 +145,26 @@ class CustomersFragment :
             }
             R.id.action_customers_clear_all -> {
                 this.showClearAllCustomersDialog()
+                true
+            }
+            R.id.action_customers_add_to_home -> {
+                if (ShortcutManagerCompat.isRequestPinShortcutSupported(requireContext())) {
+                    ShortcutInfoCompat.Builder(requireContext(), resources.getString(R.string.shortcut_customers))
+                        .setIcon(IconCompat.createWithResource(requireContext(), R.mipmap.ic_customers_shortcut))
+                        .setShortLabel("Customers")
+                        .setIntent(
+                            Intent(requireContext(), DeepLinkActivity::class.java).apply {
+                                action = MainActivity.INTENT_SHOW_CUSTOMERS
+                                putExtra("menuItemId", R.id.nav_customers)
+                            }
+                        )
+                        .build().also { shortCutInfo ->
+                            ShortcutManagerCompat.requestPinShortcut(requireContext(), shortCutInfo, null)
+                        }
+
+                } else {
+                    mainActivity.showToastMessage(getString(R.string.cant_pinned_shortcuts))
+                }
                 true
             }
             else -> super.onOptionsItemSelected(item)

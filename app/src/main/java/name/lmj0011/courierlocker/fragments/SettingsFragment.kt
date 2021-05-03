@@ -94,9 +94,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
         /**
          * Show some Preferences only on devices running Android 11 or higher
          */
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            showCurrentStatusAsBubble.isVisible = true
-        }
+        showCurrentStatusAsBubble.isVisible =
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && enableCurrentStatusService.isChecked
+
 
         googleDirectionsKeyPref.setOnPreferenceChangeListener { _, newValue ->
             when(newValue) {
@@ -188,11 +188,13 @@ class SettingsFragment : PreferenceFragmentCompat() {
         enableCurrentStatusService.setOnPreferenceChangeListener { _, newValue ->
             when (newValue) {
                 true -> {
-                    application.showCurrentStatusServiceNotification(true)
+                    application.startCurrentStatusService()
+                    showCurrentStatusAsBubble.isVisible = true
                     showCurrentStatusAsBubble.isEnabled = true
                 }
                 else -> {
-                    application.showCurrentStatusServiceNotification(false)
+                    application.stopCurrentStatusService()
+                    showCurrentStatusAsBubble.isVisible = false
                     showCurrentStatusAsBubble.isEnabled = false
                 }
             }
@@ -200,11 +202,15 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
 
         showCurrentStatusAsBubble.setOnPreferenceChangeListener { _, newValue ->
-            application.showCurrentStatusServiceNotification(false)
+            settingsActivity.toggleProgressIndicator(true)
+            showCurrentStatusAsBubble.isEnabled = false
+            application.stopCurrentStatusService()
 
             launchUI {
                 delay(3000L)
-                application.showCurrentStatusServiceNotification(true)
+                application.startCurrentStatusService()
+                showCurrentStatusAsBubble.isEnabled = true
+                settingsActivity.toggleProgressIndicator(false)
             }
             true
         }

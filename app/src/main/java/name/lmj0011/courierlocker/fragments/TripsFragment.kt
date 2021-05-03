@@ -6,6 +6,9 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.SearchView
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
@@ -15,6 +18,7 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.google.android.material.datepicker.MaterialDatePicker
 import kotlinx.coroutines.*
+import name.lmj0011.courierlocker.DeepLinkActivity
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.TripListAdapter
@@ -151,6 +155,26 @@ class TripsFragment : Fragment(R.layout.fragment_trips),
             }
             R.id.action_trips_clear_all -> {
                 this.showClearAllTripsDialog()
+                true
+            }
+            R.id.action_trips_add_to_home -> {
+                if (ShortcutManagerCompat.isRequestPinShortcutSupported(requireContext())) {
+                    ShortcutInfoCompat.Builder(requireContext(), resources.getString(R.string.shortcut_trips))
+                        .setIcon(IconCompat.createWithResource(requireContext(), R.mipmap.ic_trips_shortcut))
+                        .setShortLabel("Trips")
+                        .setIntent(
+                            Intent(requireContext(), DeepLinkActivity::class.java).apply {
+                                action = MainActivity.INTENT_SHOW_TRIPS
+                                putExtra("menuItemId", R.id.nav_trips)
+                            }
+                        )
+                        .build().also { shortCutInfo ->
+                            ShortcutManagerCompat.requestPinShortcut(requireContext(), shortCutInfo, null)
+                        }
+
+                } else {
+                    mainActivity.showToastMessage(getString(R.string.cant_pinned_shortcuts))
+                }
                 true
             }
             else -> super.onOptionsItemSelected(item)

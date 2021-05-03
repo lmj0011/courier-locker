@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:id="@+id/action_maps_search"
+    <item android:id="@+id/action_gate_codes_search"
             android:title="Search"
             android:icon="@drawable/ic_search"
             android:orderInCategory="100"
             app:showAsAction="always"/>
+    <item android:id="@+id/action_gate_codes_add_to_home"
+        android:title="@string/add_to_home_screen"
+        android:orderInCategory="101"
+        app:showAsAction="never"/>
 </menu>

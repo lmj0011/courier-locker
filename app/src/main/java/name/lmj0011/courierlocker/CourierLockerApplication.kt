@@ -9,10 +9,7 @@ import android.os.IBinder
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.mooveit.library.Fakeit
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
-import name.lmj0011.courierlocker.helpers.LocationHelper
-import name.lmj0011.courierlocker.helpers.NotificationHelper
-import name.lmj0011.courierlocker.helpers.PermissionHelper
-import name.lmj0011.courierlocker.helpers.PreferenceHelper
+import name.lmj0011.courierlocker.helpers.*
 import name.lmj0011.courierlocker.services.CurrentStatusForegroundService
 import name.lmj0011.courierlocker.viewmodels.GigLabelViewModel
 import org.kodein.di.DI
@@ -68,16 +65,17 @@ class CourierLockerApplication : Application() {
         GigLabelViewModel(gigLabelDataSource, this)
     }
 
-    fun showCurrentStatusServiceNotification(show: Boolean) {
-        when {
-            (isCurrentStatusServiceBounded && show) -> {
-                Timber.d("CurrentStatusForegroundService.start")
-                currentStatusService.start(this)
-            }
-            (isCurrentStatusServiceBounded && !show) -> {
-                Timber.d("CurrentStatusForegroundService.stop")
-                currentStatusService.stop()
-            }
+    fun startCurrentStatusService() {
+        if (isCurrentStatusServiceBounded) {
+            Timber.d("CurrentStatusForegroundService.start")
+            currentStatusService.start(this)
+        }
+    }
+
+    fun stopCurrentStatusService() {
+        if (isCurrentStatusServiceBounded) {
+            Timber.d("CurrentStatusForegroundService.stop")
+            currentStatusService.stop()
         }
     }
 }

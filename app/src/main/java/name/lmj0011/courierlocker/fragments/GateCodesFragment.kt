@@ -1,10 +1,14 @@
 package name.lmj0011.courierlocker.fragments
 
 
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.SearchView
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import androidx.fragment.app.Fragment
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
@@ -16,6 +20,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.CourierLockerApplication
+import name.lmj0011.courierlocker.DeepLinkActivity
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.GateCodeListAdapter
@@ -176,8 +181,28 @@ class GateCodesFragment : Fragment(), SearchableRecyclerView {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
-            R.id.action_maps_search -> {
+            R.id.action_gate_codes_search -> {
                 this@GateCodesFragment.toggleSearch(mainActivity, binding.gateCodesSearchView, true)
+                true
+            }
+            R.id.action_gate_codes_add_to_home -> {
+                if (ShortcutManagerCompat.isRequestPinShortcutSupported(requireContext())) {
+                    ShortcutInfoCompat.Builder(requireContext(), resources.getString(R.string.shortcut_gatecodes))
+                        .setIcon(IconCompat.createWithResource(requireContext(), R.mipmap.ic_gatecodes_shortcut))
+                        .setShortLabel("Gate Codes")
+                        .setIntent(
+                            Intent(requireContext(), DeepLinkActivity::class.java).apply {
+                                action = MainActivity.INTENT_SHOW_GATE_CODES
+                                putExtra("menuItemId", R.id.nav_gate_codes)
+                            }
+                        )
+                        .build().also { shortCutInfo ->
+                            ShortcutManagerCompat.requestPinShortcut(requireContext(), shortCutInfo, null)
+                        }
+
+                } else {
+                    mainActivity.showToastMessage(getString(R.string.cant_pinned_shortcuts))
+                }
                 true
             }
             else -> super.onOptionsItemSelected(item)
