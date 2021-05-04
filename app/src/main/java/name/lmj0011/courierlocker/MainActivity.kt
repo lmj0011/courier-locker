@@ -79,12 +79,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
 
     override fun onResume() {
-        super.onResume()
+        (applicationContext as CourierLockerApplication).stopCurrentStatusService()
         Timber.i("onResume Called")
         if(!PermissionHelper.permissionAccessFineLocationApproved) {
             PermissionHelper.requestFineLocationAccess(this)
             this.showToastMessage("Location permission is required for some features to work.", Toast.LENGTH_LONG)
         }
+
+        super.onResume()
     }
 
     override fun onPause() {

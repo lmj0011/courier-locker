@@ -133,12 +133,11 @@ class CurrentStatusForegroundService : LifecycleService() {
 
         stopForeground(true)
 
-        GlobalScope.launch(Dispatchers.Main) {
-            delay(2000)
-            NotificationManagerCompat.from(this@CurrentStatusForegroundService).apply {
-                // in case this notification is still around because of late observer cancellation
-                cancel(NotificationHelper.NEARBY_GATECODES_NOTIFICATION_ID)
-            }
+        NotificationManagerCompat.from(this@CurrentStatusForegroundService).apply {
+            cancel(NotificationHelper.CURRENT_STATUS_NOTIFICATION_ID)
+
+            // in case this notification is still around because of late observer cancellation
+            cancel(NotificationHelper.NEARBY_GATECODES_NOTIFICATION_ID)
         }
     }
 

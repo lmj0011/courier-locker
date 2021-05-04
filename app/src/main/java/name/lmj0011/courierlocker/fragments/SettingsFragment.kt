@@ -19,10 +19,7 @@ import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.SettingsActivity
 import name.lmj0011.courierlocker.database.*
 import name.lmj0011.courierlocker.fragments.dialogs.AboutDialogFragment
-import name.lmj0011.courierlocker.helpers.AppDataImportExportHelper
-import name.lmj0011.courierlocker.helpers.PreferenceHelper
-import name.lmj0011.courierlocker.helpers.launchNow
-import name.lmj0011.courierlocker.helpers.launchUI
+import name.lmj0011.courierlocker.helpers.*
 import name.lmj0011.courierlocker.workers.CalculateAllTripDistanceWorker
 import name.lmj0011.courierlocker.workers.CreateBackupWorker
 import org.kodein.di.instance
@@ -206,11 +203,13 @@ class SettingsFragment : PreferenceFragmentCompat() {
             showCurrentStatusAsBubble.isEnabled = false
             application.stopCurrentStatusService()
 
-            launchUI {
-                delay(3000L)
-                application.startCurrentStatusService()
-                showCurrentStatusAsBubble.isEnabled = true
-                settingsActivity.toggleProgressIndicator(false)
+            launchIO {
+                delay(1000L)
+                withUIContext {
+                    application.startCurrentStatusService()
+                    showCurrentStatusAsBubble.isEnabled = true
+                    settingsActivity.toggleProgressIndicator(false)
+                }
             }
             true
         }
