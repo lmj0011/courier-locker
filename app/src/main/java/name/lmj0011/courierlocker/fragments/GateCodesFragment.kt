@@ -193,7 +193,6 @@ class GateCodesFragment : Fragment(), SearchableRecyclerView {
                         .setIntent(
                             Intent(requireContext(), DeepLinkActivity::class.java).apply {
                                 action = MainActivity.INTENT_SHOW_GATE_CODES
-                                putExtra("menuItemId", R.id.nav_gate_codes)
                             }
                         )
                         .build().also { shortCutInfo ->

@@ -333,7 +333,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 settingsActivity.contentResolver.openFileDescriptor(uri, "r")?.use { p ->
                     FileInputStream(p.fileDescriptor).use { inputStream ->
                         val gson = Gson()
-                        val rootObj = JsonParser().parse(String(inputStream.readBytes())).asJsonObject
+                        val rootObj = JsonParser.parseString(String(inputStream.readBytes())).asJsonObject
                         inputStream.close()
 
                         val trips = gson.fromJson<List<Trip>>(rootObj.get("trips"))

@@ -220,7 +220,6 @@ class MapsFragment : Fragment(), SearchableRecyclerView {
                         .setIntent(
                             Intent(requireContext(), DeepLinkActivity::class.java).apply {
                                 action = MainActivity.INTENT_SHOW_MAPS
-                                putExtra("menuItemId", R.id.nav_maps)
                             }
                         )
                         .build().also { shortCutInfo ->

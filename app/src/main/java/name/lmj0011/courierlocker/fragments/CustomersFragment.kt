@@ -155,7 +155,6 @@ class CustomersFragment :
                         .setIntent(
                             Intent(requireContext(), DeepLinkActivity::class.java).apply {
                                 action = MainActivity.INTENT_SHOW_CUSTOMERS
-                                putExtra("menuItemId", R.id.nav_customers)
                             }
                         )
                         .build().also { shortCutInfo ->

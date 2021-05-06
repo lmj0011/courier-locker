@@ -13,7 +13,7 @@ import name.lmj0011.courierlocker.BuildConfig
 import timber.log.Timber
 import io.requery.android.database.sqlite.RequerySQLiteOpenHelperFactory
 
-@Database(entities = [GateCode::class, Trip::class, Customer::class, Apartment::class, GigLabel::class], version = 6,  exportSchema = true)
+@Database(entities = [GateCode::class, Trip::class, Customer::class, Apartment::class, GigLabel::class], version = 7,  exportSchema = true)
 @TypeConverters(DataConverters::class)
 abstract class CourierLockerDatabase : RoomDatabase() {
 
@@ -79,6 +79,13 @@ abstract class CourierLockerDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE `apartments_table` ADD COLUMN `gateCodeId` INTEGER NOT NULL DEFAULT 0")
+            }
+
+        }
+
         @Volatile
         private var INSTANCE: CourierLockerDatabase? = null
 
@@ -98,8 +105,12 @@ abstract class CourierLockerDatabase : RoomDatabase() {
                         "courier_locker_database"
                     )
                     .addMigrations(
+                        /**
+                         * check AppDataImportExportHelper after adding new a Migration
+                         * it may need updating to reflect DB change
+                         */
                         MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4,
-                        MIGRATION_4_5, MIGRATION_5_6
+                        MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7
                     )
 
                     if (BuildConfig.DEBUG) {

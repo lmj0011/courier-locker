@@ -2,10 +2,7 @@ package name.lmj0011.courierlocker.database
 
 import androidx.lifecycle.LiveData
 import androidx.paging.DataSource
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
 
 @Dao
 interface GateCodeDao: BaseDao {
@@ -19,8 +16,16 @@ interface GateCodeDao: BaseDao {
     @Query("SELECT * from gate_codes_table WHERE id = :key")
     fun get(key: Long): GateCode?
 
+    @Transaction
+    @Query("SELECT * from gate_codes_table WHERE id = :key")
+    fun getGateCodeAndApartment(key: Long): GateCodeAndApartment?
+
     @Query("DELETE FROM gate_codes_table")
     fun clear()
+
+    @Transaction
+    @Query("SELECT * FROM gate_codes_table ORDER BY id DESC")
+    fun getAllGateCodeAndApartmentsByThePage(): DataSource.Factory<Int, GateCodeAndApartment>
 
     @Query("SELECT * FROM gate_codes_table ORDER BY id DESC")
     fun getAllGateCodesByThePage(): DataSource.Factory<Int, GateCode>

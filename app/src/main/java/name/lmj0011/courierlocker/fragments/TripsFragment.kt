@@ -165,7 +165,6 @@ class TripsFragment : Fragment(R.layout.fragment_trips),
                         .setIntent(
                             Intent(requireContext(), DeepLinkActivity::class.java).apply {
                                 action = MainActivity.INTENT_SHOW_TRIPS
-                                putExtra("menuItemId", R.id.nav_trips)
                             }
                         )
                         .build().also { shortCutInfo ->

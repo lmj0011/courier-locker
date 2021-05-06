@@ -11,6 +11,9 @@ data class Apartment(
     @ColumnInfo(name = "id")
     var id: Long = 0L,
 
+    @ColumnInfo(name = "gateCodeId")
+    var gateCodeId: Long = 0L,
+
     // currently only relevant if Apartment was pulled from an external source. (ie. not self created)
     @ColumnInfo(name = "uid")
     var uid: String = "",

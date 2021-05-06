@@ -49,6 +49,7 @@ object AppDataImportExportHelper {
                 apartments.map {
                     jsonObject(
                         "id" to it.id,
+                        "gateCodeId" to it.gateCodeId,
                         "uid" to it.uid,
                         "name" to it.name,
                         "address" to it.address,

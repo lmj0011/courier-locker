@@ -197,6 +197,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun handleIntentAction(intent: Intent):Boolean {
+        Timber.d("intent.action: ${intent.action}")
+        Timber.d("intent.getLongExtra: ${intent.getIntExtra("menuItemId", -1)}")
+        Timber.d("R.id.nav_maps: ${R.id.nav_maps}")
         when (intent.action) {
             INTENT_CREATE_TRIP -> navController.navigate(R.id.createTripFragment)
             INTENT_EDIT_TRIP -> {
@@ -215,9 +218,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     )
                 )
             }
-            INTENT_SHOW_TRIPS, INTENT_SHOW_MAPS,
-            INTENT_SHOW_GATE_CODES, INTENT_SHOW_CUSTOMERS-> {
-                this.navigateTo(intent.getIntExtra("menuItemId", -1))
+            INTENT_SHOW_TRIPS -> {
+                navController.navigate(R.id.tripsFragment)
+            }
+            INTENT_SHOW_MAPS-> {
+                navController.navigate(R.id.mapsFragment)
+            }
+            INTENT_SHOW_GATE_CODES -> {
+                navController.navigate(R.id.gateCodesFragment)
+            }
+            INTENT_SHOW_CUSTOMERS -> {
+                navController.navigate(R.id.customersFragment)
             }
             else -> return false
         }
