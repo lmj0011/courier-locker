@@ -38,6 +38,9 @@ class ApartmentViewModel(
         }
     }
 
+    var apartmentsWithoutGateCodePaged = database.getAllApartmentsWithoutGateCodeByThePage()
+        .toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
+
     var apartmentsPaged: LiveData<PagedList<Apartment>> = Transformations.switchMap(doubleTrigger) { pair ->
         val filterByLocation = pair.first
         val query = pair.second
@@ -86,6 +89,8 @@ class ApartmentViewModel(
         super.onCleared()
         viewModelJob.cancel()
     }
+
+    fun getRelatedGateCode(gateCodeId: Long) = database.getRelatedGateCode(gateCodeId)
 
 
     fun insertApartments(apts: MutableList<Apartment>) {

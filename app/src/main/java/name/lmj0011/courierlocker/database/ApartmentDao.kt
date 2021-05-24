@@ -19,8 +19,14 @@ interface ApartmentDao: BaseDao {
     @Query("SELECT * from apartments_table WHERE id = :key")
     fun get(key: Long): Apartment?
 
+    @Query("SELECT * from gate_codes_table WHERE id = :gateCodeId")
+    fun getRelatedGateCode(gateCodeId: Long): GateCode?
+
     @Query("DELETE FROM apartments_table")
     fun clear()
+
+    @Query("SELECT * FROM apartments_table WHERE gateCodeId = 0 ORDER BY id DESC")
+    fun getAllApartmentsWithoutGateCodeByThePage(): DataSource.Factory<Int, Apartment>
 
     @Query("SELECT * FROM apartments_table ORDER BY id DESC")
     fun getAllApartmentsByThePage(): DataSource.Factory<Int, Apartment>

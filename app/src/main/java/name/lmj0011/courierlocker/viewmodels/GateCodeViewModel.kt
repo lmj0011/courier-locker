@@ -94,6 +94,8 @@ class GateCodeViewModel(
         viewModelJob.cancel()
     }
 
+    fun getRelatedApartment(gateCodeId: Long) = database.getRelatedApartment(gateCodeId)
+
 
     fun setGateCode(idx: Int) {
         uiScope.launch {

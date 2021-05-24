@@ -9,6 +9,7 @@
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:onClick="@{() -> clickListener.onClick(apartment)}"
@@ -32,41 +33,38 @@
                 tools:text="3245 Joey Diaz Ave." />
 
         <ImageButton
-                android:id="@+id/aptMapImageBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:contentDescription="TODO"
-                app:layout_constraintStart_toEndOf="@+id/deleteImageBtn"
-                app:layout_constraintTop_toBottomOf="@+id/aptAddressTextView"
-                app:srcCompat="@drawable/ic_map" />
+            android:id="@+id/deleteImageBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/aptAddressTextView"
+            app:srcCompat="@drawable/ic_delete" />
 
         <ImageButton
-                android:id="@+id/buildingImageBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:textSize="12sp"
-                app:layout_constraintStart_toEndOf="@+id/aptMapImageBtn"
-                app:layout_constraintTop_toBottomOf="@+id/aptAddressTextView"
-                app:srcCompat="@drawable/ic_menu_maps" />
+            android:id="@+id/aptMapImageBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            app:layout_constraintStart_toEndOf="@+id/deleteImageBtn"
+            app:layout_constraintTop_toBottomOf="@+id/aptAddressTextView"
+            app:srcCompat="@drawable/ic_map" />
 
         <ImageButton
-                android:id="@+id/deleteImageBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/aptAddressTextView"
-                app:srcCompat="@drawable/ic_delete" />
+            android:id="@+id/buildingImageBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:textSize="12sp"
+            app:layout_constraintStart_toEndOf="@+id/aptMapImageBtn"
+            app:layout_constraintTop_toBottomOf="@+id/aptAddressTextView"
+            app:srcCompat="@drawable/ic_menu_maps" />
 
-        <TextView
-                android:id="@+id/feedSrcTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="TextView"
-                android:textSize="12sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/aptMapImageBtn"
-                tools:text="source: https://joeydiaz.org/plexmaps/feed" />
 
+        <ImageButton
+            android:id="@+id/gateCodeImageBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            app:layout_constraintStart_toEndOf="@+id/buildingImageBtn"
+            app:layout_constraintTop_toBottomOf="@+id/aptAddressTextView"
+            app:srcCompat="@drawable/ic_menu_dialpad" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

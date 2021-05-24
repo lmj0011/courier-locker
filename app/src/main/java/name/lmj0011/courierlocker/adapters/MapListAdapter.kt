@@ -1,47 +1,84 @@
 package name.lmj0011.courierlocker.adapters
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.PopupMenu
 import android.widget.TextView
+import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.core.view.setPadding
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.paging.PagedListAdapter
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import name.lmj0011.courierlocker.database.Apartment
 import name.lmj0011.courierlocker.databinding.ListItemMapBinding
 import name.lmj0011.courierlocker.fragments.MapsFragmentDirections
 import name.lmj0011.courierlocker.fragments.dialogs.DeleteApartmentDialogFragment
 import name.lmj0011.courierlocker.fragments.dialogs.NavigateToAptBuildingDialogFragment
 import name.lmj0011.courierlocker.helpers.ListLock
+import name.lmj0011.courierlocker.helpers.launchIO
+import name.lmj0011.courierlocker.helpers.withUIContext
 
 
-class MapListAdapter(private val clickListener: MapListener, private val parentFragment: Fragment): PagedListAdapter<Apartment, MapListAdapter.ViewHolder>(MapDiffCallback())
+class MapListAdapter(private val clickListener: MapListener, private val parentFragment: Fragment, private val viewMode: Int = VIEW_MODE_NORMAL): PagedListAdapter<Apartment, MapListAdapter.ViewHolder>(MapDiffCallback())
 {
+    companion object {
+        const val VIEW_MODE_NORMAL = 0
+
+        // the ImageButtons are hidden
+        const val VIEW_MODE_COMPACT = 1
+    }
+
     class ViewHolder private constructor(val binding: ListItemMapBinding) : RecyclerView.ViewHolder(binding.root)
     {
 
-        fun bind(clickListener: MapListener, apt: Apartment?) {
+        companion object {
+            lateinit var parentFragment: Fragment
+                private set
+
+            fun from(parent: ViewGroup, pf: Fragment): ViewHolder {
+                parentFragment = pf
+                val layoutInflater = LayoutInflater.from(parent.context)
+                val binding = ListItemMapBinding.inflate(layoutInflater, parent, false)
+
+                return ViewHolder(binding)
+            }
+        }
+
+        fun bind(clickListener: MapListener, apt: Apartment?, viewMode: Int) {
+            when(viewMode) {
+                VIEW_MODE_NORMAL -> getNormalViewBindings(clickListener, apt)
+                VIEW_MODE_COMPACT -> getCompactViewBindings(clickListener, apt)
+            }
+
+            binding.executePendingBindings()
+        }
+
+        private fun getNormalViewBindings(clickListener: MapListener, apt: Apartment?) {
             val popup = PopupMenu(binding.root.context, binding.root)
 
             apt?.let {
                 binding.apartment = apt
                 binding.aptNameTextView.text = apt.name
                 binding.aptAddressTextView.text = apt.address
-                binding.feedSrcTextView.text = "id: ${apt.id} | source: ${apt.sourceUrl}"
                 binding.clickListener = clickListener
+
+                if(apt.gateCodeId > 0L) {
+                    binding.gateCodeImageBtn.visibility = ImageButton.VISIBLE
+                    binding.gateCodeImageBtn.setOnClickListener {
+                        clickListener.gateCodeBtnListener(apt)
+                    }
+                } else binding.gateCodeImageBtn.visibility = ImageButton.GONE
 
                 binding.buildingImageBtn.visibility = ImageButton.VISIBLE
                 if (apt.buildings.isEmpty()) {
                     binding.buildingImageBtn.visibility = ImageButton.GONE
                 }
-
-            if(!PreferenceManager.getDefaultSharedPreferences(binding.root.context).getBoolean("enableDebugMode", false)) {
-                binding.feedSrcTextView.visibility = TextView.GONE
-            }
 
                 // ref: https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.comparisons/natural-order.html
                 val lengthThenNatural = compareBy<String> { it.length }
@@ -81,23 +118,21 @@ class MapListAdapter(private val clickListener: MapListener, private val parentF
                     dialog.show(parentFragment.childFragmentManager, "DeleteApartmentDialogFragment")
                 }
             }
-
-            binding.executePendingBindings()
         }
 
-        companion object {
-            lateinit var parentFragment: Fragment
-                private set
-
-            fun from(parent: ViewGroup, pf: Fragment): ViewHolder {
-                parentFragment = pf
-                val layoutInflater = LayoutInflater.from(parent.context)
-                val binding = ListItemMapBinding.inflate(layoutInflater, parent, false)
-
-                return ViewHolder(binding)
+        private fun getCompactViewBindings(clickListener: MapListener, apt: Apartment?) {
+            apt?.let {
+                binding.apartment = apt
+                binding.aptNameTextView.text = apt.name
+                binding.aptAddressTextView.text = apt.address
+                binding.clickListener = clickListener
             }
-        }
 
+            binding.buildingImageBtn.visibility = ImageButton.GONE
+            binding.aptMapImageBtn.visibility = ImageButton.GONE
+            binding.deleteImageBtn.visibility = ImageButton.GONE
+            binding.gateCodeImageBtn.visibility = ImageButton.GONE
+        }
     }
 
     class MapDiffCallback : DiffUtil.ItemCallback<Apartment>() {
@@ -110,16 +145,20 @@ class MapListAdapter(private val clickListener: MapListener, private val parentF
         }
     }
 
-    class MapListener(val clickListener: (aptId: Long) -> Unit, val deleteBtnListener: (aptId: Long) -> Unit) {
-        fun onClick(apt: Apartment) = clickListener(apt.id)
+    class MapListener(val clickListener: (apt: Apartment) -> Unit,
+                      val gateCodeBtnListener: (apt: Apartment) -> Unit,
+                      val deleteBtnListener: (apt: Apartment) -> Unit) {
+        fun onClick(apt: Apartment) = clickListener(apt)
 
-        fun onDeleteBtnClick(apt: Apartment) = deleteBtnListener(apt.id)
+        fun onGateCodeBtnClick(apt: Apartment) = gateCodeBtnListener(apt)
+
+        fun onDeleteBtnListener(apt: Apartment) = deleteBtnListener(apt)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val apt: Apartment? = getItem(position)
 
-        holder.bind(clickListener, apt)
+        holder.bind(clickListener, apt, viewMode)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

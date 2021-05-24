@@ -12,12 +12,14 @@ import androidx.core.graphics.drawable.IconCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.paging.PagedList
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.DeepLinkActivity
@@ -28,9 +30,7 @@ import name.lmj0011.courierlocker.database.Apartment
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.databinding.FragmentMapsBinding
 import name.lmj0011.courierlocker.factories.ApartmentViewModelFactory
-import name.lmj0011.courierlocker.helpers.ListLock
-import name.lmj0011.courierlocker.helpers.LocationHelper
-import name.lmj0011.courierlocker.helpers.PermissionHelper
+import name.lmj0011.courierlocker.helpers.*
 import name.lmj0011.courierlocker.helpers.interfaces.SearchableRecyclerView
 import name.lmj0011.courierlocker.viewmodels.ApartmentViewModel
 import org.kodein.di.instance
@@ -72,7 +72,6 @@ class MapsFragment : Fragment(), SearchableRecyclerView {
      */
     private val lastLocationListener = Observer<Double> {
         if(!ListLock.isListLocked) {
-            Timber.i("lastLocationListener called!")
             this.refreshList()
         }
     }
@@ -80,7 +79,7 @@ class MapsFragment : Fragment(), SearchableRecyclerView {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = DataBindingUtil.inflate(
             inflater, R.layout.fragment_maps, container, false)
 
@@ -91,22 +90,56 @@ class MapsFragment : Fragment(), SearchableRecyclerView {
         val application = requireNotNull(this.activity).application
         val dataSource = CourierLockerDatabase.getInstance(application).apartmentDao
         viewModelFactory = ApartmentViewModelFactory(dataSource, application)
-        apartmentViewModel = ViewModelProviders.of(this, viewModelFactory).get(ApartmentViewModel::class.java)
+        apartmentViewModel = ViewModelProvider(this, viewModelFactory).get(ApartmentViewModel::class.java)
         locationHelper = (requireContext().applicationContext as CourierLockerApplication).kodein.instance()
 
         listAdapter = MapListAdapter( MapListAdapter.MapListener(
-            {aptId ->
-                this.findNavController().navigate(MapsFragmentDirections.actionMapsFragmentToCreateOrEditApartmentMapFragment(aptId))
+            {apt ->
+                this.findNavController().navigate(MapsFragmentDirections.actionMapsFragmentToCreateOrEditApartmentMapFragment(apt.id))
             },
-            {aptId ->
+            { apt ->
+                launchIO {
+                    val gateCode = apartmentViewModel.getRelatedGateCode(apt.gateCodeId)
+
+                    gateCode?.also {
+                        withUIContext {
+                            MaterialAlertDialogBuilder(binding.root.context)
+                                .setTitle("Gate Codes")
+                                .setMessage("${apt.name}\n\n${gateCode.codes.joinToString(", ")}")
+                                .setPositiveButton("Ok") { _, _ ->}
+                                .setNeutralButton("Disassociate") { dialog0, _ ->
+                                    dialog0.dismiss()
+                                    MaterialAlertDialogBuilder(binding.root.context)
+                                        .setTitle("Disassociate Gate Codes?")
+                                        .setMessage("${apt.name}\n\n${gateCode.codes.joinToString(", ")}")
+                                        .setPositiveButton("Yes") { dialog1, _ ->
+                                            dialog1.dismiss()
+                                            apt.gateCodeId = 0
+                                            apartmentViewModel.updateApartment(apt)
+                                            findNavController().navigate(R.id.mapsFragment)
+                                        }
+                                        .setNeutralButton("Cancel") {dialog, _ ->
+                                            dialog.dismiss()
+                                        }
+                                        .show()
+                                }
+                                .show()
+                        }
+                    }
+                }
+
+            },
+            {apt ->
                 uiScope.launch{
                     withContext(Dispatchers.IO) {
-                        apartmentViewModel.database.deleteByApartmentId(aptId)
+                        apartmentViewModel.database.deleteByApartmentId(apt.id)
                     }
                     listAdapter.notifyDataSetChanged()
                 }
             }
-        ), this)
+        ), this,
+            MapListAdapter.VIEW_MODE_NORMAL
+        )
 
         binding.mapList.addItemDecoration(DividerItemDecoration(mainActivity, DividerItemDecoration.VERTICAL))
 

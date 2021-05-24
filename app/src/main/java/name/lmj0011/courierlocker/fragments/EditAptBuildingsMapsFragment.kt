@@ -177,7 +177,6 @@ class EditAptBuildingsMapsFragment : Fragment(){
                 true
             }
 
-            gMap.moveCamera(CameraUpdateFactory.zoomTo(16f))
         }
 
         binding.addButton.setOnClickListener {
@@ -296,11 +295,9 @@ class EditAptBuildingsMapsFragment : Fragment(){
                 .visible(false)
         )
 
-        selectedApt.value!!.buildings.forEach { bldg ->
-            bldg?.let{
-                val item = AptBldgClusterItem(it)
-                clusterManager.addItem(item)
-            }
+        selectedApt.value?.buildings?.forEach { bldg ->
+            val item = AptBldgClusterItem(bldg)
+            clusterManager.addItem(item)
         }
 
         clusterManager.cluster()
@@ -318,6 +315,8 @@ class EditAptBuildingsMapsFragment : Fragment(){
                 ))
             }
         }
+
+        gMap.moveCamera(CameraUpdateFactory.zoomTo(17f))
 
         this.hideEditUI()
     }

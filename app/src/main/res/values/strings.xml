@@ -70,4 +70,5 @@
     <string name="trip_start_time">Trip start time</string>
     <string name="add_to_home_screen">Add to Home Screen</string>
     <string name="cant_pinned_shortcuts">The current Launcher does not support pinned Shortcuts</string>
+    <string name="gatecodes_selectable_map_list">Select a Map to associate with this GateCode list</string>
 </resources>

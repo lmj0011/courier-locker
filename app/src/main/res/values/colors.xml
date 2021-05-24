@@ -7,4 +7,6 @@
     <color name="colorDefaultFace">#878787</color>
     <color name="colorHappyFace">#36FF00</color>
     <color name="colorSadFace">#FF0000</color>
+
+    <color name="colorDefaultTint">#878787</color>
 </resources>

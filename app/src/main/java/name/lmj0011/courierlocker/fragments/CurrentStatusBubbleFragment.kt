@@ -164,8 +164,7 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
 
         binding.openMapButton.setOnClickListener {
             listOfApartments.find { apt ->
-                (apt.latitude == mGateCode.value?.latitude)
-                        && (apt.longitude == mGateCode.value?.longitude)
+                apt.gateCodeId == mGateCode.value?.id
             }?.let { apt ->
                 val intent = Intent(context, DeepLinkActivity::class.java).apply {
                     action = MainActivity.INTENT_EDIT_APARTMENT_MAP
@@ -177,8 +176,8 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
 
         binding.nextGateCodeImageButton.setOnClickListener {
             /**
-             * disable this observer for undisturbed navigating, user can tap the current gatecode
-             * to start observing nearby gatecodes again
+             * disable this observer for undisturbed navigating the recentGateCodesList,
+             * the user can tap the current gatecode to start observing nearby gatecodes again
              */
             locationHelper.lastLatitude.removeObserver(latitudeObserver)
 
@@ -285,5 +284,13 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
 
         binding.nearestGateCodesContainer.visibility = View.VISIBLE
         binding.nearestGateCodesControlsContainer.visibility = View.VISIBLE
+
+        val apt = listOfApartments.find { apt ->
+            apt.gateCodeId == gateCode.id
+        }
+
+        if (apt != null) {
+            binding.openMapButton.visibility = View.VISIBLE
+        } else binding.openMapButton.visibility = View.GONE
     }
 }

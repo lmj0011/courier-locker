@@ -16,6 +16,9 @@ interface GateCodeDao: BaseDao {
     @Query("SELECT * from gate_codes_table WHERE id = :key")
     fun get(key: Long): GateCode?
 
+    @Query("SELECT * from apartments_table WHERE gateCodeId = :gateCodeId")
+    fun getRelatedApartment(gateCodeId: Long): Apartment?
+
     @Transaction
     @Query("SELECT * from gate_codes_table WHERE id = :key")
     fun getGateCodeAndApartment(key: Long): GateCodeAndApartment?

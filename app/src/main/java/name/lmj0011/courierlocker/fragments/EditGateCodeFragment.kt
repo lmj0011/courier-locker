@@ -3,25 +3,26 @@ package name.lmj0011.courierlocker.fragments
 
 import android.os.Bundle
 import android.text.InputType
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.database.GateCode
 import name.lmj0011.courierlocker.databinding.FragmentEditGateCodeBinding
+import name.lmj0011.courierlocker.factories.ApartmentViewModelFactory
 import name.lmj0011.courierlocker.factories.GateCodeViewModelFactory
+import name.lmj0011.courierlocker.fragments.bottomsheets.BottomSheetAptMapsFragment
 import name.lmj0011.courierlocker.fragments.dialogs.DeleteGateCodeDialogFragment
+import name.lmj0011.courierlocker.helpers.launchIO
+import name.lmj0011.courierlocker.helpers.withUIContext
+import name.lmj0011.courierlocker.viewmodels.ApartmentViewModel
 import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
-
 
 /**
  * A simple [Fragment] subclass.
@@ -31,8 +32,12 @@ class EditGateCodeFragment : Fragment(), DeleteGateCodeDialogFragment.NoticeDial
 
     private lateinit var binding: FragmentEditGateCodeBinding
     private lateinit var mainActivity: MainActivity
-    private var gateCode: GateCode? = null
+    private lateinit var gateCode: GateCode
     private lateinit var gateCodeViewModel: GateCodeViewModel
+    private lateinit var apartmentViewModel: ApartmentViewModel
+    private lateinit var bottomSheetAptMapsFragment: BottomSheetAptMapsFragment
+    private lateinit var args: EditGateCodeFragmentArgs
+    private lateinit var mapAssociationMenuItem: MenuItem
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,22 +47,38 @@ class EditGateCodeFragment : Fragment(), DeleteGateCodeDialogFragment.NoticeDial
             inflater, R.layout.fragment_edit_gate_code, container, false)
 
         mainActivity = activity as MainActivity
+        setHasOptionsMenu(true)
 
         val application = requireNotNull(this.activity).application
         val dataSource = CourierLockerDatabase.getInstance(application).gateCodeDao
         val viewModelFactory = GateCodeViewModelFactory(dataSource, application)
-        val args = EditGateCodeFragmentArgs.fromBundle(requireArguments())
-        this.gateCodeViewModel = ViewModelProviders.of(this, viewModelFactory).get(GateCodeViewModel::class.java)
+        args = EditGateCodeFragmentArgs.fromBundle(requireArguments())
+        gateCodeViewModel = ViewModelProvider(this, viewModelFactory).get(GateCodeViewModel::class.java)
 
-        binding.gateCodeViewModel = this.gateCodeViewModel
+        apartmentViewModel= ViewModelProvider(this,
+            ApartmentViewModelFactory(CourierLockerDatabase
+                .getInstance(application).apartmentDao, application))
+            .get(ApartmentViewModel::class.java)
+
+        binding.gateCodeViewModel = gateCodeViewModel
 
         mainActivity.hideFab()
 
-        gateCodeViewModel.gateCode.observe(viewLifecycleOwner, Observer {
-            this.gateCode  = it
-            mainActivity.supportActionBar?.subtitle = gateCode?.address
+        gateCodeViewModel.gateCode.observe(viewLifecycleOwner, {
+            it?.let { gc ->
+                gateCode  = gc
+                mainActivity.supportActionBar?.subtitle = gateCode.address
 
-            this.injectGateCodeIntoView(it)
+                this.injectGateCodeIntoView(gc)
+
+                launchIO {
+                    val apt = gateCodeViewModel.getRelatedApartment(gc.id)
+
+                    apt?.also {
+                        withUIContext { mapAssociationMenuItem.isEnabled = false }
+                    }
+                }
+            }
         })
 
         gateCodeViewModel.setGateCode(args.gateCodeId)
@@ -73,10 +94,38 @@ class EditGateCodeFragment : Fragment(), DeleteGateCodeDialogFragment.NoticeDial
         return binding.root
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.edit_gatecodes, menu)
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        mapAssociationMenuItem = menu.getItem(0)
+        super.onPrepareOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_gate_codes_link_map -> {
+                bottomSheetAptMapsFragment = BottomSheetAptMapsFragment { apt ->
+                    apt.gateCodeId = args.gateCodeId.toLong()
+                    apartmentViewModel.updateApartment(apt)
+                    findNavController().navigate(R.id.gateCodesFragment)
+                }
+
+                bottomSheetAptMapsFragment
+                    .show(childFragmentManager, "BottomSheetAptMapsFragment")
+
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
     override fun onDialogPositiveClick(dialog: DialogFragment) {
-        gateCodeViewModel.deleteGateCode(this.gateCode!!.id)
+        gateCodeViewModel.deleteGateCode(gateCode.id)
         mainActivity.showToastMessage("Deleted a gate code entry")
-        this.findNavController().navigate(R.id.gateCodesFragment)
+        findNavController().navigate(R.id.gateCodesFragment)
     }
 
     override fun onDialogNegativeClick(dialog: DialogFragment) {
@@ -159,11 +208,9 @@ class EditGateCodeFragment : Fragment(), DeleteGateCodeDialogFragment.NoticeDial
             return
         }
 
-        this.gateCode?.let {
-            it.address = address
-            it.codes.clear()
-            it.codes.addAll(codes)
-        }
+        gateCode.address = address
+        gateCode.codes.clear()
+        gateCode.codes.addAll(codes)
 
         this.gateCodeViewModel.updateGateCode(gateCode)
         mainActivity.showToastMessage("Updated gate code")
