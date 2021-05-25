@@ -38,32 +38,7 @@ class CurrentStatusBubbleActivity: AppCompatActivity(R.layout.activity_current_s
 
     override fun onPostResume() {
         super.onPostResume()
-        supportFragmentManager.commitNow {
-            detach(currentStatusFragment)
-            attach(currentStatusFragment)
-        }
-    }
-
-    override fun onBackPressed() {
-        val fragments = supportFragmentManager.fragments
-
-        /**
-         * fragments for this activity are expected NOT to go past 1-level deep
-         */
-        if (fragments.size > 1) {
-            supportFragmentManager.commitNow {
-                fragments.filter {
-                    it.tag != CURRENT_STATUS_BUBBLE_FRAGMENT_TAG
-                }.forEach { frag ->
-                    setCustomAnimations(0, R.anim.slide_out_to_right)
-                    remove(frag)
-                }
-                setCustomAnimations(R.anim.slide_in_from_left, 0)
-                detach(currentStatusFragment)
-                attach(currentStatusFragment)
-                show(currentStatusFragment)
-            }
-        } else super.onBackPressed()
+        refreshCurrentStatusFragment()
     }
 
     override fun onRequestPermissionsResult(
@@ -78,6 +53,13 @@ class CurrentStatusBubbleActivity: AppCompatActivity(R.layout.activity_current_s
         }
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    fun refreshCurrentStatusFragment() {
+        supportFragmentManager.commitNow {
+            detach(currentStatusFragment)
+            attach(currentStatusFragment)
+        }
     }
 
     fun showToastMessage(message: String, duration: Int = Toast.LENGTH_SHORT, position: Int = Gravity.TOP) {

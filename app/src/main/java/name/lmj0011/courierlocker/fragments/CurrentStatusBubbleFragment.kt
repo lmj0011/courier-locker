@@ -8,12 +8,12 @@ import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.commitNow
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import name.lmj0011.courierlocker.*
 import name.lmj0011.courierlocker.database.*
 import name.lmj0011.courierlocker.databinding.FragmentBubbleCurrentStatusBinding
+import name.lmj0011.courierlocker.fragments.bottomsheets.BottomSheetCreateTripBubbleFragment
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.Util
 import name.lmj0011.courierlocker.helpers.launchIO
@@ -27,6 +27,7 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
     private lateinit var activity: CurrentStatusBubbleActivity
     private lateinit var binding: FragmentBubbleCurrentStatusBinding
     private lateinit var locationHelper: LocationHelper
+    private lateinit var bottomSheetCreateTripBubbleFragment: BottomSheetCreateTripBubbleFragment
     lateinit var gateCodeViewModel: GateCodeViewModel
     lateinit var tripViewModel: TripViewModel
     lateinit var apartmentViewModel: ApartmentViewModel
@@ -68,6 +69,7 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
         tripViewModel = TripViewModel(CourierLockerDatabase.getInstance(application).tripDao, application)
         apartmentViewModel = ApartmentViewModel(CourierLockerDatabase.getInstance(application).apartmentDao, application)
         locationHelper = (requireContext().applicationContext as CourierLockerApplication).kodein.instance()
+        bottomSheetCreateTripBubbleFragment = BottomSheetCreateTripBubbleFragment { activity.refreshCurrentStatusFragment() }
 
         activity = requireActivity() as CurrentStatusBubbleActivity
         mTrip.postValue(null)
@@ -104,12 +106,8 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
             synchronized(btnView) {
                 btnView.isEnabled = false
 
-                activity.supportFragmentManager.commitNow {
-                    setCustomAnimations(0, R.anim.slide_out_to_left)
-                    hide(activity.currentStatusFragment)
-                    setCustomAnimations(R.anim.slide_in_from_right, 0)
-                    add(R.id.container, CreateTripBubbleFragment(), CurrentStatusBubbleActivity.CREATE_TRIP_BUBBLE_FRAGMENT_TAG)
-                }
+                bottomSheetCreateTripBubbleFragment
+                    .show(childFragmentManager, "BottomSheetCreateTripBubbleFragment")
 
                 btnView.postDelayed({ btnView.isEnabled = true },
                     resources.getInteger(android.R.integer.config_mediumAnimTime).toLong()

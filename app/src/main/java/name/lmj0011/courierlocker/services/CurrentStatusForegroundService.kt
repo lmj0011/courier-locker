@@ -108,7 +108,7 @@ class CurrentStatusForegroundService : LifecycleService() {
         } else {
             notificationBuilder
                 .setGroup(NotificationHelper.NOTIFICATION_CURRENT_STATUS_GROUP_KEY)
-                .setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
+                .setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY)
                 .setGroupSummary(true)
 
             val notification = notificationBuilder.build()
@@ -229,7 +229,7 @@ class CurrentStatusForegroundService : LifecycleService() {
                     .setSmallIcon(R.drawable.ic_action_name)
                     .setContentIntent(pendingIntent)
                     .setGroup(NotificationHelper.NOTIFICATION_CURRENT_STATUS_GROUP_KEY)
-                    .setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
+                    .setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY)
                     .setOnlyAlertOnce(true)
                     .setSortKey("c")
                     .setColor(ContextCompat.getColor(mThis, R.color.colorPrimary))
@@ -338,7 +338,7 @@ class CurrentStatusForegroundService : LifecycleService() {
 
         val bubbleBuilder = Notification.BubbleMetadata
             .Builder(bubbleIntent, shortIcon).apply {
-            setDesiredHeight(resources.getDimensionPixelSize(R.dimen.bubble_height))
+            setDesiredHeight(resources.getDimensionPixelSize(R.dimen.current_status_bubble_height))
             setAutoExpandBubble(false)
             setSuppressNotification(false)
         }
