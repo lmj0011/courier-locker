@@ -14,7 +14,7 @@ import name.lmj0011.courierlocker.helpers.PermissionHelper
 import org.kodein.di.instance
 
 class CurrentStatusBubbleActivity: AppCompatActivity(R.layout.activity_current_status_bubble) {
-    val currentStatusFragment = CurrentStatusBubbleFragment()
+    private val currentStatusFragment = CurrentStatusBubbleFragment()
     private lateinit var locationHelper: LocationHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,9 +62,8 @@ class CurrentStatusBubbleActivity: AppCompatActivity(R.layout.activity_current_s
         }
     }
 
-    fun showToastMessage(message: String, duration: Int = Toast.LENGTH_SHORT, position: Int = Gravity.TOP) {
-        val toast = Toast.makeText(this, message, duration)
-        toast.setGravity(position, 0, 150)
+    fun showToastMessage(message: String, duration: Int = Toast.LENGTH_SHORT) {
+        val toast = Toast.makeText(applicationContext, message, duration)
         toast.show()
     }
 

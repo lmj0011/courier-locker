@@ -1,7 +1,12 @@
 package name.lmj0011.courierlocker.helpers
 
+import android.animation.ValueAnimator
+import android.os.SystemClock
 import android.text.Html
 import android.text.Spanned
+import android.view.MotionEvent
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
 import name.lmj0011.courierlocker.database.GateCode
 import name.lmj0011.courierlocker.database.Trip
 import org.threeten.bp.Instant
@@ -20,13 +25,17 @@ object Util {
      * Shortens a Postal Address to only the street name if possible
      *
      * ex.) "1994 Waddell Dr., Huntsville, AL 35806, USA" -> "1994 Waddell Dr."
+     *
+     * [min] the minimum amount of characters the shorten address should contain
+     * [offset] increase this number, to indicate the amount of delimiters to skip before shorting
+     * the address
      */
-    fun addressShortener(address: String, min: Int = 5, delimiter: Char = ','): String {
+    fun addressShortener(address: String, min: Int = 5, delimiter: Char = ',', offset: Int = 1): String {
         val parts = address.split(delimiter)
         var str = ""
 
         for (idx in parts.indices) {
-            str = parts.take(idx + 1).joinToString(delimiter.toString())
+            str = parts.take(idx + offset).joinToString(delimiter.toString())
 
             if(str.length > min) break
         }
@@ -198,6 +207,63 @@ object Util {
             .format(Instant.ofEpochMilli(range.second!!).atZone(ZoneId.of("UTC")))
 
         return "${dateStr1}_${dateStr2}"
+    }
+
+    /**
+     * Programmatically swipe RecyclerView item
+     * @param recyclerView RecyclerView which item will be swiped
+     * @param index Position of item
+     * @param distance Swipe distance
+     * @param direction Swipe direction, can be [ItemTouchHelper.START] or [ItemTouchHelper.END]
+     * @param time Animation time in milliseconds
+     *
+     * @author Oleh Haidaienko | https://stackoverflow.com/a/63253518/2445763
+     * @since 29.07.2020
+     */
+    fun swipeRecyclerViewItem(
+        recyclerView: RecyclerView,
+        index: Int,
+        distance: Int,
+        direction: Int,
+        time: Long
+    ) {
+        val childView = recyclerView.getChildAt(index) ?: return
+        val x = childView.width / 2F
+        val viewLocation = IntArray(2)
+        childView.getLocationInWindow(viewLocation)
+        val y = (viewLocation[1] + childView.height) / 2F
+        val downTime = SystemClock.uptimeMillis()
+        recyclerView.dispatchTouchEvent(
+            MotionEvent.obtain(
+                downTime,
+                downTime,
+                MotionEvent.ACTION_DOWN,
+                x,
+                y,
+                0
+            )
+        )
+        ValueAnimator.ofInt(0, distance).apply {
+            duration = time
+            addUpdateListener {
+                val dX = it.animatedValue as Int
+                val mX = when (direction) {
+                    ItemTouchHelper.END -> x + dX
+                    ItemTouchHelper.START -> x - dX
+                    else -> 0F
+                }
+                recyclerView.dispatchTouchEvent(
+                    MotionEvent.obtain(
+                        downTime,
+                        SystemClock.uptimeMillis(),
+                        MotionEvent.ACTION_MOVE,
+                        mX,
+                        y,
+                        0
+                    )
+                )
+            }
+        }.start()
     }
 }
 

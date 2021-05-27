@@ -18,6 +18,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import name.lmj0011.courierlocker.database.Apartment
 import name.lmj0011.courierlocker.databinding.ListItemMapBinding
 import name.lmj0011.courierlocker.fragments.MapsFragmentDirections
+import name.lmj0011.courierlocker.fragments.bottomsheets.BottomSheetNavigableBuildingsFragment
 import name.lmj0011.courierlocker.fragments.dialogs.DeleteApartmentDialogFragment
 import name.lmj0011.courierlocker.fragments.dialogs.NavigateToAptBuildingDialogFragment
 import name.lmj0011.courierlocker.helpers.ListLock
@@ -60,8 +61,6 @@ class MapListAdapter(private val clickListener: MapListener, private val parentF
         }
 
         private fun getNormalViewBindings(clickListener: MapListener, apt: Apartment?) {
-            val popup = PopupMenu(binding.root.context, binding.root)
-
             apt?.let {
                 binding.apartment = apt
                 binding.aptNameTextView.text = apt.name
@@ -80,33 +79,10 @@ class MapListAdapter(private val clickListener: MapListener, private val parentF
                     binding.buildingImageBtn.visibility = ImageButton.GONE
                 }
 
-                // ref: https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.comparisons/natural-order.html
-                val lengthThenNatural = compareBy<String> { it.length }
-                    .then(naturalOrder())
-
-                apt.buildings.filter { it.number != null }.map { it.number }.sortedWith(lengthThenNatural).forEach {
-                    popup.menu.add(it)
-                }
-
-                popup.setOnMenuItemClickListener {
-                    val buildNumber = it.title.toString()
-
-                    val bld = apt.buildings.filter {
-                        it.number == buildNumber
-                    }.firstOrNull()
-
-                    bld?.let { building ->
-                        // Create an instance of the dialog fragment and show it
-                        val dialog = NavigateToAptBuildingDialogFragment(building, apt.name)
-                        dialog.show(parentFragment.childFragmentManager, "NavigateToAptBuildingDialogFragment")
-                    }
-
-                    true
-                }
-
                 binding.buildingImageBtn.setOnClickListener {
                     ListLock.lock()
-                    popup.show()
+                    BottomSheetNavigableBuildingsFragment(apt)
+                        .show(parentFragment.childFragmentManager, "BottomSheetNavigableBuildingsFragment")
                 }
 
                 binding.aptMapImageBtn.setOnClickListener {

@@ -41,10 +41,18 @@
             app:srcCompat="@drawable/ic_delete" />
 
         <ImageButton
-            android:id="@+id/aptMapImageBtn"
+            android:id="@+id/gateCodeImageBtn"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             app:layout_constraintStart_toEndOf="@+id/deleteImageBtn"
+            app:layout_constraintTop_toBottomOf="@+id/aptAddressTextView"
+            app:srcCompat="@drawable/ic_menu_dialpad" />
+
+        <ImageButton
+            android:id="@+id/aptMapImageBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            app:layout_constraintStart_toEndOf="@+id/gateCodeImageBtn"
             app:layout_constraintTop_toBottomOf="@+id/aptAddressTextView"
             app:srcCompat="@drawable/ic_map" />
 
@@ -56,15 +64,6 @@
             app:layout_constraintStart_toEndOf="@+id/aptMapImageBtn"
             app:layout_constraintTop_toBottomOf="@+id/aptAddressTextView"
             app:srcCompat="@drawable/ic_menu_maps" />
-
-
-        <ImageButton
-            android:id="@+id/gateCodeImageBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            app:layout_constraintStart_toEndOf="@+id/buildingImageBtn"
-            app:layout_constraintTop_toBottomOf="@+id/aptAddressTextView"
-            app:srcCompat="@drawable/ic_menu_dialpad" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

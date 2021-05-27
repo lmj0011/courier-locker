@@ -10,10 +10,12 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import kotlinx.android.synthetic.main.bottomsheet_fragment_buildings.*
 import name.lmj0011.courierlocker.*
 import name.lmj0011.courierlocker.database.*
 import name.lmj0011.courierlocker.databinding.FragmentBubbleCurrentStatusBinding
 import name.lmj0011.courierlocker.fragments.bottomsheets.BottomSheetCreateTripBubbleFragment
+import name.lmj0011.courierlocker.fragments.bottomsheets.BottomSheetNavigableBuildingsFragment
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.Util
 import name.lmj0011.courierlocker.helpers.launchIO
@@ -28,6 +30,7 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
     private lateinit var binding: FragmentBubbleCurrentStatusBinding
     private lateinit var locationHelper: LocationHelper
     private lateinit var bottomSheetCreateTripBubbleFragment: BottomSheetCreateTripBubbleFragment
+    private lateinit var bottomSheetNavigableBuildingsFragment: BottomSheetNavigableBuildingsFragment
     lateinit var gateCodeViewModel: GateCodeViewModel
     lateinit var tripViewModel: TripViewModel
     lateinit var apartmentViewModel: ApartmentViewModel
@@ -51,7 +54,7 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
                 gc.latitude,
                 gc.longitude
             )
-        }.take(3).toMutableList()
+        }.take(5).toMutableList()
 
         recentGateCodesListIterator = listOfRecentGateCodes.listIterator()
 
@@ -172,6 +175,11 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
             }
         }
 
+        binding.buildingsButton.setOnClickListener {
+            bottomSheetNavigableBuildingsFragment
+                .show(childFragmentManager, "BottomSheetNavigableBuildingsFragment")
+        }
+
         binding.nextGateCodeImageButton.setOnClickListener {
             /**
              * disable this observer for undisturbed navigating the recentGateCodesList,
@@ -289,6 +297,15 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
 
         if (apt != null) {
             binding.openMapButton.visibility = View.VISIBLE
-        } else binding.openMapButton.visibility = View.GONE
+
+            if (apt.buildings.size > 0) {
+                binding.buildingsButton.visibility = View.VISIBLE
+                bottomSheetNavigableBuildingsFragment = BottomSheetNavigableBuildingsFragment(apt)
+            } else binding.buildingsButton.visibility = View.GONE
+
+        } else {
+            binding.openMapButton.visibility = View.GONE
+            binding.buildingsButton.visibility = View.GONE
+        }
     }
 }
