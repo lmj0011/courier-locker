@@ -52,8 +52,8 @@ class TripsFragment : Fragment(R.layout.fragment_trips),
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mainActivity = requireActivity() as MainActivity
         setHasOptionsMenu(true)
+        mainActivity = requireActivity() as MainActivity
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity)
         val application = requireNotNull(this.activity).application
@@ -61,14 +61,19 @@ class TripsFragment : Fragment(R.layout.fragment_trips),
         viewModelFactory = TripViewModelFactory(dataSource, application)
         tripViewModel = ViewModelProviders.of(this, viewModelFactory).get(TripViewModel::class.java)
 
-        mainActivity.showFabAndSetListener({
-            findNavController()
-                .navigate(TripsFragmentDirections.actionTripsFragmentToCreateTripFragment())
-        }, R.drawable.ic_fab_add)
-        mainActivity.supportActionBar?.subtitle = null
-
         setupBinding(view)
         setupObservers()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        mainActivity.showFabAndSetListener({
+            this.findNavController()
+                .navigate(TripsFragmentDirections.actionTripsFragmentToCreateTripFragment())
+        }, R.drawable.ic_fab_add)
+
+        mainActivity.supportActionBar?.subtitle = null
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
