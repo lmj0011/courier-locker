@@ -7,12 +7,12 @@ import android.text.TextWatcher
 import android.view.*
 import android.widget.*
 import androidx.core.view.children
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
-import br.com.simplepass.loadingbutton.presentation.State
 import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.MainActivity
@@ -42,7 +42,7 @@ class CreateTripFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = DataBindingUtil.inflate(
             inflater, R.layout.fragment_create_trip, container, false)
 
@@ -74,7 +74,7 @@ class CreateTripFragment : Fragment() {
             }
         }
 
-        binding.createTripSaveCircularProgressButton.setOnClickListener(this::saveButtonOnClickListener)
+        binding.createTripSaveButton.setOnClickListener(this::saveButtonOnClickListener)
         binding.createTripAddStopButton.setOnClickListener{
             addStop()
         }
@@ -88,16 +88,13 @@ class CreateTripFragment : Fragment() {
         })
 
         tripViewModel.trips.observe(viewLifecycleOwner, Observer {
-            val btnState = binding.createTripSaveCircularProgressButton.getState()
-
-            // revert button animation and navigate back to Trips
-            if (btnState == State.MORPHING || btnState == State.PROGRESS) {
-                binding.createTripSaveCircularProgressButton.revertAnimation()
+            if(!binding.createTripSaveButton.isEnabled) {
+                hideProgressBar()
                 findNavController().navigateUp()
             }
         })
 
-        tripViewModel.errorMsg.observe(viewLifecycleOwner, Observer {
+        tripViewModel.errorMsg.observe(viewLifecycleOwner, {
             if (it.isNotBlank()) mainActivity.showToastMessage(it)
         })
 
@@ -221,8 +218,20 @@ class CreateTripFragment : Fragment() {
         }
     }
 
+    private fun showProgressBar() {
+        binding.progressBar.isIndeterminate = true
+        binding.progressBar.isVisible = true
+    }
+
+    private fun hideProgressBar() {
+        binding.progressBar.isVisible = false
+    }
+
     @Suppress("UNUSED_PARAMETER")
     private fun saveButtonOnClickListener(v: View) {
+        showProgressBar()
+        binding.createTripSaveButton.isEnabled = false
+
         var payAmount = binding.payAmountEditText.text.toString()
         val gig = binding.gigSpinner.selectedItem.toString()
         val layout: LinearLayout = binding.createTripFragmentLinearLayout
@@ -235,23 +244,21 @@ class CreateTripFragment : Fragment() {
         when{
             arrayOfStops.isEmpty() -> {
                 mainActivity.showToastMessage("This trip has no stops, cannot save.")
+                binding.createTripSaveButton.isEnabled = true
             }
             else -> {
-                var pickupAddress = arrayOfStops.first().address
-                var pickupLat = arrayOfStops.first().latitude
-                var pickupLong = arrayOfStops.first().longitude
+                val pickupAddress = arrayOfStops.first().address
+                val pickupLat = arrayOfStops.first().latitude
+                val pickupLong = arrayOfStops.first().longitude
 
-                var dropOffAddress = arrayOfStops.last().address
-                var dropOffLat = arrayOfStops.last().latitude
-                var dropOffLong = arrayOfStops.last().longitude
+                val dropOffAddress = arrayOfStops.last().address
+                val dropOffLat = arrayOfStops.last().latitude
+                val dropOffLong = arrayOfStops.last().longitude
 
 
                 if(!this.tripViewModel.validatePayAmount(payAmount)) {
                     payAmount = "0"
                 }
-
-                binding.createTripSaveCircularProgressButton.isEnabled = false
-                binding.createTripSaveCircularProgressButton.startAnimation()
 
                 this.tripViewModel.insertTrip(
                     pickupAddress,

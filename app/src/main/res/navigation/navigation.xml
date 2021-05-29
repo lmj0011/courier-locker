@@ -95,19 +95,12 @@
             android:name="name.lmj0011.courierlocker.fragments.MapsFragment"
             android:label="Maps" >
         <action
-                android:id="@+id/action_mapsFragment_to_editMapFeedsFragment"
-                app:destination="@id/editMapFeedsFragment" />
-        <action
                 android:id="@+id/action_mapsFragment_to_editAptBuildingsMapsFragment"
                 app:destination="@id/editAptBuildingsMapsFragment" />
         <action
                 android:id="@+id/action_mapsFragment_to_createOrEditApartmentMapFragment"
                 app:destination="@id/createOrEditApartmentMapFragment" />
     </fragment>
-    <fragment
-            android:id="@+id/editMapFeedsFragment"
-            android:name="name.lmj0011.courierlocker.fragments.EditMapFeedsFragment"
-            android:label="Map Feed List" />
     <fragment
             android:id="@+id/editAptBuildingsMapsFragment"
             android:name="name.lmj0011.courierlocker.fragments.EditAptBuildingsMapsFragment"

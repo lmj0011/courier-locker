@@ -7,13 +7,13 @@ import android.text.TextWatcher
 import android.view.*
 import android.widget.*
 import androidx.core.view.children
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
-import br.com.simplepass.loadingbutton.presentation.State
 import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.MainActivity
@@ -48,7 +48,7 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = DataBindingUtil.inflate(
             inflater, R.layout.fragment_edit_trip, container, false)
 
@@ -72,19 +72,19 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
 
         this.tripViewModel.setTrip(args.tripId)
 
-        binding.editTripSaveCircularProgressButton.setOnClickListener(this::saveButtonOnClickListener)
+        binding.editTripSaveButton.setOnClickListener(this::saveButtonOnClickListener)
         binding.editTripAddStopButton.setOnClickListener{
             addStop()
         }
 
-        binding.editTripDeleteCircularProgressButton.setOnClickListener {
+        binding.editTripDeleteButton.setOnClickListener {
             val dialog = DeleteTripDialogFragment()
             dialog.show(childFragmentManager, "DeleteTripDialogFragment")
 
         }
 
 
-        tripViewModel.payAmountValidated.observe(viewLifecycleOwner, Observer {
+        tripViewModel.payAmountValidated.observe(viewLifecycleOwner, {
             it?.let {
                 if(!it){
                     mainActivity.showToastMessage("No amount was entered.")
@@ -92,17 +92,14 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
             }
         })
 
-        tripViewModel.trips.observe(viewLifecycleOwner, Observer {
-            val btnState = binding.editTripSaveCircularProgressButton.getState()
-
-            // revert button animation and navigate back to Trips
-            if (btnState == State.MORPHING || btnState == State.PROGRESS) {
-                binding.editTripSaveCircularProgressButton.revertAnimation()
+        tripViewModel.trips.observe(viewLifecycleOwner, {
+            if (!binding.editTripSaveButton.isEnabled || !binding.editTripDeleteButton.isEnabled) {
+                hideProgressBar()
                 findNavController().navigateUp()
             }
         })
 
-        tripViewModel.errorMsg.observe(viewLifecycleOwner, Observer {
+        tripViewModel.errorMsg.observe(viewLifecycleOwner, {
             if (it.isNotBlank()) mainActivity.showToastMessage(it)
         })
 
@@ -143,9 +140,9 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
 
     override fun onDialogPositiveClick(dialog: DialogFragment) {
         // User touched the dialog's positive button
+        showProgressBar()
+        binding.editTripDeleteButton.isEnabled = false
         tripViewModel.deleteTrip(this.trip!!.id)
-        mainActivity.showToastMessage("deleted Trip")
-        findNavController().navigateUp()
     }
 
     override fun onDialogNegativeClick(dialog: DialogFragment) {
@@ -278,8 +275,20 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
         }
     }
 
+    private fun showProgressBar() {
+        binding.progressBar.isIndeterminate = true
+        binding.progressBar.isVisible = true
+    }
+
+    private fun hideProgressBar() {
+        binding.progressBar.isVisible = false
+    }
+
     @Suppress("UNUSED_PARAMETER")
     private fun saveButtonOnClickListener(v: View) {
+        showProgressBar()
+        binding.editTripSaveButton.isEnabled = false
+
         var payAmount = binding.payAmountEditText.text.toString()
         val gig = binding.gigSpinner.selectedItem.toString()
         val layout: LinearLayout = binding.editTripFragmentLinearLayout
@@ -293,21 +302,18 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
                 mainActivity.showToastMessage("This trip has no stops, cannot save.")
             }
             else -> {
-                var pickupAddress = arrayOfStops.first().address
-                var pickupLat = arrayOfStops.first().latitude
-                var pickupLong = arrayOfStops.first().longitude
+                val pickupAddress = arrayOfStops.first().address
+                val pickupLat = arrayOfStops.first().latitude
+                val pickupLong = arrayOfStops.first().longitude
 
-                var dropOffAddress = arrayOfStops.last().address
-                var dropOffLat = arrayOfStops.last().latitude
-                var dropOffLong = arrayOfStops.last().longitude
+                val dropOffAddress = arrayOfStops.last().address
+                val dropOffLat = arrayOfStops.last().latitude
+                val dropOffLong = arrayOfStops.last().longitude
 
 
                 if(!this.tripViewModel.validatePayAmount(payAmount)) {
                     payAmount = "0"
                 }
-
-                binding.editTripSaveCircularProgressButton.isEnabled = false
-                binding.editTripSaveCircularProgressButton.startAnimation()
 
                 this.trip?.let {
                     it.pickupAddress = pickupAddress

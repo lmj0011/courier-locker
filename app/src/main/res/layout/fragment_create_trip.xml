@@ -15,6 +15,18 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/progressBar"
+            style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:indicatorColor="@color/colorAccent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
 
         <ScrollView
                 android:id="@+id/createTripFragmentScrollView"
@@ -22,7 +34,7 @@
                 android:layout_height="250dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                app:layout_constraintTop_toBottomOf="@+id/progressBar">
 
             <LinearLayout
                     android:id="@+id/createTripFragmentLinearLayout"
@@ -33,16 +45,18 @@
             </LinearLayout>
         </ScrollView>
 
-        <br.com.simplepass.loadingbutton.customViews.CircularProgressButton
-                android:id="@+id/createTripSaveCircularProgressButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="#D6D7D7"
-                android:text="Save"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/guideline3"
-                app:spinning_bar_color="@android:color/white" />
+        <Button
+            android:id="@+id/createTripSaveButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/shape_default_button_background"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp"
+            android:text="Save"
+            android:textColor="@color/colorPrimary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/guideline3" />
 
         <Spinner
                 android:id="@+id/gigSpinner"
@@ -68,13 +82,16 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/createTripAddStopButton" />
 
+
         <Button
             android:id="@+id/createTripAddStopButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:background="@drawable/shape_default_button_background"
             android:layout_marginStart="32dp"
             android:layout_marginEnd="32dp"
             android:text="Add Stop"
+            android:textColor="@color/colorPrimary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/createTripFragmentScrollView" />

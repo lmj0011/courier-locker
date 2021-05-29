@@ -17,6 +17,40 @@
             android:focusable="true"
             android:focusableInTouchMode="true">
 
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/progressBar"
+            style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:indicatorColor="@color/colorAccent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/editCustomerGoodImpressionImageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/editCustomerBadImpressionImageView"
+            app:layout_constraintTop_toBottomOf="@+id/progressBar"
+            app:layout_constraintVertical_bias=".2"
+            app:srcCompat="@drawable/ic_happy_face" />
+
+        <ImageView
+            android:id="@+id/editCustomerBadImpressionImageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/editCustomerGoodImpressionImageView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/progressBar"
+            app:layout_constraintVertical_bias=".2"
+            app:srcCompat="@drawable/ic_sad_face" />
+
         <AutoCompleteTextView
                 android:id="@+id/editCustomerAddressAutoCompleteTextView"
                 android:layout_width="0dp"
@@ -40,14 +74,16 @@
                 app:layout_constraintTop_toBottomOf="@+id/editCustomerAddressAutoCompleteTextView" />
 
         <Button
-                android:id="@+id/editCustomerSaveButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="117dp"
-                android:text="Save"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/editCustomerDeleteButton"
-                app:layout_constraintTop_toBottomOf="@+id/editCustomerNoteEditText" />
+            android:id="@+id/editCustomerSaveButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/shape_default_button_background"
+            android:layout_marginStart="117dp"
+            android:text="Save"
+            android:textColor="@color/colorPrimary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/editCustomerDeleteButton"
+            app:layout_constraintTop_toBottomOf="@+id/editCustomerNoteEditText" />
 
         <ImageView
                 android:id="@+id/editCustomerInsertMyLocationButton"
@@ -70,36 +106,16 @@
                 app:layout_constraintTop_toBottomOf="@+id/editCustomerGoodImpressionImageView"
                 app:layout_constraintVertical_bias=".1" />
 
-        <ImageView
-                android:id="@+id/editCustomerGoodImpressionImageView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/editCustomerBadImpressionImageView"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias=".2"
-                app:srcCompat="@drawable/ic_happy_face" />
-
-        <ImageView
-                android:id="@+id/editCustomerBadImpressionImageView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/editCustomerGoodImpressionImageView"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias=".2"
-                app:srcCompat="@drawable/ic_sad_face" />
-
         <Button
-                android:id="@+id/editCustomerDeleteButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Delete"
-                app:layout_constraintEnd_toStartOf="@+id/editCustomerSaveButton"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/editCustomerNoteEditText" />
+            android:id="@+id/editCustomerDeleteButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/shape_default_button_background"
+            android:text="Delete"
+            android:textColor="@color/colorPrimary"
+            app:layout_constraintEnd_toStartOf="@+id/editCustomerSaveButton"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/editCustomerNoteEditText" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

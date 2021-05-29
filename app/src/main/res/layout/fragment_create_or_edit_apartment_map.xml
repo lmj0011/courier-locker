@@ -15,6 +15,27 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/progressBar"
+            style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:indicatorColor="@color/colorAccent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/latitudeHiddenTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/progressBar"/>
+
         <EditText
                 android:id="@+id/createApartmentMapNameEditText"
                 android:layout_width="0dp"
@@ -38,14 +59,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/createApartmentMapNameEditText" />
 
-        <TextView
-                android:id="@+id/latitudeHiddenTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
                 android:id="@+id/longitudeHiddenTextView"
@@ -56,17 +69,18 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-        <br.com.simplepass.loadingbutton.customViews.CircularProgressButton
-                android:id="@+id/createApartmentMapCircularProgressButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="200dp"
-                android:background="#D6D7D7"
-                android:text="Save"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/createApartmentMapAddressAutoCompleteTextView"
-                app:spinning_bar_color="@android:color/white" />
+
+        <Button
+            android:id="@+id/createApartmentMapSaveButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/shape_default_button_background"
+            android:layout_marginTop="200dp"
+            android:text="Save"
+            android:textColor="@color/colorPrimary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/createApartmentMapAddressAutoCompleteTextView" />
 
         <ImageView
                 android:id="@+id/createApartmentMapInsertMyLocationButton"

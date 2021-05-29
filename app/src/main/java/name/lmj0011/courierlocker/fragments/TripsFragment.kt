@@ -9,7 +9,6 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
@@ -51,24 +50,6 @@ class TripsFragment : Fragment(R.layout.fragment_trips),
     private var fragmentJob: Job = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
 
-    private val drawerLayoutListener = object: DrawerLayout.DrawerListener {
-        override fun onDrawerOpened(drawerView: View) {}
-
-        override fun onDrawerClosed(drawerView: View) {
-            Timber.d("onDrawerClosed")
-            launchIO {
-                withUIContext { updateTodaysTotalMoneyUI() }
-                delay(500L)
-                withUIContext { observeTrips() }
-            }
-        }
-
-        override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
-
-        override fun onDrawerStateChanged(newState: Int) {}
-
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mainActivity = requireActivity() as MainActivity
@@ -89,30 +70,6 @@ class TripsFragment : Fragment(R.layout.fragment_trips),
         setupBinding(view)
         setupObservers()
     }
-
-    override fun onResume() {
-        super.onResume()
-
-        val application = mainActivity.application
-        val dataSource = CourierLockerDatabase.getInstance(application).tripDao
-        viewModelFactory = TripViewModelFactory(dataSource, application)
-        tripViewModel = ViewModelProviders.of(this, viewModelFactory).get(TripViewModel::class.java)
-
-        mainActivity.binding.drawerLayout.addDrawerListener(drawerLayoutListener)
-
-        if(mainActivity.binding.drawerLayout.isOpen) {
-            // let drawerLayoutListener handle UI changes
-        } else {
-            updateTodaysTotalMoneyUI()
-            observeTrips()
-        }
-    }
-
-    override fun onPause() {
-        mainActivity.binding.drawerLayout.removeDrawerListener(drawerLayoutListener)
-        super.onPause()
-    }
-
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
@@ -270,6 +227,8 @@ class TripsFragment : Fragment(R.layout.fragment_trips),
                 this@TripsFragment.toggleSearch(mainActivity, binding.tripsSearchView, false)
             }
         }
+
+        updateTodaysTotalMoneyUI()
     }
 
     private fun setupObservers() {

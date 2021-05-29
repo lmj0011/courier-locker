@@ -9,13 +9,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
-import br.com.simplepass.loadingbutton.presentation.State
 import kotlinx.android.synthetic.main.fragment_create_or_edit_apartment_map.view.*
 import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.CourierLockerApplication
@@ -176,16 +176,13 @@ class CreateOrEditApartmentMapFragment : Fragment() {
         //////////////////
 
         apartmentViewModel.apartments.observe(viewLifecycleOwner, Observer {
-            val btnState = binding.createApartmentMapCircularProgressButton.getState()
-
-            // revert button animation and navigate back to Trips
-            if (btnState == State.MORPHING || btnState == State.PROGRESS) {
-                binding.createApartmentMapCircularProgressButton.revertAnimation()
-                this.findNavController().navigate(R.id.mapsFragment)
+            if(!binding.createApartmentMapSaveButton.isEnabled) {
+                hideProgressBar()
+                findNavController().navigate(R.id.mapsFragment)
             }
         })
 
-        binding.createApartmentMapCircularProgressButton.setOnClickListener(this::saveButtonOnClickListener)
+        binding.createApartmentMapSaveButton.setOnClickListener(this::saveButtonOnClickListener)
 
         binding.createApartmentMapAddressAutoCompleteTextView.requestFocus()
 
@@ -210,8 +207,20 @@ class CreateOrEditApartmentMapFragment : Fragment() {
 
     private fun applyPreferences() {}
 
+    private fun showProgressBar() {
+        binding.progressBar.isIndeterminate = true
+        binding.progressBar.isVisible = true
+    }
+
+    private fun hideProgressBar() {
+        binding.progressBar.isVisible = false
+    }
+
     @Suppress("UNUSED_PARAMETER")
     private fun saveButtonOnClickListener(v: View) {
+        showProgressBar()
+        binding.createApartmentMapSaveButton.isEnabled = false
+
         val apt = selectedApt.value
         val name = binding.createApartmentMapNameEditText.text.toString()
         val address: String = binding.createApartmentMapAddressAutoCompleteTextView.text.toString()
@@ -232,9 +241,6 @@ class CreateOrEditApartmentMapFragment : Fragment() {
 
             this.apartmentViewModel.insertApartments(mutableListOf(apt))
         }
-
-        binding.createApartmentMapCircularProgressButton.isEnabled = false
-        binding.createApartmentMapCircularProgressButton.startAnimation()
         mainActivity.hideKeyBoard(v.rootView)
     }
 }

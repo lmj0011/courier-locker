@@ -3,7 +3,6 @@ package name.lmj0011.courierlocker.fragments
 
 import android.location.Address
 import android.os.Bundle
-import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import androidx.fragment.app.Fragment
@@ -11,12 +10,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.CoroutineScope
@@ -83,7 +81,14 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
 
         }
 
-        customerViewModel.customer.observe(viewLifecycleOwner, Observer {
+        customerViewModel.customers.observe(viewLifecycleOwner, {
+            if (!binding.editCustomerSaveButton.isEnabled || !binding.editCustomerDeleteButton.isEnabled) {
+                hideProgressBar()
+                findNavController().navigateUp()
+            }
+        })
+
+        customerViewModel.customer.observe(viewLifecycleOwner, {
             this.customer  = it
             mainActivity.supportActionBar?.subtitle = customer?.name
 
@@ -186,9 +191,9 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
 
     override fun onDialogPositiveClick(dialog: DialogFragment) {
         // User touched the dialog's positive button
-        this.customerViewModel.deleteCustomer(this.customer!!.id)
-        mainActivity.showToastMessage("deleted Customer")
-        this.findNavController().navigate(R.id.customersFragment)
+        showProgressBar()
+        binding.editCustomerDeleteButton.isEnabled = false
+        customerViewModel.deleteCustomer(this.customer!!.id)
     }
 
     override fun onDialogNegativeClick(dialog: DialogFragment) {
@@ -256,8 +261,20 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
 
     }
 
+    private fun showProgressBar() {
+        binding.progressBar.isIndeterminate = true
+        binding.progressBar.isVisible = true
+    }
+
+    private fun hideProgressBar() {
+        binding.progressBar.isVisible = false
+    }
+
     @Suppress("UNUSED_PARAMETER")
     private fun saveButtonOnClickListener(v: View) {
+        showProgressBar()
+        binding.editCustomerSaveButton.isEnabled = false
+
         val name = binding.editCustomerNameEditText.text.toString()
         val address = binding.editCustomerAddressAutoCompleteTextView.text.toString()
         val note = binding.editCustomerNoteEditText.text.toString()

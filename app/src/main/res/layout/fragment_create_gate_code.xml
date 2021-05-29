@@ -15,6 +15,18 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/progressBar"
+            style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:indicatorColor="@color/colorAccent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
         <AutoCompleteTextView
                 android:id="@+id/createGateCodeAddressAutoCompleteTextView"
                 android:layout_width="0dp"
@@ -24,7 +36,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/createGateCodeInsertMyLocationButton"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/progressBar"
                 app:layout_constraintVertical_bias="0.25" />
 
         <TextView
@@ -107,13 +119,15 @@
         </LinearLayout>
 
         <Button
-                android:id="@+id/createGateCodeSaveButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Save"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/createGateCodeFragmentLinearLayout" />
+            android:id="@+id/createGateCodeSaveButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/shape_default_button_background"
+            android:text="Save"
+            android:textColor="@color/colorPrimary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/createGateCodeFragmentLinearLayout" />
 
         <ImageView
                 android:id="@+id/createGateCodeInsertMyLocationButton"

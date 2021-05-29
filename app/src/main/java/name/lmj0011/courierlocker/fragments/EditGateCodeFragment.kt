@@ -6,6 +6,7 @@ import android.text.InputType
 import android.view.*
 import androidx.fragment.app.Fragment
 import android.widget.*
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
@@ -63,6 +64,13 @@ class EditGateCodeFragment : Fragment(), DeleteGateCodeDialogFragment.NoticeDial
         binding.gateCodeViewModel = gateCodeViewModel
 
         mainActivity.hideFab()
+
+        gateCodeViewModel.gateCodes.observe(viewLifecycleOwner, {
+            if(!binding.editGateCodeSaveButton.isEnabled || !binding.editGateCodeDeleteButton.isEnabled) {
+                hideProgressBar()
+                findNavController().navigateUp()
+            }
+        })
 
         gateCodeViewModel.gateCode.observe(viewLifecycleOwner, {
             it?.let { gc ->
@@ -123,9 +131,9 @@ class EditGateCodeFragment : Fragment(), DeleteGateCodeDialogFragment.NoticeDial
     }
 
     override fun onDialogPositiveClick(dialog: DialogFragment) {
+        showProgressBar()
+        binding.editGateCodeDeleteButton.isEnabled = false
         gateCodeViewModel.deleteGateCode(gateCode.id)
-        mainActivity.showToastMessage("Deleted a gate code entry")
-        findNavController().navigate(R.id.gateCodesFragment)
     }
 
     override fun onDialogNegativeClick(dialog: DialogFragment) {
@@ -184,8 +192,20 @@ class EditGateCodeFragment : Fragment(), DeleteGateCodeDialogFragment.NoticeDial
         scroll.scrollTo(0, scroll.height)
     }
 
+    private fun showProgressBar() {
+        binding.progressBar.isIndeterminate = true
+        binding.progressBar.isVisible = true
+    }
+
+    private fun hideProgressBar() {
+        binding.progressBar.isVisible = false
+    }
+
     @Suppress("UNUSED_PARAMETER")
     private fun saveButtonOnClickListener(v: View) {
+        showProgressBar()
+        binding.editGateCodeSaveButton.isEnabled = false
+
         val codesContainer: LinearLayout = binding.editGateCodeFragmentLinearLayout
         val address: String = binding.addressTextView.text.toString()
         val codes: ArrayList<String> = arrayListOf()
@@ -215,7 +235,6 @@ class EditGateCodeFragment : Fragment(), DeleteGateCodeDialogFragment.NoticeDial
         this.gateCodeViewModel.updateGateCode(gateCode)
         mainActivity.showToastMessage("Updated gate code")
         mainActivity.hideKeyBoard(v.rootView)
-        findNavController().navigate(R.id.gateCodesFragment)
     }
 
 

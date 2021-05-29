@@ -3,7 +3,6 @@ package name.lmj0011.courierlocker.fragments
 
 import android.location.Address
 import android.os.Bundle
-import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import androidx.fragment.app.Fragment
@@ -11,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
@@ -50,7 +50,7 @@ class CreateGateCodeFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = DataBindingUtil.inflate(
             inflater, R.layout.fragment_create_gate_code, container, false)
 
@@ -68,6 +68,13 @@ class CreateGateCodeFragment : Fragment() {
 
         binding.createGateCodeSaveButton.setOnClickListener(this::saveButtonOnClickListener)
 
+
+        gateCodeViewModel.gateCodes.observe(viewLifecycleOwner, {
+            if (!binding.createGateCodeSaveButton.isEnabled) {
+                hideProgressBar()
+                findNavController().navigateUp()
+            }
+        })
 
         /// Auto Complete Text View Adapter setup
 
@@ -153,8 +160,20 @@ class CreateGateCodeFragment : Fragment() {
         addressAutoCompleteJob?.cancel()
     }
 
+    private fun showProgressBar() {
+        binding.progressBar.isIndeterminate = true
+        binding.progressBar.isVisible = true
+    }
+
+    private fun hideProgressBar() {
+        binding.progressBar.isVisible = false
+    }
+
     @Suppress("UNUSED_PARAMETER")
     private fun saveButtonOnClickListener(v: View) {
+        showProgressBar()
+        binding.createGateCodeSaveButton.isEnabled = false
+
         val codesContainer: LinearLayout = binding.createGateCodeFragmentLinearLayout
         val address: String = binding.createGateCodeAddressAutoCompleteTextView.text.toString()
         val codes: ArrayList<String> = arrayListOf()
@@ -175,9 +194,7 @@ class CreateGateCodeFragment : Fragment() {
         }
 
         this.gateCodeViewModel.insertGateCode(address, codes.toTypedArray(), lat, lng)
-        mainActivity.showToastMessage("New gate code added")
         mainActivity.hideKeyBoard(v.rootView)
-        this.findNavController().navigate(R.id.gateCodesFragment)
     }
 
 

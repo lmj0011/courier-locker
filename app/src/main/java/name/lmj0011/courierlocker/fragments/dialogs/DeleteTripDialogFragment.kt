@@ -1,9 +1,7 @@
 package name.lmj0011.courierlocker.fragments.dialogs
 
-import android.app.Activity
 import android.app.Dialog
 import android.content.Context
-import android.content.DialogInterface
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
@@ -37,7 +35,7 @@ class DeleteTripDialogFragment : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return listener?.let {
             // Build the dialog and set up the button click handlers
-            val builder = AlertDialog.Builder(context!!)
+            val builder = AlertDialog.Builder(requireContext())
 
             builder
                 .setTitle("Delete this Trip?")
