@@ -3,6 +3,7 @@ package name.lmj0011.courierlocker.database
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import name.lmj0011.courierlocker.helpers.interfaces.Addressable
 
 @Entity(tableName = "apartments_table")
 data class Apartment(
@@ -22,13 +23,13 @@ data class Apartment(
     var name: String = "",
 
     @ColumnInfo(name = "address")
-    var address: String = "",
+    override var address: String = "",
 
     @ColumnInfo(name = "latitude")
-    var latitude: Double = 0.0,
+    override var latitude: Double = 0.0,
 
     @ColumnInfo(name = "longitude")
-    var longitude: Double = 0.0,
+    override var longitude: Double = 0.0,
 
     // can be omitted
     @ColumnInfo(name = "mapImageUrl")
@@ -40,4 +41,4 @@ data class Apartment(
 
     @ColumnInfo(name = "buildings")
     var buildings: MutableList<Building> = mutableListOf()
-)
+): Addressable

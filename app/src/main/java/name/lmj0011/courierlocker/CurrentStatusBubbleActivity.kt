@@ -12,6 +12,7 @@ import name.lmj0011.courierlocker.fragments.CurrentStatusBubbleFragment
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.PermissionHelper
 import org.kodein.di.instance
+import timber.log.Timber
 
 class CurrentStatusBubbleActivity: AppCompatActivity(R.layout.activity_current_status_bubble) {
     private val currentStatusFragment = CurrentStatusBubbleFragment()
@@ -36,11 +37,6 @@ class CurrentStatusBubbleActivity: AppCompatActivity(R.layout.activity_current_s
         }
     }
 
-    override fun onPostResume() {
-        super.onPostResume()
-        refreshCurrentStatusFragment()
-    }
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -53,13 +49,6 @@ class CurrentStatusBubbleActivity: AppCompatActivity(R.layout.activity_current_s
         }
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    }
-
-    fun refreshCurrentStatusFragment() {
-        supportFragmentManager.commitNow {
-            detach(currentStatusFragment)
-            attach(currentStatusFragment)
-        }
     }
 
     fun showToastMessage(message: String, duration: Int = Toast.LENGTH_SHORT) {

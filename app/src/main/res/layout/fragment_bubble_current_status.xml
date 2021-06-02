@@ -170,63 +170,55 @@
                     android:layout_marginEnd="100dp" />
 
             <TextView
-                    android:id="@+id/nearestGateCodesHeaderTextView"
+                    android:id="@+id/nearestAddressableHeaderTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="5dp"
-                    android:text="Nearby Gate Codes"
+                    android:text="Nearby Gate Codes and Maps"
                     android:textStyle="bold" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/nearestGateCodesContainer"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="@dimen/default_list_item_padding_8dp"
-                    android:visibility="gone"
-                    tools:visibility="visible">
-
-                <TextView
-                        android:id="@+id/gateCodesAddressTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textStyle="bold"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.020"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/gateCodeTextView"
-                        tools:text="Joey Diaz Ave." />
-
-                <TextView
-                        android:id="@+id/gateCodeTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="18sp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.020"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:text="#1212" />
-
-                <TextView
-                        android:id="@+id/otherGateCodesTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="12sp"
-                        android:visibility="visible"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.020"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/gateCodesAddressTextView"
-                        tools:visibility="visible" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/nearestGateCodesControlsContainer"
+                android:id="@+id/nearestAddressableContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="@dimen/default_list_item_padding_8dp"
-                android:visibility="gone"
-                tools:visibility="visible">
+                android:visibility="visible">
+
+                <TextView
+                    android:id="@+id/addressableNameTextView"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="#1212" />
+
+                <TextView
+                    android:id="@+id/addressableAddressTextView"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/addressableNameTextView"
+                    tools:text="Joey Diaz Ave." />
+
+                <TextView
+                    android:id="@+id/gateCodesTextView"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/addressableAddressTextView" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/nearestAddressableControlsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/default_list_item_padding_8dp"
+                android:visibility="visible">
 
                 <Button
                     android:id="@+id/openMapButton"
@@ -253,7 +245,7 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageButton
-                    android:id="@+id/nextGateCodeImageButton"
+                    android:id="@+id/nextAddressableImageButton"
                     style="@android:style/Widget.Material.ImageButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

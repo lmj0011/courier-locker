@@ -2,10 +2,8 @@ package name.lmj0011.courierlocker.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
-import androidx.paging.PagedList
 import androidx.paging.toLiveData
 import androidx.preference.PreferenceManager
 import androidx.sqlite.db.SimpleSQLiteQuery
@@ -40,23 +38,22 @@ class TripViewModel(
 
     var errorMsg = MutableLiveData("")
 
-    val tripsPaged: LiveData<PagedList<Trip>>
-        get() {
-            return Transformations.switchMap(filterText) { mQuery ->
-                return@switchMap if (mQuery.isNullOrEmpty()) {
-                    database.getAllTripsByThePage().toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
-                } else {
-                    val query = SimpleSQLiteQuery("SELECT * FROM trips_table, json_each(stops) WHERE pickupAddress LIKE '%$mQuery%' OR dropOffAddress LIKE '%$mQuery%' OR payAmount LIKE '%$mQuery%' OR gigName LIKE '%$mQuery%' OR json_extract(json_each.value, '\$.address') LIKE '%$mQuery%' ORDER BY id DESC")
-                    database.getAllTripsByThePageFiltered(query).toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
-                }
+    val tripsPaged = RefreshableLiveData {
+        Transformations.switchMap(filterText) { mQuery ->
+            return@switchMap if (mQuery.isNullOrEmpty()) {
+                database.getAllTripsByThePage().toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
+            } else {
+                val query = SimpleSQLiteQuery("SELECT * FROM trips_table, json_each(stops) WHERE pickupAddress LIKE '%$mQuery%' OR dropOffAddress LIKE '%$mQuery%' OR payAmount LIKE '%$mQuery%' OR gigName LIKE '%$mQuery%' OR json_extract(json_each.value, '\$.address') LIKE '%$mQuery%' ORDER BY id DESC")
+                database.getAllTripsByThePageFiltered(query).toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
             }
         }
+    }
 
     val trip = MutableLiveData<Trip?>()
 
     var payAmountValidated = MutableLiveData<Boolean?>()
 
-    var trips: LiveData<MutableList<Trip>> = database.getAllTrips()
+    val trips = RefreshableLiveData { database.getAllTrips() }
 
     fun totalMoney(): String {
         val result = database.getAllTripPayAmounts().fold(0.0) { sum, pa ->
@@ -131,8 +128,8 @@ class TripViewModel(
         }
     }
 
-    fun insertTrip(trip: Trip) {
-        launchIO {
+    fun insertTrip(trip: Trip): Job {
+        return launchIO {
             trip.apply {
                 Util.setTripTimestamp(this)
                 distance = calculateTripDistance(this)
@@ -153,25 +150,22 @@ class TripViewModel(
         gigName: String,
         stops: Array<Stop>
 
-    ) {
-        uiScope.launch {
-            val trip = Trip().apply {
-                Util.setTripTimestamp(this)
-                this.pickupAddress = pickupAddress
-                this.pickupAddressLatitude = pickupAddressLatitude
-                this.pickupAddressLongitude = pickupAddressLongitude
-                dropOffAddress?.let { this.dropOffAddress = it }
-                dropOffAddressLatitude?.let { this.dropOffAddressLatitude = it }
-                dropOffAddressLongitude?.let { this.dropOffAddressLongitude = it }
-                payAmount?.let { this.payAmount = payAmount }
-                this.gigName = gigName
-                this.stops.addAll(stops)
-            }
-
-            trip.distance = this@TripViewModel.calculateTripDistance(trip)
-            this@TripViewModel.database.insert(trip)
+    ): Job {
+        val trip = Trip().apply {
+            Util.setTripTimestamp(this)
+            this.pickupAddress = pickupAddress
+            this.pickupAddressLatitude = pickupAddressLatitude
+            this.pickupAddressLongitude = pickupAddressLongitude
+            dropOffAddress?.let { this.dropOffAddress = it }
+            dropOffAddressLatitude?.let { this.dropOffAddressLatitude = it }
+            dropOffAddressLongitude?.let { this.dropOffAddressLongitude = it }
+            payAmount?.let { this.payAmount = payAmount }
+            this.gigName = gigName
+            this.stops.addAll(stops)
         }
 
+        trip.distance = this@TripViewModel.calculateTripDistance(trip)
+        return this@TripViewModel.insertTrip(trip)
     }
 
     fun updateTrip(trip: Trip?) {

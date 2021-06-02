@@ -10,16 +10,14 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import kotlinx.android.synthetic.main.bottomsheet_fragment_buildings.*
+import com.zhuinden.livedatacombinetuplekt.combineTuple
 import name.lmj0011.courierlocker.*
 import name.lmj0011.courierlocker.database.*
 import name.lmj0011.courierlocker.databinding.FragmentBubbleCurrentStatusBinding
 import name.lmj0011.courierlocker.fragments.bottomsheets.BottomSheetCreateTripBubbleFragment
 import name.lmj0011.courierlocker.fragments.bottomsheets.BottomSheetNavigableBuildingsFragment
-import name.lmj0011.courierlocker.helpers.LocationHelper
-import name.lmj0011.courierlocker.helpers.Util
-import name.lmj0011.courierlocker.helpers.launchIO
-import name.lmj0011.courierlocker.helpers.withUIContext
+import name.lmj0011.courierlocker.helpers.*
+import name.lmj0011.courierlocker.helpers.interfaces.Addressable
 import name.lmj0011.courierlocker.viewmodels.ApartmentViewModel
 import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
 import name.lmj0011.courierlocker.viewmodels.TripViewModel
@@ -38,32 +36,15 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
     private lateinit var recentTripsListIterator: MutableListIterator<Trip>
     private lateinit var listOfRecentTrips: MutableList<Trip>
     private val mTrip = MutableLiveData<Trip?>()
+    private var resetRecentTripsOrder: Boolean = true
 
-    private lateinit var recentGateCodesListIterator: MutableListIterator<GateCode>
-    private lateinit var listOfRecentGateCodes: MutableList<GateCode>
-    private val mGateCode = MutableLiveData<GateCode?>()
-    private val latitudeObserver: Observer<Double> = Observer {
-        if (::listOfRecentGateCodes.isInitialized.not() || listOfRecentGateCodes.isNullOrEmpty()) {
-            return@Observer
-        }
-
-        listOfRecentGateCodes = listOfRecentGateCodes.sortedBy { gc ->
-            locationHelper.calculateApproxDistanceBetweenMapPoints(
-                locationHelper.lastLatitude.value!!,
-                locationHelper.lastLongitude.value!!,
-                gc.latitude,
-                gc.longitude
-            )
-        }.take(5).toMutableList()
-
-        recentGateCodesListIterator = listOfRecentGateCodes.listIterator()
-
-        recentGateCodesListIterator.next().let { gc ->
-            mGateCode.postValue(gc)
-        }
-    }
-
+    private lateinit var recentAddressablesListIterator: MutableListIterator<Addressable>
+    private var listOfRecentGateCodes = mutableListOf<GateCode>()
+    private var listOfAddressables = mutableListOf<Addressable>()
     private var listOfApartments = mutableListOf<Apartment>()
+    private val mAddressable = MutableLiveData<Addressable?>()
+
+    private val latitudeObserver: Observer<Double> = Observer { populateRecentAddressables() }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -72,23 +53,30 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
         tripViewModel = TripViewModel(CourierLockerDatabase.getInstance(application).tripDao, application)
         apartmentViewModel = ApartmentViewModel(CourierLockerDatabase.getInstance(application).apartmentDao, application)
         locationHelper = (requireContext().applicationContext as CourierLockerApplication).kodein.instance()
-        bottomSheetCreateTripBubbleFragment = BottomSheetCreateTripBubbleFragment { activity.refreshCurrentStatusFragment() }
+        bottomSheetCreateTripBubbleFragment = BottomSheetCreateTripBubbleFragment { refreshUI() }
 
         activity = requireActivity() as CurrentStatusBubbleActivity
         mTrip.postValue(null)
-        mGateCode.postValue(null)
+        mAddressable.postValue(null)
 
         setupBinding(view)
         setupObservers()
+    }
 
+    override fun onResume() {
+        super.onResume()
+        refreshUI()
+    }
+
+    private fun refreshUI() {
         launchIO {
             val total = tripViewModel.todayTotalMoney()
             val size = tripViewModel.todayCompletedTrips()
             withUIContext {
                 binding.quickStatusTextView.text = "$total | $size"
+                tripViewModel.tripsPaged.refresh()
             }
         }
-
     }
 
     private fun setupBinding(view: View) {
@@ -129,6 +117,8 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
                         if(address.isNotEmpty()) {
                             val stop = Stop(address[0].getAddressLine(0), address[0].latitude, address[0].longitude)
 
+                            resetRecentTripsOrder = false
+
                             mTrip.value?.let { trip ->
                                 trip.stops.add(stop)
                                 tripViewModel.updateTrip(trip)
@@ -159,13 +149,17 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
             }
         }
 
-        binding.nearestGateCodesContainer.setOnClickListener {
+        binding.nearestAddressableContainer.setOnClickListener {
             locationHelper.lastLatitude.observe(viewLifecycleOwner, latitudeObserver)
         }
 
         binding.openMapButton.setOnClickListener {
             listOfApartments.find { apt ->
-                apt.gateCodeId == mGateCode.value?.id
+                when (val addressable = mAddressable.value) {
+                    is GateCode -> apt.gateCodeId == addressable.id
+                    is Apartment -> apt.id == addressable.id
+                    else -> false
+                }
             }?.let { apt ->
                 val intent = Intent(context, DeepLinkActivity::class.java).apply {
                     action = MainActivity.INTENT_EDIT_APARTMENT_MAP
@@ -180,21 +174,21 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
                 .show(childFragmentManager, "BottomSheetNavigableBuildingsFragment")
         }
 
-        binding.nextGateCodeImageButton.setOnClickListener {
+        binding.nextAddressableImageButton.setOnClickListener {
             /**
              * disable this observer for undisturbed navigating the recentGateCodesList,
              * the user can tap the current gatecode to start observing nearby gatecodes again
              */
             locationHelper.lastLatitude.removeObserver(latitudeObserver)
 
-            if(::recentGateCodesListIterator.isInitialized
-                && recentGateCodesListIterator.hasNext()) {
-                val gc = recentGateCodesListIterator.withIndex().next()
-                mGateCode.postValue(gc.value)
+            if(::recentAddressablesListIterator.isInitialized
+                && recentAddressablesListIterator.hasNext()) {
+                val addr = recentAddressablesListIterator.withIndex().next()
+                mAddressable.postValue(addr.value)
             } else {
-                recentGateCodesListIterator = listOfRecentGateCodes.listIterator()
-                recentGateCodesListIterator.next().let { gc ->
-                    mGateCode.postValue(gc)
+                recentAddressablesListIterator = listOfAddressables.listIterator()
+                recentAddressablesListIterator.next().let { addressable ->
+                    mAddressable.postValue(addressable)
                 }
             }
         }
@@ -203,17 +197,24 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
     private fun setupObservers() {
         tripViewModel.tripsPaged.observe(viewLifecycleOwner, { newPagedList ->
             listOfRecentTrips = newPagedList.take(3).toMutableList()
-
             recentTripsListIterator = listOfRecentTrips.listIterator()
 
-            val trip = mTrip.value
-            if (trip != null) {
-                newPagedList.find { ele ->
-                    if(ele == null) return@find false
-                    ele.id == trip.id
-                }?.let { t ->
-                    mTrip.postValue(t)
-                }
+            /**
+             * Here we're determining whether to update the Trip currently in the view
+             * or show the first Trip in [recentTripsListIterator], which would normally
+             * mean we created a new Trip
+             *
+             * for example, we'll want to update the Trip currently in View if we performed an
+             * "Add Stop" action from the Current Status Bubble
+             */
+            val trip = listOfRecentTrips.find { ele ->
+                val targetTrip: Trip? = mTrip.value
+                (targetTrip != null && ele.id == targetTrip.id)
+            }
+
+            if (trip is Trip && !resetRecentTripsOrder) {
+                mTrip.postValue(trip)
+                resetRecentTripsOrder = true
             } else {
                 recentTripsListIterator.next().let { t ->
                     mTrip.postValue(t)
@@ -221,22 +222,23 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
             }
         })
 
-        gateCodeViewModel.gateCodes.observe(viewLifecycleOwner, { list ->
-            listOfRecentGateCodes = list
-        })
-
         locationHelper.lastLatitude.observe(viewLifecycleOwner, latitudeObserver)
 
-        apartmentViewModel.apartments.observe(viewLifecycleOwner, { list ->
-            listOfApartments = list
-        })
+        combineTuple(gateCodeViewModel.gateCodes, apartmentViewModel.apartments)
+            .observe(viewLifecycleOwner, { (gateCodes, apartments) ->
+                if (gateCodes != null && apartments != null) {
+                    listOfRecentGateCodes = gateCodes
+                    listOfApartments = apartments
+                    populateRecentAddressables()
+                }
+            })
 
         mTrip.observe(viewLifecycleOwner, { trip ->
             trip?.run { injectTripIntoView(this) }
         })
 
-        mGateCode.observe(viewLifecycleOwner, { gc ->
-            gc?.run { injectGateCodeIntoView(this) }
+        mAddressable.observe(viewLifecycleOwner, { addressable ->
+            addressable?.run { injectAddressableIntoView(this) }
         })
     }
 
@@ -247,6 +249,31 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
 
     private fun hideProgressBar() {
         binding.progressBar.isVisible = false
+    }
+
+    private fun populateRecentAddressables() {
+        launchDefault {
+            listOfAddressables = mutableListOf()
+            listOfAddressables.addAll(listOfApartments.filter { apt -> apt.gateCodeId < 1 }) // apts w/o gatecode relation
+            listOfAddressables.addAll(listOfRecentGateCodes)
+
+            listOfAddressables = listOfAddressables.sortedBy { addressable ->
+                locationHelper.calculateApproxDistanceBetweenMapPoints(
+                    locationHelper.lastLatitude.value!!,
+                    locationHelper.lastLongitude.value!!,
+                    addressable.latitude,
+                    addressable.longitude
+                )
+            }.take(5).toMutableList()
+
+            recentAddressablesListIterator = listOfAddressables.listIterator()
+
+            if(recentAddressablesListIterator.hasNext()) {
+                recentAddressablesListIterator.next().let { addressable ->
+                    mAddressable.postValue(addressable)
+                }
+            }
+        }
     }
 
     private fun injectTripIntoView(trip: Trip) {
@@ -275,37 +302,51 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
         }
     }
 
-    private fun injectGateCodeIntoView(gateCode: GateCode) {
-        if(gateCode.codes.isNotEmpty()) {
-            binding.gateCodeTextView.text = gateCode.codes[0]
-        }
+    private fun injectAddressableIntoView(addressable: Addressable) {
+        binding.addressableAddressTextView.text = Util.addressShortener(
+            address = addressable.address,
+            offset = 3
+        )
 
-        binding.gateCodesAddressTextView.text = gateCode.address
+        when(addressable) {
+            is GateCode -> {
+                if(addressable.codes.isNotEmpty()) {
+                    binding.gateCodesTextView.visibility = View.VISIBLE
+                    "gate codes: ${addressable.codes.take(4).joinToString(", ")}".also { binding.gateCodesTextView.text = it }
+                } else {
+                    "gate codes: n/a".also { binding.gateCodesTextView.text = it }
+                }
 
-        if(gateCode.codes.size > 1) {
-            binding.otherGateCodesTextView.text = gateCode.codes.joinToString(", ")
-        } else {
-            binding.otherGateCodesTextView.text = ""
-        }
+                val apt = listOfApartments.find { apt ->
+                    apt.gateCodeId == addressable.id
+                }
 
-        binding.nearestGateCodesContainer.visibility = View.VISIBLE
-        binding.nearestGateCodesControlsContainer.visibility = View.VISIBLE
+                if (apt != null) {
+                    binding.addressableNameTextView.text = apt.name
+                    binding.openMapButton.visibility = View.VISIBLE
 
-        val apt = listOfApartments.find { apt ->
-            apt.gateCodeId == gateCode.id
-        }
+                    if (apt.buildings.size > 0) {
+                        binding.buildingsButton.visibility = View.VISIBLE
+                        bottomSheetNavigableBuildingsFragment = BottomSheetNavigableBuildingsFragment(apt)
+                    } else binding.buildingsButton.visibility = View.GONE
 
-        if (apt != null) {
-            binding.openMapButton.visibility = View.VISIBLE
+                } else {
+                    binding.addressableNameTextView.text = ""
+                    binding.openMapButton.visibility = View.GONE
+                    binding.buildingsButton.visibility = View.GONE
+                }
+            }
+            is Apartment -> {
+                binding.addressableNameTextView.text = addressable.name
+                binding.gateCodesTextView.text = ""
+                binding.openMapButton.visibility = View.VISIBLE
+                "gate codes: n/a".also { binding.gateCodesTextView.text = it }
 
-            if (apt.buildings.size > 0) {
-                binding.buildingsButton.visibility = View.VISIBLE
-                bottomSheetNavigableBuildingsFragment = BottomSheetNavigableBuildingsFragment(apt)
-            } else binding.buildingsButton.visibility = View.GONE
-
-        } else {
-            binding.openMapButton.visibility = View.GONE
-            binding.buildingsButton.visibility = View.GONE
+                if (addressable.buildings.size > 0) {
+                    binding.buildingsButton.visibility = View.VISIBLE
+                    bottomSheetNavigableBuildingsFragment = BottomSheetNavigableBuildingsFragment(addressable)
+                } else binding.buildingsButton.visibility = View.GONE
+            }
         }
     }
 }

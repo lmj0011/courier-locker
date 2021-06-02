@@ -194,6 +194,9 @@ dependencies {
 
     // sqlite
     implementation 'com.github.requery:sqlite-android:3.35.4'
+
+    // https://github.com/Zhuinden/livedata-combinetuple-kt#livedata-combinetuple-kt
+    implementation 'com.github.Zhuinden:livedata-combinetuple-kt:1.2.1'
 }
 
 

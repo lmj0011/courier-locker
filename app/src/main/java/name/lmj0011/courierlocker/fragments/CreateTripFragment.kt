@@ -23,6 +23,8 @@ import name.lmj0011.courierlocker.database.Stop
 import name.lmj0011.courierlocker.databinding.FragmentCreateTripBinding
 import name.lmj0011.courierlocker.factories.TripViewModelFactory
 import name.lmj0011.courierlocker.helpers.LocationHelper
+import name.lmj0011.courierlocker.helpers.launchIO
+import name.lmj0011.courierlocker.helpers.withUIContext
 import name.lmj0011.courierlocker.viewmodels.TripViewModel
 import org.kodein.di.instance
 import kotlin.collections.ArrayList
@@ -84,13 +86,6 @@ class CreateTripFragment : Fragment() {
                 if(!it){
                     mainActivity.showToastMessage("No amount was entered.")
                 }
-            }
-        })
-
-        tripViewModel.trips.observe(viewLifecycleOwner, Observer {
-            if(!binding.createTripSaveButton.isEnabled) {
-                hideProgressBar()
-                findNavController().navigateUp()
             }
         })
 
@@ -260,17 +255,25 @@ class CreateTripFragment : Fragment() {
                     payAmount = "0"
                 }
 
-                this.tripViewModel.insertTrip(
-                    pickupAddress,
-                    pickupLat,
-                    pickupLong,
-                    dropOffAddress,
-                    dropOffLat,
-                    dropOffLong,
-                    payAmount,
-                    gig,
-                    arrayOfStops
-                )
+                launchIO {
+                    tripViewModel.insertTrip(
+                        pickupAddress,
+                        pickupLat,
+                        pickupLong,
+                        dropOffAddress,
+                        dropOffLat,
+                        dropOffLong,
+                        payAmount,
+                        gig,
+                        arrayOfStops
+                    ).join()
+
+                    withUIContext {
+                        hideProgressBar()
+                        findNavController().navigateUp()
+                    }
+                }
+
                 mainActivity.hideKeyBoard(v.rootView)
             }
         }

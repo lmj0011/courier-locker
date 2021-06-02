@@ -16,7 +16,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import kotlinx.android.synthetic.main.bottomsheet_fragment_bubble_create_trip.view.*
 import kotlinx.coroutines.delay
 import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.CurrentStatusBubbleActivity
@@ -165,7 +164,14 @@ class BottomSheetCreateTripBubbleFragment(private val dismissCallback: () -> Uni
                 stops = mutableListOf(stop)
             }
 
-            tripViewModel.insertTrip(mTrip!!)
+            launchIO {
+                tripViewModel.insertTrip(mTrip!!).join()
+
+                withUIContext {
+                    hideProgressBar()
+                    dismissDialog()
+                }
+            }
         }
 
     }
@@ -182,14 +188,6 @@ class BottomSheetCreateTripBubbleFragment(private val dismissCallback: () -> Uni
 
         tripViewModel.errorMsg.observe(viewLifecycleOwner, {
             if (it.isNotBlank()) activity.showToastMessage(it)
-        })
-
-        tripViewModel.tripsPaged.observe(viewLifecycleOwner, { newPagedList ->
-            hideProgressBar()
-            if(mTrip != null) {
-                dismissDialog()
-            }
-
         })
 
         bottomSheetDialog.behavior.addBottomSheetCallback(object :BottomSheetBehavior.BottomSheetCallback() {
