@@ -16,8 +16,8 @@ android {
         applicationId "name.lmj0011.courierlocker"
         minSdkVersion 26
         targetSdkVersion 30
-        versionCode 81
-        versionName "2.2.0-beta06"
+        versionCode 82
+        versionName "2.2.0-beta07"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
@@ -33,6 +33,7 @@ android {
         release {
             minifyEnabled true
             shrinkResources true
+            debuggable false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             resValue("bool", "DEBUG_MODE", "false")
             resValue("string", "app_build", appBuildPrefix)

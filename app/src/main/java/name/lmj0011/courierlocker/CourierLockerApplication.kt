@@ -50,7 +50,14 @@ class CourierLockerApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         Timber.plant(Timber.DebugTree())
-        Fakeit.init()
+
+        /**
+         * TODO - migrate to using https://github.com/serpro69/kotlin-faker because fakeit is
+         * abandoned, and also getting this error in the Release build
+         * https://github.com/moove-it/fakeit/issues/48
+         */
+        if(BuildConfig.DEBUG) Fakeit.init()
+
         AndroidThreeTen.init(this)
         NotificationHelper.init(this)
         PermissionHelper.checkPermissionApprovals(this)

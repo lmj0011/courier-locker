@@ -1,12 +1,8 @@
 package name.lmj0011.courierlocker.helpers
 
-import android.animation.ValueAnimator
-import android.os.SystemClock
 import android.text.Html
 import android.text.Spanned
-import android.view.MotionEvent
 import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.RecyclerView
 import name.lmj0011.courierlocker.database.GateCode
 import name.lmj0011.courierlocker.database.Trip
 import org.threeten.bp.Instant
@@ -220,51 +216,51 @@ object Util {
      * @author Oleh Haidaienko | https://stackoverflow.com/a/63253518/2445763
      * @since 29.07.2020
      */
-    fun swipeRecyclerViewItem(
-        recyclerView: RecyclerView,
-        index: Int,
-        distance: Int,
-        direction: Int,
-        time: Long
-    ) {
-        val childView = recyclerView.getChildAt(index) ?: return
-        val x = childView.width / 2F
-        val viewLocation = IntArray(2)
-        childView.getLocationInWindow(viewLocation)
-        val y = (viewLocation[1] + childView.height) / 2F
-        val downTime = SystemClock.uptimeMillis()
-        recyclerView.dispatchTouchEvent(
-            MotionEvent.obtain(
-                downTime,
-                downTime,
-                MotionEvent.ACTION_DOWN,
-                x,
-                y,
-                0
-            )
-        )
-        ValueAnimator.ofInt(0, distance).apply {
-            duration = time
-            addUpdateListener {
-                val dX = it.animatedValue as Int
-                val mX = when (direction) {
-                    ItemTouchHelper.END -> x + dX
-                    ItemTouchHelper.START -> x - dX
-                    else -> 0F
-                }
-                recyclerView.dispatchTouchEvent(
-                    MotionEvent.obtain(
-                        downTime,
-                        SystemClock.uptimeMillis(),
-                        MotionEvent.ACTION_MOVE,
-                        mX,
-                        y,
-                        0
-                    )
-                )
-            }
-        }.start()
-    }
+//    fun swipeRecyclerViewItem(
+//        recyclerView: RecyclerView,
+//        index: Int,
+//        distance: Int,
+//        direction: Int,
+//        time: Long
+//    ) {
+//        val childView = recyclerView.getChildAt(index) ?: return
+//        val x = childView.width / 2F
+//        val viewLocation = IntArray(2)
+//        childView.getLocationInWindow(viewLocation)
+//        val y = (viewLocation[1] + childView.height) / 2F
+//        val downTime = SystemClock.uptimeMillis()
+//        recyclerView.dispatchTouchEvent(
+//            MotionEvent.obtain(
+//                downTime,
+//                downTime,
+//                MotionEvent.ACTION_DOWN,
+//                x,
+//                y,
+//                0
+//            )
+//        )
+//        ValueAnimator.ofInt(0, distance).apply {
+//            duration = time
+//            addUpdateListener {
+//                val dX = it.animatedValue as Int
+//                val mX = when (direction) {
+//                    ItemTouchHelper.END -> x + dX
+//                    ItemTouchHelper.START -> x - dX
+//                    else -> 0F
+//                }
+//                recyclerView.dispatchTouchEvent(
+//                    MotionEvent.obtain(
+//                        downTime,
+//                        SystemClock.uptimeMillis(),
+//                        MotionEvent.ACTION_MOVE,
+//                        mX,
+//                        y,
+//                        0
+//                    )
+//                )
+//            }
+//        }.start()
+//    }
 }
 
 

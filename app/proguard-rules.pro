@@ -26,4 +26,9 @@
 -keep class name.lmj0011.courierlocker.database.** { *; }
 -keep class com.google.android.libraries.maps.** { *; }
 -keep interface com.google.android.libraries.maps.** { *; }
+
+# ref: https://stackoverflow.com/a/46333633/2445763
+-keep class androidx.dynamicanimation.animation.FloatPropertyCompat
+-keepclasseswithmembernames class * { @androidx.dynamicanimation.animation.FloatPropertyCompat <methods>; }
+-keepclasseswithmembernames class * { @androidx.dynamicanimation.animation.FloatPropertyCompat <fields>; }
 ##---------------End: proguard configuration for Gson  ----------
