@@ -58,7 +58,7 @@ android {
             manifestPlaceholders = [
                     appIcon: "@mipmap/ic_launcher_dev",
                     appRoundIcon: "@mipmap/ic_launcher_dev_round",
-                    appThemeLauncher: "@style/AppTheme.Launcher"
+                    appThemeLauncher: "@style/AppTheme.NoActionBar"
             ]
         }
         beta { // public testing
@@ -67,7 +67,7 @@ android {
             manifestPlaceholders = [
                     appIcon: "@mipmap/ic_launcher_beta",
                     appRoundIcon: "@mipmap/ic_launcher_beta_round",
-                    appThemeLauncher: "@style/AppTheme.Launcher"
+                    appThemeLauncher: "@style/AppTheme.NoActionBar"
             ]
         }
         prod { // official release
@@ -76,7 +76,7 @@ android {
             manifestPlaceholders = [
                     appIcon: "@mipmap/ic_launcher",
                     appRoundIcon: "@mipmap/ic_launcher_round",
-                    appThemeLauncher: "@style/AppTheme.Launcher"
+                    appThemeLauncher: "@style/AppTheme.NoActionBar"
             ]
         }
     }

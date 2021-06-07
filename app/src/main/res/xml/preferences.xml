@@ -20,6 +20,20 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        app:key="displayCategory"
+        app:title="@string/pref_display_category_title">
+
+        <ListPreference
+            android:key="@string/pref_key_mode_night"
+            android:title="Change Theme"
+            app:defaultValue="dark"
+            app:useSimpleSummaryProvider="true"
+            android:entries="@array/app_theme_list_entries"
+            android:entryValues="@array/app_theme_list_entry_values" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
             app:key="backupCategory"
             app:title="Backup">
 

@@ -77,10 +77,9 @@
             android:id="@+id/editCustomerSaveButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/shape_default_button_background"
             android:layout_marginStart="117dp"
+            android:layout_marginTop="8dp"
             android:text="Save"
-            android:textColor="@color/colorPrimary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/editCustomerDeleteButton"
             app:layout_constraintTop_toBottomOf="@+id/editCustomerNoteEditText" />
@@ -110,9 +109,8 @@
             android:id="@+id/editCustomerDeleteButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/shape_default_button_background"
+            android:layout_marginTop="8dp"
             android:text="Delete"
-            android:textColor="@color/colorPrimary"
             app:layout_constraintEnd_toStartOf="@+id/editCustomerSaveButton"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/editCustomerNoteEditText" />

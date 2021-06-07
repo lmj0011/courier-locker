@@ -4,9 +4,9 @@ import android.app.Dialog
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProviders
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.factories.TripViewModelFactory
@@ -19,7 +19,7 @@ class TripsStatsDialogFragment : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let{
-            val builder = AlertDialog.Builder(it)
+            val builder = MaterialAlertDialogBuilder(requireContext())
 
             // Get the layout inflater
             val inflater = requireActivity().layoutInflater

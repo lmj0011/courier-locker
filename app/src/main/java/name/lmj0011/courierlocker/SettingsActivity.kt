@@ -1,5 +1,6 @@
 package name.lmj0011.courierlocker
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
@@ -35,6 +36,13 @@ class SettingsActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        (application as CourierLockerApplication).applyTheme()
+
+        recreate()
     }
 
     fun showToastMessage(message: String, duration: Int = Toast.LENGTH_SHORT) {

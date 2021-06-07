@@ -56,6 +56,6 @@ object NotificationHelper {
             .setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
             .setOnlyAlertOnce(true)
             .setSortKey("a")
-            .setColor(ContextCompat.getColor(context, R.color.colorPrimary))
+            .setColor(ContextCompat.getColor(context, R.color.colorDefaultIcon))
     }
 }

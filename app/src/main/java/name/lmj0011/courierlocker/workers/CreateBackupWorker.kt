@@ -1,6 +1,5 @@
 package name.lmj0011.courierlocker.workers
 
-import android.app.Application
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -12,7 +11,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
-import androidx.preference.PreferenceManager
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
@@ -60,7 +58,7 @@ class CreateBackupWorker (private val appContext: Context, parameters: WorkerPar
             .setSmallIcon(R.drawable.ic_baseline_sync_24)
             .setContentTitle(appContext.getString(R.string.creating_app_backup))
             .setOnlyAlertOnce(true)
-            .setColor(ContextCompat.getColor(appContext, R.color.colorPrimary))
+            .setColor(ContextCompat.getColor(appContext, R.color.colorDefaultIcon))
             .addAction(0, appContext.getString(R.string.notification_action_button_cancel), notificationCancelWorkerPendingIntent)
             .build()
 
@@ -129,7 +127,7 @@ class CreateBackupWorker (private val appContext: Context, parameters: WorkerPar
             .setContentTitle(appContext.getString(R.string.creating_app_backup))
             .setContentText(message)
             .setProgress(100, progress, false)
-            .setColor(ContextCompat.getColor(appContext, R.color.colorPrimary))
+            .setColor(ContextCompat.getColor(appContext, R.color.colorDefaultIcon))
             .addAction(0, appContext.getString(R.string.notification_action_button_cancel), notificationCancelWorkerPendingIntent)
             .build()
 

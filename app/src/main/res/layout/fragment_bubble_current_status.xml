@@ -17,7 +17,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:indicatorColor="@color/colorPrimary"
+                app:indicatorColor="@color/colorAccent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -29,7 +29,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/mtrl_card_spacing"
                 app:strokeWidth="1dp"
-                app:strokeColor="@color/colorPrimary"
+                app:strokeColor="@color/colorDefaultIcon"
                 app:layout_constraintBottom_toTopOf="@+id/linearLayout"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -70,6 +70,8 @@
                     android:id="@+id/recentTripsContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:background="?android:attr/selectableItemBackground"
                     android:padding="@dimen/default_list_item_padding_8dp">
 
                 <TextView
@@ -129,9 +131,7 @@
                     android:id="@+id/addStopButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/shape_default_button_background"
                     android:text="Add Stop"
-                    android:textColor="@color/colorPrimary"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -142,26 +142,24 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
-                    android:background="@drawable/shape_default_button_background"
                     android:text="New Trip"
-                    android:textColor="@color/colorPrimary"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/addStopButton"
                     app:layout_constraintTop_toTopOf="parent" />
 
 
                 <ImageButton
-                        android:id="@+id/nextTripImageButton"
-                        style="@android:style/Widget.DeviceDefault.ImageButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/shape_default_button_background"
-                        android:padding="12dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:srcCompat="@drawable/ic_green_baseline_arrow_forward_ios_24"
-                        tools:ignore="SpeakableTextPresentCheck" />
+                    android:id="@+id/nextTripImageButton"
+                    style="@android:style/Widget.DeviceDefault.ImageButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/shape_green_outlined_button"
+                    android:padding="12dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_green_baseline_arrow_forward_ios_24"
+                    tools:ignore="SpeakableTextPresentCheck" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -181,6 +179,8 @@
                 android:id="@+id/nearestAddressableContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:clickable="true"
+                android:background="?android:attr/selectableItemBackground"
                 android:padding="@dimen/default_list_item_padding_8dp"
                 android:visibility="visible">
 
@@ -225,9 +225,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
-                    android:background="@drawable/shape_default_button_background"
                     android:text="Open Map"
-                    android:textColor="@color/colorPrimary"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -237,9 +235,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
-                    android:background="@drawable/shape_default_button_background"
                     android:text="Buildings"
-                    android:textColor="@color/colorPrimary"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/openMapButton"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -249,7 +245,7 @@
                     style="@android:style/Widget.Material.ImageButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/shape_default_button_background"
+                    android:background="@drawable/shape_green_outlined_button"
                     android:padding="12dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"

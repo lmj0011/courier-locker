@@ -1,7 +1,6 @@
 package name.lmj0011.courierlocker.fragments.bottomsheets
 
 import android.app.Dialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -9,32 +8,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.delay
-import name.lmj0011.courierlocker.CurrentStatusBubbleActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.BuildingListAdapter
-import name.lmj0011.courierlocker.adapters.MapListAdapter
 import name.lmj0011.courierlocker.database.Apartment
 import name.lmj0011.courierlocker.database.Building
-import name.lmj0011.courierlocker.database.CourierLockerDatabase
-import name.lmj0011.courierlocker.databinding.BottomsheetFragmentAptMapsBinding
 import name.lmj0011.courierlocker.databinding.BottomsheetFragmentBuildingsBinding
-import name.lmj0011.courierlocker.factories.ApartmentViewModelFactory
 import name.lmj0011.courierlocker.helpers.SwipeHelper
 import name.lmj0011.courierlocker.helpers.Util
-import name.lmj0011.courierlocker.helpers.launchIO
-import name.lmj0011.courierlocker.helpers.launchUI
-import name.lmj0011.courierlocker.services.observeOnce
-import name.lmj0011.courierlocker.viewmodels.ApartmentViewModel
-import timber.log.Timber
 
 class BottomSheetNavigableBuildingsFragment(private val apartment: Apartment): BottomSheetDialogFragment() {
     private lateinit var binding: BottomsheetFragmentBuildingsBinding
@@ -116,7 +101,7 @@ class BottomSheetNavigableBuildingsFragment(private val apartment: Apartment): B
             requireContext(),
             "Directions",
             14.0f,
-            R.color.colorPrimary,
+            R.color.colorDefaultIcon,
             object : SwipeHelper.UnderlayButtonClickListener {
                 override fun onClick() {
                     val gmmIntentUri: Uri = Uri.parse("geo:0,0?z=18&q=${bldg.latitude},${bldg.longitude}(bldg: ${bldg.number})")

@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.InputType
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.documentfile.provider.DocumentFile
 import androidx.preference.*
 import androidx.work.*
@@ -45,6 +46,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
     private lateinit var boundingCoordinatesDistance: EditTextPreference
     private lateinit var enableCurrentStatusService: SwitchPreferenceCompat
     private lateinit var showCurrentStatusAsBubble: SwitchPreferenceCompat
+    private lateinit var appThemeListPreference: ListPreference
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         settingsActivity = activity as SettingsActivity
@@ -64,6 +66,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         boundingCoordinatesDistance = findPreference(application.getString(R.string.pref_key_bounding_coordinates_distance))!!
         enableCurrentStatusService = findPreference(application.getString(R.string.pref_enable_current_status_service))!!
         showCurrentStatusAsBubble = findPreference("showCurrentStatusAsBubble")!!
+        appThemeListPreference = findPreference(application.getString(R.string.pref_key_mode_night))!!
 
         if(!resources.getBoolean(R.bool.DEBUG_MODE)) {
             val prfScreen = findPreference<PreferenceScreen>("preferenceScreen")
@@ -210,6 +213,15 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     showCurrentStatusAsBubble.isEnabled = true
                     settingsActivity.toggleProgressIndicator(false)
                 }
+            }
+            true
+        }
+
+        appThemeListPreference.setOnPreferenceChangeListener { _, newValue ->
+            when(newValue) {
+                "light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                "dark" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
             }
             true
         }

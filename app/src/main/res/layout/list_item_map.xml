@@ -36,6 +36,8 @@
             android:id="@+id/deleteImageBtn"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
+            android:background="@drawable/shape_default_outlined_button"
+            android:padding="@dimen/default_image_button_padding"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/aptAddressTextView"
             app:srcCompat="@drawable/ic_delete" />
@@ -44,6 +46,9 @@
             android:id="@+id/gateCodeImageBtn"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
+            android:layout_marginStart="2dp"
+            android:background="@drawable/shape_default_outlined_button"
+            android:padding="@dimen/default_image_button_padding"
             app:layout_constraintStart_toEndOf="@+id/deleteImageBtn"
             app:layout_constraintTop_toBottomOf="@+id/aptAddressTextView"
             app:srcCompat="@drawable/ic_menu_dialpad" />
@@ -52,6 +57,9 @@
             android:id="@+id/aptMapImageBtn"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
+            android:layout_marginStart="2dp"
+            android:background="@drawable/shape_default_outlined_button"
+            android:padding="@dimen/default_image_button_padding"
             app:layout_constraintStart_toEndOf="@+id/gateCodeImageBtn"
             app:layout_constraintTop_toBottomOf="@+id/aptAddressTextView"
             app:srcCompat="@drawable/ic_map" />
@@ -60,6 +68,9 @@
             android:id="@+id/buildingImageBtn"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
+            android:layout_marginStart="2dp"
+            android:background="@drawable/shape_default_outlined_button"
+            android:padding="@dimen/default_image_button_padding"
             android:textSize="12sp"
             app:layout_constraintStart_toEndOf="@+id/aptMapImageBtn"
             app:layout_constraintTop_toBottomOf="@+id/aptAddressTextView"

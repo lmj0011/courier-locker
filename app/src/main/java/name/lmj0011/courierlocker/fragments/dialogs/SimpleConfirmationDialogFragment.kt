@@ -2,13 +2,12 @@ package name.lmj0011.courierlocker.fragments.dialogs
 
 import android.app.Dialog
 import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
-import name.lmj0011.courierlocker.database.Apartment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class SimpleConfirmationDialogFragment(private val title: String, private val message: String, private val positiveClickListener: () -> Unit) : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val builder = AlertDialog.Builder(context!!)
+        val builder = MaterialAlertDialogBuilder(requireContext())
 
         builder
             .setTitle(title)
@@ -16,7 +15,7 @@ class SimpleConfirmationDialogFragment(private val title: String, private val me
             .setPositiveButton("Yes") { dialog, id ->
                 positiveClickListener()
             }
-            .setNegativeButton("No") { dialog, id ->
+            .setNeutralButton("No") { dialog, id ->
 
             }
 

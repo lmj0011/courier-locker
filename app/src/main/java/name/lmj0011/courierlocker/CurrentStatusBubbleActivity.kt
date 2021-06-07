@@ -1,8 +1,8 @@
 package name.lmj0011.courierlocker
 
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
-import android.view.Gravity
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
@@ -12,7 +12,6 @@ import name.lmj0011.courierlocker.fragments.CurrentStatusBubbleFragment
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.PermissionHelper
 import org.kodein.di.instance
-import timber.log.Timber
 
 class CurrentStatusBubbleActivity: AppCompatActivity(R.layout.activity_current_status_bubble) {
     private val currentStatusFragment = CurrentStatusBubbleFragment()
@@ -49,6 +48,13 @@ class CurrentStatusBubbleActivity: AppCompatActivity(R.layout.activity_current_s
         }
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        (application as CourierLockerApplication).applyTheme()
+
+        recreate()
     }
 
     fun showToastMessage(message: String, duration: Int = Toast.LENGTH_SHORT) {

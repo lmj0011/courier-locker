@@ -226,6 +226,7 @@ class BottomSheetCreateTripBubbleFragment(private val dismissCallback: () -> Uni
 
     private fun dismissDialog() {
         activity.hideKeyBoard(binding.container)
+        binding.payAmountEditText.setText("")
         dismissCallback()
         bottomSheetDialog.dismiss()
     }

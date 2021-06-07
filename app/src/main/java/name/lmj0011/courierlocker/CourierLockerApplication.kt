@@ -6,6 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
+import android.os.SystemClock
+import android.view.View
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.preference.PreferenceManager
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.mooveit.library.Fakeit
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
@@ -50,6 +54,7 @@ class CourierLockerApplication : Application() {
         AndroidThreeTen.init(this)
         NotificationHelper.init(this)
         PermissionHelper.checkPermissionApprovals(this)
+        applyTheme()
 
         /**
          * Bind to CurrentStatusForegroundService, we'll leave it to the OS to kill this Service
@@ -78,4 +83,41 @@ class CourierLockerApplication : Application() {
             currentStatusService.stop()
         }
     }
+
+    /**
+     * Applies the App's Theme from sharedPrefs
+     */
+    fun applyTheme() {
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+
+        when(sharedPreferences.getString(getString(R.string.pref_key_mode_night), "dark")) {
+            "light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            "dark" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        }
+    }
+}
+
+/**
+ *  Extension functions
+ */
+class OnClickListenerThrottled(private val block: () -> Unit, private val wait: Long) : View.OnClickListener {
+
+    private var lastClickTime = 0L
+
+    override fun onClick(view: View) {
+        if (SystemClock.elapsedRealtime() - lastClickTime < wait) {
+            return
+        }
+        lastClickTime = SystemClock.elapsedRealtime()
+
+        block()
+    }
+}
+
+/**
+ * A throttled click listener that only invokes [block] at most once per every [wait] milliseconds.
+ */
+fun View.setOnClickListenerThrottled(block: () -> Unit, wait: Long = 1000L) {
+    setOnClickListener(OnClickListenerThrottled(block, wait))
 }

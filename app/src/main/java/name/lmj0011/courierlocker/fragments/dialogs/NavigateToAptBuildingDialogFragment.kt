@@ -4,13 +4,13 @@ import android.app.Dialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import name.lmj0011.courierlocker.database.Building
 
 class NavigateToAptBuildingDialogFragment(private val building: Building, private val aptName: String) : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val builder = AlertDialog.Builder(context!!)
+        val builder = MaterialAlertDialogBuilder(requireContext())
 
         builder
             .setTitle("$aptName")
@@ -21,7 +21,7 @@ class NavigateToAptBuildingDialogFragment(private val building: Building, privat
                 mapIntent.setPackage("com.google.android.apps.maps")
                 startActivity(mapIntent)
             }
-            .setNegativeButton("No") { dialog, id ->
+            .setNeutralButton("No") { dialog, id ->
 
             }
 

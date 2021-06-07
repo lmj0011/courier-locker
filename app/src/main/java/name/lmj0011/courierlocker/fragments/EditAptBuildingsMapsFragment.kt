@@ -6,7 +6,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.*
-import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
@@ -19,6 +18,7 @@ import com.google.android.libraries.maps.CameraUpdateFactory
 import com.google.android.libraries.maps.GoogleMap
 import com.google.android.libraries.maps.SupportMapFragment
 import com.google.android.libraries.maps.model.*
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
 import com.google.maps.android.ui.IconGenerator
@@ -110,6 +110,7 @@ class EditAptBuildingsMapsFragment : Fragment(){
         mapFragment.getMapAsync { map ->
             gMap = map
             applyPreferences()
+            gMap.moveCamera(CameraUpdateFactory.zoomTo(17f))
             clusterManager = ClusterManager(mainActivity, gMap)
 
             val renderer = object: DefaultClusterRenderer<AptBldgClusterItem>(mainActivity, gMap, clusterManager) {
@@ -250,7 +251,7 @@ class EditAptBuildingsMapsFragment : Fragment(){
         return when (item.itemId) {
             R.id.action_change_map_type -> {
                 // https://stackoverflow.com/a/27178343/2445763
-                val builder = AlertDialog.Builder(requireContext())
+                val builder = MaterialAlertDialogBuilder(requireContext())
                 val checkedItem = gMap.mapType - 1
 
                 builder.setTitle("Change Map Type")
@@ -315,9 +316,6 @@ class EditAptBuildingsMapsFragment : Fragment(){
                 ))
             }
         }
-
-        gMap.moveCamera(CameraUpdateFactory.zoomTo(17f))
-
         this.hideEditUI()
     }
 

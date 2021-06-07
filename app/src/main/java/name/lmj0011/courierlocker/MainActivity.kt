@@ -2,6 +2,7 @@ package name.lmj0011.courierlocker
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.Gravity
 import androidx.core.view.GravityCompat
@@ -13,7 +14,6 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.*
@@ -41,7 +41,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var locationHelper: LocationHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(R.style.AppTheme_NoActionBar)
         super.onCreate(savedInstanceState)
         Timber.i("onCreate Called")
 
@@ -234,6 +233,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return true
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        (application as CourierLockerApplication).applyTheme()
+
+        recreate()
+    }
+
     fun showToastMessage(message: String, duration: Int = Toast.LENGTH_SHORT, position: Int = Gravity.TOP) {
         val toast = Toast.makeText(this, message, duration)
         toast.setGravity(position, 0, 150)
@@ -241,9 +247,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     fun showFabAndSetListener(cb: () -> Unit, imgSrcId: Int) {
+        binding.drawerLayout.fab.isEnabled = false
+
         binding.drawerLayout.fab.let {
             it.setOnClickListener(null) // should remove all attached listeners
-            it.setOnClickListener { cb() }
+            it.setOnClickListenerThrottled(block = { cb() })
 
             // hide and show to repaint the img src
             it.hide()
@@ -252,6 +260,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             it.show()
         }
+
+        binding.drawerLayout.fab.isEnabled = true
     }
 
     fun hideFab() {

@@ -88,7 +88,7 @@ class CurrentStatusForegroundService : LifecycleService() {
             .setContentTitle("Current Status")
             .setContentText("Running Foreground service.")
             .setContentIntent(pendingIntent)
-            .setColor(ContextCompat.getColor(this,R.color.colorPrimary))
+            .setColor(ContextCompat.getColor(this,R.color.colorDefaultIcon))
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && preferences.showCurrentStatusAsBubble()) {
             val bubbleData = getBubbleMetadata()
@@ -232,7 +232,7 @@ class CurrentStatusForegroundService : LifecycleService() {
                     .setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY)
                     .setOnlyAlertOnce(true)
                     .setSortKey("c")
-                    .setColor(ContextCompat.getColor(mThis, R.color.colorPrimary))
+                    .setColor(ContextCompat.getColor(mThis, R.color.colorDefaultIcon))
 
 
                 notification = notificationBuilder.build()
@@ -286,7 +286,7 @@ class CurrentStatusForegroundService : LifecycleService() {
                     .setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
                     .setOnlyAlertOnce(true)
                     .setSortKey("b")
-                    .setColor(ContextCompat.getColor(this,R.color.colorPrimary))
+                    .setColor(ContextCompat.getColor(this,R.color.colorDefaultIcon))
                     .build()
 
                 NotificationManagerCompat.from(this).apply {

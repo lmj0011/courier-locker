@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="app_theme_list_entries">
+        <item name="light">Light</item>
+        <item name="dark">Dark</item>
+        <item name="system">System</item>
+    </string-array>
+
+    <string-array name="app_theme_list_entry_values">
+        <item name="light">light</item>
+        <item name="dark">dark</item>
+        <item name="system">system</item>
+    </string-array>
+</resources>

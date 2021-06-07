@@ -49,11 +49,9 @@
             android:id="@+id/createTripSaveButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/shape_default_button_background"
             android:layout_marginStart="32dp"
             android:layout_marginEnd="32dp"
             android:text="Save"
-            android:textColor="@color/colorPrimary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/guideline3" />
@@ -87,11 +85,9 @@
             android:id="@+id/createTripAddStopButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:background="@drawable/shape_default_button_background"
             android:layout_marginStart="32dp"
             android:layout_marginEnd="32dp"
             android:text="Add Stop"
-            android:textColor="@color/colorPrimary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/createTripFragmentScrollView" />

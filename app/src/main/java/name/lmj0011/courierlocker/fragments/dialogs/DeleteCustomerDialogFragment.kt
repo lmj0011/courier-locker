@@ -1,12 +1,10 @@
 package name.lmj0011.courierlocker.fragments.dialogs
 
-import android.app.Activity
 import android.app.Dialog
 import android.content.Context
-import android.content.DialogInterface
 import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class DeleteCustomerDialogFragment : DialogFragment() {
     // Use this instance of the interface to deliver action events
@@ -35,9 +33,9 @@ class DeleteCustomerDialogFragment : DialogFragment() {
 
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return listener?.let {
+        return listener.let {
             // Build the dialog and set up the button click handlers
-            val builder = AlertDialog.Builder(context!!)
+            val builder = MaterialAlertDialogBuilder(requireContext())
 
             builder
                 .setTitle("Delete this Customer?")
@@ -45,7 +43,7 @@ class DeleteCustomerDialogFragment : DialogFragment() {
                     // Send the positive button event back to the host activity
                     listener.onDialogPositiveClick(this)
                 }
-                .setNegativeButton("No") { dialog, id ->
+                .setNeutralButton("No") { dialog, id ->
                     // Send the negative button event back to the host activity
                     listener.onDialogNegativeClick(this)
                 }

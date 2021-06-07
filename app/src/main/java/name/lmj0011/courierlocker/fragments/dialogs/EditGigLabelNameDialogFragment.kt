@@ -4,15 +4,14 @@ import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.EditText
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import name.lmj0011.courierlocker.R
-import name.lmj0011.courierlocker.database.Apartment
 import name.lmj0011.courierlocker.database.GigLabel
 
 class EditGigLabelNameDialogFragment(private val gigLabel: GigLabel, private val positiveClickListener: (newName: String) -> Unit) : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val builder = AlertDialog.Builder(context!!)
+        val builder = MaterialAlertDialogBuilder(requireContext())
 
         // ref: https://stackoverflow.com/a/17502042/2445763
         val textEnter = LayoutInflater.from(context).inflate(R.layout.dialog_gig_labels_name_input, null)
@@ -26,7 +25,7 @@ class EditGigLabelNameDialogFragment(private val gigLabel: GigLabel, private val
                 val newName = userInput.text.toString()
                 positiveClickListener(newName)
             }
-            .setNegativeButton("Cancel") { dialog, id ->
+            .setNeutralButton("Cancel") { dialog, id ->
 
             }
 
