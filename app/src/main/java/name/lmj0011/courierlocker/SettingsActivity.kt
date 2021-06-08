@@ -46,8 +46,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     fun showToastMessage(message: String, duration: Int = Toast.LENGTH_SHORT) {
-        val toast = Toast.makeText(this, message, duration)
-        toast.setGravity(Gravity.TOP, 0, 150)
+        val toast = Toast.makeText(applicationContext, message, duration)
         toast.show()
     }
 

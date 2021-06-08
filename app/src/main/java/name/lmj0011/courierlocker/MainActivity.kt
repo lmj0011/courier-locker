@@ -240,9 +240,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         recreate()
     }
 
-    fun showToastMessage(message: String, duration: Int = Toast.LENGTH_SHORT, position: Int = Gravity.TOP) {
-        val toast = Toast.makeText(this, message, duration)
-        toast.setGravity(position, 0, 150)
+    fun showToastMessage(message: String, duration: Int = Toast.LENGTH_SHORT) {
+        val toast = Toast.makeText(applicationContext, message, duration)
         toast.show()
     }
 

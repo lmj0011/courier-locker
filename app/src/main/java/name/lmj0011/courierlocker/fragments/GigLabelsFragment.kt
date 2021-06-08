@@ -69,9 +69,9 @@ class GigLabelsFragment : Fragment() {
                     gigLabelViewModel.updateGig(g)
 
                     if (g.visible) {
-                        mainActivity.showToastMessage(message = "${g.name} is now selectable when creating Trips", position = Gravity.BOTTOM)
+                        mainActivity.showToastMessage(message = "${g.name} is now selectable when creating Trips")
                     } else {
-                        mainActivity.showToastMessage(message = "${g.name} is now non-selectable when creating Trips", position = Gravity.BOTTOM)
+                        mainActivity.showToastMessage(message = "${g.name} is now non-selectable when creating Trips")
                     }
 
                 },
