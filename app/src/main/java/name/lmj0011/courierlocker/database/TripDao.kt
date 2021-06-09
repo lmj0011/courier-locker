@@ -29,6 +29,9 @@ interface TripDao: BaseDao {
     @Query("SELECT * FROM trips_table ORDER BY id DESC")
     fun getAllTrips(): LiveData<MutableList<Trip>>
 
+    @Query("SELECT * FROM trips_table ORDER BY id DESC LIMIT :limit")
+    fun getMostRecentTrips(limit: Int): List<Trip>
+
     @Query("SELECT * FROM trips_table WHERE strftime('%Y-%m-%d',date(timestamp, 'localtime')) = strftime('%Y-%m-%d',date('now', 'localtime'))")
     fun getAllTodayTrips(): List<Trip>
 

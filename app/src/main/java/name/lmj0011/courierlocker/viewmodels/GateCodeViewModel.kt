@@ -2,18 +2,17 @@ package name.lmj0011.courierlocker.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.*
-import androidx.paging.PagedList
-import androidx.paging.toLiveData
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
+import androidx.paging.*
 import com.mooveit.library.Fakeit
 import name.lmj0011.courierlocker.database.GateCode
 import name.lmj0011.courierlocker.database.GateCodeDao
 import kotlin.random.Random
 import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.CourierLockerApplication
-import name.lmj0011.courierlocker.helpers.Const
 import name.lmj0011.courierlocker.helpers.LocationHelper
+import name.lmj0011.courierlocker.helpers.Util
 import org.kodein.di.instance
 
 
@@ -46,46 +45,54 @@ class GateCodeViewModel(
         }
     }
 
-    var gatecodesPaged: LiveData<PagedList<GateCode>> = Transformations.switchMap(doubleTrigger) { pair ->
+
+
+    var gatecodesPaged: LiveData<PagingData<GateCode>> = Transformations.switchMap(doubleTrigger) { pair ->
         val filterByLocation = pair.first
         val query = pair.second
 
         return@switchMap if (query.isNullOrEmpty()) {
-            database.getAllGateCodesByThePage()
-                .mapByPage { list ->
-                    when(filterByLocation) {
-                        true -> {
-                            list.sortedBy {
-                                locationHelper.calculateApproxDistanceBetweenMapPoints(
-                                    locationHelper.lastLatitude.value!!,
-                                    locationHelper.lastLongitude.value!!,
-                                    it.latitude,
-                                    it.longitude
-                                )
+            Pager(
+                config = Util.getDefaultPagingConfig(),
+                initialKey = null,
+                database.getAllGateCodesByThePage()
+                    .mapByPage { list ->
+                        when(filterByLocation) {
+                            true -> {
+                                list.sortedBy {
+                                    locationHelper.calculateApproxDistanceBetweenMapPoints(
+                                        locationHelper.lastLatitude.value!!,
+                                        locationHelper.lastLongitude.value!!,
+                                        it.latitude,
+                                        it.longitude
+                                    )
+                                }
                             }
+                            else -> { list }
                         }
-                        else -> { list }
-                    }
-                }
-                .toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
+                    }.asPagingSourceFactory()
+            ).flow.cachedIn(viewModelScope).asLiveData()
         } else {
-            database.getAllGateCodesByThePageFiltered("%$query%")
-                .mapByPage { list ->
-                    when(filterByLocation) {
-                        true -> {
-                            list.sortedBy {
-                                locationHelper.calculateApproxDistanceBetweenMapPoints(
-                                    locationHelper.lastLatitude.value!!,
-                                    locationHelper.lastLongitude.value!!,
-                                    it.latitude,
-                                    it.longitude
-                                )
+            Pager(
+                config = Util.getDefaultPagingConfig(),
+                initialKey = null,
+                database.getAllGateCodesByThePageFiltered("%$query%")
+                    .mapByPage { list ->
+                        when(filterByLocation) {
+                            true -> {
+                                list.sortedBy {
+                                    locationHelper.calculateApproxDistanceBetweenMapPoints(
+                                        locationHelper.lastLatitude.value!!,
+                                        locationHelper.lastLongitude.value!!,
+                                        it.latitude,
+                                        it.longitude
+                                    )
+                                }
                             }
+                            else -> { list }
                         }
-                        else -> { list }
-                    }
-                }
-                .toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
+                    }.asPagingSourceFactory()
+            ).flow.cachedIn(viewModelScope).asLiveData()
         }
     }
 

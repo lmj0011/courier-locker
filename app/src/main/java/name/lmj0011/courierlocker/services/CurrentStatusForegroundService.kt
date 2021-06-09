@@ -17,7 +17,6 @@ import androidx.core.graphics.drawable.IconCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import androidx.paging.PagedList
 import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.*
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
@@ -48,7 +47,6 @@ class CurrentStatusForegroundService : LifecycleService() {
         private set
     private lateinit var latitudeObserver: Observer<Double>
     private lateinit var gateCodesObserver: Observer<MutableList<GateCode>>
-    private lateinit var recentTripsObserver: Observer<PagedList<Trip>>
     private lateinit var recentTripsListIterator: MutableListIterator<Trip>
     lateinit var listOfRecentTrips: MutableList<Trip>
         private set
@@ -72,12 +70,11 @@ class CurrentStatusForegroundService : LifecycleService() {
         val preferences: PreferenceHelper = application.kodein.instance()
         locationHelper = application.kodein.instance()
 
-        recentTripsObserver = Observer { pagedList ->
-            listOfRecentTrips = pagedList.take(3).toMutableList()
+        launchIO {
+            val trips = tripViewModel.getMostRecentTrips(Const.DEFAULT_RECENT_TRIPS_LIMIT)
+            listOfRecentTrips = trips.toMutableList()
             resetListOfRecentTripsIterator()
         }
-
-        tripViewModel.tripsPaged.observe(this, recentTripsObserver)
 
         val notificationIntent = Intent(this, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0)
@@ -126,7 +123,6 @@ class CurrentStatusForegroundService : LifecycleService() {
      * stops this foreground service
      */
     fun stop() {
-        if(::tripViewModel.isInitialized) tripViewModel.tripsPaged.removeObserver(recentTripsObserver)
         if(::gateCodeViewModel.isInitialized) gateCodeViewModel.gateCodes.removeObservers(this)
         if(::locationHelper.isInitialized) locationHelper.lastLatitude.removeObservers(this)
 
@@ -351,14 +347,16 @@ class CurrentStatusForegroundService : LifecycleService() {
 
      class SetTripDropoffReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
+            val application = requireNotNull(context.applicationContext as CourierLockerApplication)
             val isBounded = (context.applicationContext as CourierLockerApplication).isCurrentStatusServiceBounded
             val locationHelper: LocationHelper = (context.applicationContext as CourierLockerApplication).kodein.instance()
+            val tripViewModel = TripViewModel(CourierLockerDatabase.getInstance(application).tripDao, application)
 
             if (isBounded) {
                 val service = (context.applicationContext as CourierLockerApplication).currentStatusService
+                val tripId = intent.extras?.getLong("TripId")
 
-                service.tripViewModel.tripsPaged.observeOnce { pagedList ->
-                    val tripId = intent.extras?.getLong("TripId")
+                launchIO {
                     val address = locationHelper.getFromLocation(
                         null,
                         locationHelper.lastLatitude.value!!,
@@ -366,7 +364,9 @@ class CurrentStatusForegroundService : LifecycleService() {
                         1
                     )
 
-                    val trip = pagedList.find { t ->
+                    val listOfTrips = tripViewModel.getMostRecentTrips(Const.DEFAULT_RECENT_TRIPS_LIMIT)
+
+                    val trip = listOfTrips.find { t ->
                         t.id == tripId
                     }
 
@@ -380,7 +380,9 @@ class CurrentStatusForegroundService : LifecycleService() {
                             t.stops.add(stop)
                         }
 
-                        service.tripViewModel.updateTrip(t)
+                        launchIO {
+                            service.tripViewModel.updateTrip(t)
+                        }
 
                         val notificationActionIntent =
                             Intent(context, SetTripDropoffReceiver::class.java).apply {
@@ -442,10 +444,8 @@ class CurrentStatusForegroundService : LifecycleService() {
                                 notification.build()
                             )
                         }
-                        //////
                     }
                 }
-
             }
         }
     }

@@ -6,9 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
-import androidx.core.view.setMargins
-import androidx.core.view.updateLayoutParams
-import androidx.paging.PagedListAdapter
+import androidx.paging.PagingDataAdapter
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -20,7 +18,7 @@ import name.lmj0011.courierlocker.database.Trip
 import name.lmj0011.courierlocker.databinding.ListItemTripBinding
 import name.lmj0011.courierlocker.helpers.Util
 
-class TripListAdapter(private val clickListener: TripListener): PagedListAdapter<Trip, TripListAdapter.ViewHolder>(TripDiffCallback()) {
+class TripListAdapter(private val clickListener: TripListener): PagingDataAdapter<Trip, TripListAdapter.ViewHolder>(TripDiffCallback()) {
     class ViewHolder private constructor(val binding: ListItemTripBinding, val context: Context) : RecyclerView.ViewHolder(binding.root){
 
         private val googleApiKey = when(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("googleDirectionsKey", false)) {
@@ -110,19 +108,5 @@ class TripListAdapter(private val clickListener: TripListener): PagedListAdapter
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder.from(parent)
-    }
-
-    fun filterBySearchQuery(query: String?, list: MutableList<Trip>): MutableList<Trip> {
-        if (query.isNullOrBlank()) return list
-
-        return list.filter {
-            val inDate = Util.getTripDate(it).contains(query, true)
-            val inPickupAddress = it.pickupAddress.contains(query, true)
-            val inDropOffAddress = it.dropOffAddress.contains(query, true)
-            val inPayAmount = it.payAmount.contains(query, true)
-            val inGigName = it.gigName.contains(query, true)
-
-            return@filter inGigName || inPickupAddress || inDropOffAddress|| inPayAmount || inDate
-        }.toMutableList()
     }
 }

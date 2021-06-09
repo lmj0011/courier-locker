@@ -4,16 +4,12 @@ import name.lmj0011.courierlocker.database.Customer
 import name.lmj0011.courierlocker.database.CustomerDao
 import android.app.Application
 import android.content.SharedPreferences
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
-import androidx.paging.PagedList
-import androidx.paging.toLiveData
+import androidx.lifecycle.*
+import androidx.paging.*
 import androidx.preference.PreferenceManager
 import com.mooveit.library.Fakeit
 import kotlinx.coroutines.*
-import name.lmj0011.courierlocker.helpers.Const
+import name.lmj0011.courierlocker.helpers.Util
 
 
 class CustomerViewModel(
@@ -32,13 +28,19 @@ class CustomerViewModel(
 
     val customer = MutableLiveData<Customer?>()
 
-    var customersPaged: LiveData<PagedList<Customer>> = Transformations.switchMap(filterText) { query ->
+    var customersPaged: LiveData<PagingData<Customer>> = Transformations.switchMap(filterText) { query ->
         return@switchMap if (query.isNullOrEmpty()) {
-            database.getAllCustomersByThePage()
-                .toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
+            Pager(
+                config = Util.getDefaultPagingConfig(),
+                initialKey = null,
+                database.getAllCustomersByThePage().asPagingSourceFactory()
+            ).flow.cachedIn(viewModelScope).asLiveData()
         } else {
-            database.getAllCustomersByThePageFiltered("%$query%")
-                .toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
+            Pager(
+                config = Util.getDefaultPagingConfig(),
+                initialKey = null,
+                database.getAllCustomersByThePageFiltered("%$query%").asPagingSourceFactory()
+            ).flow.cachedIn(viewModelScope).asLiveData()
         }
     }
 

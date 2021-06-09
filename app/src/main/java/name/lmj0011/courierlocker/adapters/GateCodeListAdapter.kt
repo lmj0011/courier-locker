@@ -2,13 +2,13 @@ package name.lmj0011.courierlocker.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.paging.PagedListAdapter
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import name.lmj0011.courierlocker.database.GateCode
 import name.lmj0011.courierlocker.databinding.ListItemGateCodeBinding
 
-class GateCodeListAdapter(private val clickListener: GateCodeListener): PagedListAdapter<GateCode, GateCodeListAdapter.ViewHolder>(GateCodeDiffCallback()) {
+class GateCodeListAdapter(private val clickListener: GateCodeListener): PagingDataAdapter<GateCode, GateCodeListAdapter.ViewHolder>(GateCodeDiffCallback()) {
     class ViewHolder private constructor(val binding: ListItemGateCodeBinding) : RecyclerView.ViewHolder(binding.root){
 
         fun bind(clickListener: GateCodeListener, gc: GateCode?) {

@@ -147,8 +147,10 @@ class MapsFragment : Fragment(), SearchableRecyclerView {
 
         binding.lifecycleOwner = this
 
-        apartmentViewModel.apartmentsPaged.observe(viewLifecycleOwner, Observer {
-            this.submitListToAdapter(it)
+        apartmentViewModel.apartmentsPaged.observe(viewLifecycleOwner, {
+            listAdapter.submitData(viewLifecycleOwner.lifecycle, it)
+            listAdapter.notifyItemRangeChanged(0, Const.DEFAULT_PAGE_COUNT)
+            binding.mapList.scrollToPosition(0)
         })
 
         locationHelper.lastLatitude.observe(viewLifecycleOwner, lastLocationListener)
@@ -279,14 +281,8 @@ class MapsFragment : Fragment(), SearchableRecyclerView {
     }
 
     private fun refreshList() {
-        val apts =  apartmentViewModel.apartmentsPaged.value
-        apts?.let{ this.submitListToAdapter(it) }
         binding.swipeRefresh.isRefreshing = false
     }
 
-    private fun submitListToAdapter (list: PagedList<Apartment>) {
-        listAdapter.submitList(list)
-        listAdapter.notifyDataSetChanged()
-    }
 
 }

@@ -2,13 +2,12 @@ package name.lmj0011.courierlocker.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.*
-import androidx.paging.PagedList
-import androidx.paging.toLiveData
+import androidx.paging.*
 import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.database.*
-import name.lmj0011.courierlocker.helpers.Const
 import name.lmj0011.courierlocker.helpers.LocationHelper
+import name.lmj0011.courierlocker.helpers.Util
 import org.kodein.di.instance
 
 class ApartmentViewModel(
@@ -38,16 +37,22 @@ class ApartmentViewModel(
         }
     }
 
-    var apartmentsWithoutGateCodePaged = database.getAllApartmentsWithoutGateCodeByThePage()
-        .toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
 
-    var apartmentsPaged: LiveData<PagedList<Apartment>> = Transformations.switchMap(doubleTrigger) { pair ->
+    var apartmentsWithoutGateCodePaged = Pager(
+        config = Util.getDefaultPagingConfig(),
+        initialKey = null,
+        database.getAllApartmentsWithoutGateCodeByThePage().asPagingSourceFactory()
+    ).flow.cachedIn(viewModelScope).asLiveData()
+
+    var apartmentsPaged: LiveData<PagingData<Apartment>> = Transformations.switchMap(doubleTrigger) { pair ->
         val filterByLocation = pair.first
         val query = pair.second
 
         return@switchMap if (query.isNullOrEmpty()) {
-            database.getAllApartmentsByThePage()
-                .mapByPage { list ->
+            Pager(
+                config = Util.getDefaultPagingConfig(),
+                initialKey = null,
+                database.getAllApartmentsByThePage().mapByPage { list ->
                     when(filterByLocation) {
                         true -> {
                             list.sortedBy {
@@ -61,11 +66,13 @@ class ApartmentViewModel(
                         }
                         else -> { list }
                     }
-                }
-                .toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
+                }.asPagingSourceFactory()
+            ).flow.cachedIn(viewModelScope).asLiveData()
         } else {
-            database.getAllApartmentsByThePageFiltered("%$query%")
-                .mapByPage { list ->
+            Pager(
+                config = Util.getDefaultPagingConfig(),
+                initialKey = null,
+                database.getAllApartmentsByThePageFiltered("%$query%").mapByPage { list ->
                     when(filterByLocation) {
                         true -> {
                             list.sortedBy {
@@ -79,8 +86,8 @@ class ApartmentViewModel(
                         }
                         else -> { list }
                     }
-                }
-                .toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
+                }.asPagingSourceFactory()
+            ).flow.cachedIn(viewModelScope).asLiveData()
         }
     }
 

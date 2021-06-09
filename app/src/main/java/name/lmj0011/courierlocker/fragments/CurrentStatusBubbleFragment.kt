@@ -61,10 +61,6 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
 
         setupBinding(view)
         setupObservers()
-    }
-
-    override fun onResume() {
-        super.onResume()
         refreshUI()
     }
 
@@ -72,9 +68,10 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
         launchIO {
             val total = tripViewModel.todayTotalMoney()
             val size = tripViewModel.todayCompletedTrips()
+            val trips = tripViewModel.getMostRecentTrips(Const.DEFAULT_RECENT_TRIPS_LIMIT)
             withUIContext {
                 binding.quickStatusTextView.text = "$total | $size"
-                tripViewModel.tripsPaged.refresh()
+                populateRecentTrips(trips)
             }
         }
     }
@@ -121,7 +118,8 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
 
                             mTrip.value?.let { trip ->
                                 trip.stops.add(stop)
-                                tripViewModel.updateTrip(trip)
+                                val newTrip = tripViewModel.updateTrip(trip)
+                                withUIContext { injectTripIntoView(newTrip) }
                             }
                         }
                     } catch (ex: Exception) {
@@ -195,33 +193,6 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
     }
 
     private fun setupObservers() {
-        tripViewModel.tripsPaged.observe(viewLifecycleOwner, { newPagedList ->
-            listOfRecentTrips = newPagedList.take(3).toMutableList()
-            recentTripsListIterator = listOfRecentTrips.listIterator()
-
-            /**
-             * Here we're determining whether to update the Trip currently in the view
-             * or show the first Trip in [recentTripsListIterator], which would normally
-             * mean we created a new Trip
-             *
-             * for example, we'll want to update the Trip currently in View if we performed an
-             * "Add Stop" action from the Current Status Bubble
-             */
-            val trip = listOfRecentTrips.find { ele ->
-                val targetTrip: Trip? = mTrip.value
-                (targetTrip != null && ele.id == targetTrip.id)
-            }
-
-            if (trip is Trip && !resetRecentTripsOrder) {
-                mTrip.postValue(trip)
-                resetRecentTripsOrder = true
-            } else {
-                recentTripsListIterator.next().let { t ->
-                    mTrip.postValue(t)
-                }
-            }
-        })
-
         locationHelper.lastLatitude.observe(viewLifecycleOwner, latitudeObserver)
 
         combineTuple(gateCodeViewModel.gateCodes, apartmentViewModel.apartments)
@@ -249,6 +220,35 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
 
     private fun hideProgressBar() {
         binding.progressBar.isVisible = false
+    }
+
+    private fun populateRecentTrips(trips: List<Trip>){
+        listOfRecentTrips = trips.toMutableList()
+        recentTripsListIterator = listOfRecentTrips.listIterator()
+
+        /**
+         * Here we're determining whether to update the Trip currently in the view
+         * or show the first Trip in [recentTripsListIterator], which would normally
+         * mean we created a new Trip
+         *
+         * for example, we'll want to update the Trip currently in View if we performed an
+         * "Add Stop" action from the Current Status Bubble
+         */
+        val trip = listOfRecentTrips.find { ele ->
+            val targetTrip: Trip? = mTrip.value
+            (targetTrip != null && ele.id == targetTrip.id)
+        }
+
+        if (trip is Trip && !resetRecentTripsOrder) {
+            mTrip.postValue(trip)
+            resetRecentTripsOrder = true
+        } else {
+            if(recentTripsListIterator.hasNext()) {
+                recentTripsListIterator.next().let { t ->
+                    mTrip.postValue(t)
+                }
+            }
+        }
     }
 
     private fun populateRecentAddressables() {

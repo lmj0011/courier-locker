@@ -2,17 +2,14 @@ package name.lmj0011.courierlocker.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
-import androidx.paging.PagedListAdapter
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.database.Customer
 import name.lmj0011.courierlocker.databinding.ListItemCustomerBinding
 
-class CustomerListAdapter(private val clickListener: CustomerListener): PagedListAdapter<Customer, CustomerListAdapter.ViewHolder>(CustomerDiffCallback()) {
+class CustomerListAdapter(private val clickListener: CustomerListener): PagingDataAdapter<Customer, CustomerListAdapter.ViewHolder>(CustomerDiffCallback()) {
     class ViewHolder private constructor(val binding: ListItemCustomerBinding) : RecyclerView.ViewHolder(binding.root){
 
         fun bind(clickListener: CustomerListener, c: Customer?) {

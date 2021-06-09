@@ -1,10 +1,8 @@
 package name.lmj0011.courierlocker.viewmodels
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
-import androidx.paging.toLiveData
+import androidx.lifecycle.*
+import androidx.paging.*
 import androidx.preference.PreferenceManager
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.github.kittinunf.fuel.httpGet
@@ -41,10 +39,18 @@ class TripViewModel(
     val tripsPaged = RefreshableLiveData {
         Transformations.switchMap(filterText) { mQuery ->
             return@switchMap if (mQuery.isNullOrEmpty()) {
-                database.getAllTripsByThePage().toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
+                Pager(
+                    config = Util.getDefaultPagingConfig(),
+                    initialKey = null,
+                    database.getAllTripsByThePage().asPagingSourceFactory()
+                ).flow.cachedIn(viewModelScope).asLiveData()
             } else {
-                val query = SimpleSQLiteQuery("SELECT * FROM trips_table, json_each(stops) WHERE pickupAddress LIKE '%$mQuery%' OR dropOffAddress LIKE '%$mQuery%' OR payAmount LIKE '%$mQuery%' OR gigName LIKE '%$mQuery%' OR json_extract(json_each.value, '\$.address') LIKE '%$mQuery%' ORDER BY id DESC")
-                database.getAllTripsByThePageFiltered(query).toLiveData(pageSize = Const.DEFAULT_PAGE_COUNT)
+                val query = SimpleSQLiteQuery("SELECT * FROM trips_table, json_each(stops) WHERE payAmount LIKE '%$mQuery%' OR gigName LIKE '%$mQuery%' OR json_extract(json_each.value, '\$.address') LIKE '%$mQuery%' ORDER BY id DESC")
+                Pager(
+                    config = Util.getDefaultPagingConfig(),
+                    initialKey = null,
+                    database.getAllTripsByThePageFiltered(query).asPagingSourceFactory()
+                ).flow.cachedIn(viewModelScope).asLiveData()
             }
         }
     }
@@ -128,6 +134,12 @@ class TripViewModel(
         }
     }
 
+    suspend fun getMostRecentTrips(limit: Int): List<Trip> {
+        return withIOContext {
+            database.getMostRecentTrips(limit)
+        }
+    }
+
     fun insertTrip(trip: Trip): Job {
         return launchIO {
             trip.apply {
@@ -168,25 +180,18 @@ class TripViewModel(
         return this@TripViewModel.insertTrip(trip)
     }
 
-    fun updateTrip(trip: Trip?) {
-        trip?.let {
-            val stop = it.stops.last()
-            it.dropOffAddress = stop.address
-            it.dropOffAddressLatitude = stop.latitude
-            it.dropOffAddressLongitude = stop.longitude
-        }
-
-        uiScope.launch {
-            trip?.let {
-                try {
-                    it.distance = this@TripViewModel.calculateTripDistance(it)
-                    this@TripViewModel.database.update(it)
-                } catch (ex: Exception) {
-                    this@TripViewModel.errorMsg.postValue("distance calculation error!")
-                    this@TripViewModel.database.update(it)
-                    Timber.e(ex)
-                }
+    suspend fun updateTrip(trip: Trip): Trip {
+        return withIOContext {
+            trip.apply {
+                val stop = stops.last()
+                dropOffAddress = stop.address
+                dropOffAddressLatitude = stop.latitude
+                dropOffAddressLongitude = stop.longitude
+                distance = this@TripViewModel.calculateTripDistance(this)
             }
+
+            database.update(trip)
+            return@withIOContext database.get(trip.id)!!
         }
 
     }

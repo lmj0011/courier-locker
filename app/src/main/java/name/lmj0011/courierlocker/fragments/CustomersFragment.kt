@@ -14,10 +14,8 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
-import androidx.paging.PagedList
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import kotlinx.coroutines.*
@@ -28,9 +26,9 @@ import name.lmj0011.courierlocker.databinding.FragmentCustomersBinding
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.CustomerListAdapter
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
-import name.lmj0011.courierlocker.database.Customer
 import name.lmj0011.courierlocker.factories.CustomerViewModelFactory
 import name.lmj0011.courierlocker.fragments.dialogs.ClearAllCustomersDialogFragment
+import name.lmj0011.courierlocker.helpers.Const
 import name.lmj0011.courierlocker.helpers.interfaces.SearchableRecyclerView
 import name.lmj0011.courierlocker.viewmodels.CustomerViewModel
 
@@ -73,8 +71,10 @@ class CustomersFragment :
             this.findNavController().navigate(CustomersFragmentDirections.actionCustomersFragmentToEditCustomerFragment(customerId.toInt()))
         })
 
-        customerViewModel.customersPaged.observe(viewLifecycleOwner, Observer {
-            this.submitListToAdapter(it)
+        customerViewModel.customersPaged.observe(viewLifecycleOwner, {
+            listAdapter.submitData(viewLifecycleOwner.lifecycle, it)
+            listAdapter.notifyItemRangeChanged(0, Const.DEFAULT_PAGE_COUNT)
+            binding.customerList.scrollToPosition(0)
         })
 
         binding.customerList.addItemDecoration(DividerItemDecoration(mainActivity, DividerItemDecoration.VERTICAL))
@@ -201,11 +201,6 @@ class CustomersFragment :
             ContextCompat.getDrawable(mainActivity, R.drawable.ic_sad_face)!!,
             ContextCompat.getColor(mainActivity, R.color.colorSadFace)
         )
-    }
-
-    private fun submitListToAdapter (list: PagedList<Customer>) {
-        listAdapter.submitList(list)
-        listAdapter.notifyDataSetChanged()
     }
 
 }

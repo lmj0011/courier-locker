@@ -27,6 +27,7 @@ import name.lmj0011.courierlocker.factories.TripViewModelFactory
 import name.lmj0011.courierlocker.fragments.dialogs.DeleteTripDialogFragment
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.Util
+import name.lmj0011.courierlocker.helpers.launchIO
 import name.lmj0011.courierlocker.viewmodels.TripViewModel
 import org.kodein.di.instance
 
@@ -325,10 +326,10 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
                     it.payAmount = payAmount
                     it.gigName = gig
                     it.stops = arrayOfStops.toMutableList()
-                }
 
-                this.tripViewModel.updateTrip(trip)
-                mainActivity.hideKeyBoard(v.rootView)
+                    launchIO { tripViewModel.updateTrip(it) }
+                    mainActivity.hideKeyBoard(v.rootView)
+                }
             }
         }
 

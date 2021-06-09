@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -19,7 +18,7 @@ import name.lmj0011.courierlocker.database.Apartment
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.databinding.BottomsheetFragmentAptMapsBinding
 import name.lmj0011.courierlocker.factories.ApartmentViewModelFactory
-import name.lmj0011.courierlocker.helpers.launchIO
+import name.lmj0011.courierlocker.helpers.Const
 import name.lmj0011.courierlocker.services.observeOnce
 import name.lmj0011.courierlocker.viewmodels.ApartmentViewModel
 
@@ -88,9 +87,10 @@ class BottomSheetAptMapsFragment(private val selectedAptMap: (apt: Apartment) ->
     }
 
     private fun setupObservers() {
-        apartmentViewModel.apartmentsWithoutGateCodePaged.observeOnce { apts ->
-            listAdapter.submitList(apts)
-            listAdapter.notifyDataSetChanged()
+        apartmentViewModel.apartmentsWithoutGateCodePaged.observeOnce {
+            listAdapter.submitData(viewLifecycleOwner.lifecycle, it)
+            listAdapter.notifyItemRangeChanged(0, Const.DEFAULT_PAGE_COUNT)
+            binding.mapList.scrollToPosition(0)
         }
     }
 }

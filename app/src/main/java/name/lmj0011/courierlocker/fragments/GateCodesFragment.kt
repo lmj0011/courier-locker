@@ -14,7 +14,6 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
-import androidx.paging.PagedList
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
@@ -25,10 +24,10 @@ import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.GateCodeListAdapter
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
-import name.lmj0011.courierlocker.database.GateCode
 import name.lmj0011.courierlocker.databinding.FragmentGateCodesBinding
 import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
 import name.lmj0011.courierlocker.factories.GateCodeViewModelFactory
+import name.lmj0011.courierlocker.helpers.Const
 import name.lmj0011.courierlocker.helpers.ListLock
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.interfaces.SearchableRecyclerView
@@ -93,8 +92,10 @@ class GateCodesFragment : Fragment(), SearchableRecyclerView {
             this.findNavController().navigate(GateCodesFragmentDirections.actionGateCodesFragmentToEditGateCodeFragment(gateCodeId.toInt()))
         })
 
-        gateCodeViewModel.gatecodesPaged.observe(viewLifecycleOwner, Observer {
-            this.submitListToAdapter(it)
+        gateCodeViewModel.gatecodesPaged.observe(viewLifecycleOwner, {
+            listAdapter.submitData(viewLifecycleOwner.lifecycle, it)
+            listAdapter.notifyItemRangeChanged(0, Const.DEFAULT_PAGE_COUNT)
+            binding.gateCodesList.scrollToPosition(0)
         })
 
         locationHelper.lastLatitude.observe(viewLifecycleOwner, lastLocationListener)
@@ -208,15 +209,7 @@ class GateCodesFragment : Fragment(), SearchableRecyclerView {
         }
     }
 
-    private fun refreshList() {
-        val gcs = gateCodeViewModel.gatecodesPaged.value
-        gcs?.let{ this.submitListToAdapter(gcs) }
-    }
-
-    private fun submitListToAdapter (list: PagedList<GateCode>) {
-        listAdapter.submitList(list)
-        listAdapter.notifyDataSetChanged()
-    }
+    private fun refreshList() { }
 
     private fun fabOnClickListenerCallback() {
         this.findNavController().navigate(GateCodesFragmentDirections.actionGateCodesFragmentToCreateGateCodeFragment())

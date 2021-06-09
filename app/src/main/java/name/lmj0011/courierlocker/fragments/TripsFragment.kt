@@ -256,7 +256,8 @@ class TripsFragment : Fragment(R.layout.fragment_trips),
         tripViewModel.tripsPaged.removeObservers(viewLifecycleOwner)
 
         tripViewModel.tripsPaged.observe(viewLifecycleOwner, {
-            listAdapter.submitList(it)
+            listAdapter.submitData(viewLifecycleOwner.lifecycle, it)
+
             listAdapter.notifyItemRangeChanged(0, Const.DEFAULT_PAGE_COUNT)
             binding.tripList.scrollToPosition(0)
         })

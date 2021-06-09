@@ -1,32 +1,22 @@
 package name.lmj0011.courierlocker.adapters
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
-import android.widget.PopupMenu
-import android.widget.TextView
-import androidx.core.content.ContentProviderCompat.requireContext
-import androidx.core.view.setPadding
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import androidx.paging.PagedListAdapter
-import androidx.preference.PreferenceManager
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import name.lmj0011.courierlocker.database.Apartment
 import name.lmj0011.courierlocker.databinding.ListItemMapBinding
 import name.lmj0011.courierlocker.fragments.MapsFragmentDirections
 import name.lmj0011.courierlocker.fragments.bottomsheets.BottomSheetNavigableBuildingsFragment
 import name.lmj0011.courierlocker.fragments.dialogs.DeleteApartmentDialogFragment
-import name.lmj0011.courierlocker.fragments.dialogs.NavigateToAptBuildingDialogFragment
 import name.lmj0011.courierlocker.helpers.ListLock
-import name.lmj0011.courierlocker.helpers.launchIO
-import name.lmj0011.courierlocker.helpers.withUIContext
 
 
-class MapListAdapter(private val clickListener: MapListener, private val parentFragment: Fragment, private val viewMode: Int = VIEW_MODE_NORMAL): PagedListAdapter<Apartment, MapListAdapter.ViewHolder>(MapDiffCallback())
+class MapListAdapter(private val clickListener: MapListener, private val parentFragment: Fragment, private val viewMode: Int = VIEW_MODE_NORMAL): PagingDataAdapter<Apartment, MapListAdapter.ViewHolder>(MapDiffCallback())
 {
     companion object {
         const val VIEW_MODE_NORMAL = 0

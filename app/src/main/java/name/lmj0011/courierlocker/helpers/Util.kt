@@ -2,7 +2,7 @@ package name.lmj0011.courierlocker.helpers
 
 import android.text.Html
 import android.text.Spanned
-import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.paging.PagingConfig
 import name.lmj0011.courierlocker.database.GateCode
 import name.lmj0011.courierlocker.database.Trip
 import org.threeten.bp.Instant
@@ -205,62 +205,13 @@ object Util {
         return "${dateStr1}_${dateStr2}"
     }
 
-    /**
-     * Programmatically swipe RecyclerView item
-     * @param recyclerView RecyclerView which item will be swiped
-     * @param index Position of item
-     * @param distance Swipe distance
-     * @param direction Swipe direction, can be [ItemTouchHelper.START] or [ItemTouchHelper.END]
-     * @param time Animation time in milliseconds
-     *
-     * @author Oleh Haidaienko | https://stackoverflow.com/a/63253518/2445763
-     * @since 29.07.2020
-     */
-//    fun swipeRecyclerViewItem(
-//        recyclerView: RecyclerView,
-//        index: Int,
-//        distance: Int,
-//        direction: Int,
-//        time: Long
-//    ) {
-//        val childView = recyclerView.getChildAt(index) ?: return
-//        val x = childView.width / 2F
-//        val viewLocation = IntArray(2)
-//        childView.getLocationInWindow(viewLocation)
-//        val y = (viewLocation[1] + childView.height) / 2F
-//        val downTime = SystemClock.uptimeMillis()
-//        recyclerView.dispatchTouchEvent(
-//            MotionEvent.obtain(
-//                downTime,
-//                downTime,
-//                MotionEvent.ACTION_DOWN,
-//                x,
-//                y,
-//                0
-//            )
-//        )
-//        ValueAnimator.ofInt(0, distance).apply {
-//            duration = time
-//            addUpdateListener {
-//                val dX = it.animatedValue as Int
-//                val mX = when (direction) {
-//                    ItemTouchHelper.END -> x + dX
-//                    ItemTouchHelper.START -> x - dX
-//                    else -> 0F
-//                }
-//                recyclerView.dispatchTouchEvent(
-//                    MotionEvent.obtain(
-//                        downTime,
-//                        SystemClock.uptimeMillis(),
-//                        MotionEvent.ACTION_MOVE,
-//                        mX,
-//                        y,
-//                        0
-//                    )
-//                )
-//            }
-//        }.start()
-//    }
+    fun getDefaultPagingConfig(): PagingConfig {
+        return PagingConfig(
+            pageSize = Const.DEFAULT_PAGE_COUNT,
+            enablePlaceholders = false,
+            initialLoadSize = Const.DEFAULT_PAGE_COUNT
+        )
+    }
 }
 
 
