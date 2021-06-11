@@ -13,6 +13,9 @@ interface GateCodeDao: BaseDao {
     @Update
     fun update(gateCode: GateCode)
 
+    @Update
+    fun update(apartment: Apartment)
+
     @Query("SELECT * from gate_codes_table WHERE id = :key")
     fun get(key: Long): GateCode?
 

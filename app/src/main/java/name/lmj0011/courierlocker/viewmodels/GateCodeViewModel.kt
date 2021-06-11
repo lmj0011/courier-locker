@@ -146,6 +146,11 @@ class GateCodeViewModel(
     fun deleteGateCode(idx: Long) {
         uiScope.launch {
             withContext(Dispatchers.IO){
+                val apt = this@GateCodeViewModel.database.getRelatedApartment(idx)
+                apt?.run {
+                    gateCodeId = 0
+                    this@GateCodeViewModel.database.update(this)
+                }
                 this@GateCodeViewModel.database.deleteByGateCodeId(idx)
             }
         }
