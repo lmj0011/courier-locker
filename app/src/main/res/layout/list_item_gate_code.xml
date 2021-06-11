@@ -15,15 +15,16 @@
             android:padding="@dimen/default_list_item_padding_8dp">
 
         <TextView
-                android:id="@+id/addressString"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.020"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/gateCode1"
-                tools:text="Joey Diaz Ave." />
+            android:id="@+id/addressString"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.020"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/gateCode1"
+            tools:text="Joey Diaz Ave." />
 
         <TextView
                 android:id="@+id/gateCode1"

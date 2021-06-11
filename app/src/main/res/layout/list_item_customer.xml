@@ -15,20 +15,22 @@
             android:padding="@dimen/default_list_item_padding_8dp">
 
         <TextView
-                android:id="@+id/customerNameTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                tools:text="Fredo G"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+            android:id="@+id/customerNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Fredo G" />
 
         <TextView
-                android:id="@+id/customerAddressTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                tools:text="147 Walnut St."
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/customerNameTextView" />
+            android:id="@+id/customerAddressTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/customerNameTextView"
+            tools:text="147 Walnut St." />
 
         <ImageView
                 android:id="@+id/impressionImageView"
@@ -39,14 +41,15 @@
                 app:srcCompat="@drawable/ic_happy_face" />
 
         <TextView
-                android:id="@+id/noteTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/customerAddressTextView"
-                tools:text="Big Tipper $$..." />
+            android:id="@+id/noteTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/customerAddressTextView"
+            tools:text="Big Tipper $$..." />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.database.Customer
 import name.lmj0011.courierlocker.databinding.ListItemCustomerBinding
+import name.lmj0011.courierlocker.helpers.Util
 
 class CustomerListAdapter(private val clickListener: CustomerListener): PagingDataAdapter<Customer, CustomerListAdapter.ViewHolder>(CustomerDiffCallback()) {
     class ViewHolder private constructor(val binding: ListItemCustomerBinding) : RecyclerView.ViewHolder(binding.root){
@@ -17,7 +18,7 @@ class CustomerListAdapter(private val clickListener: CustomerListener): PagingDa
                 binding.customer = c
                 binding.clickListener = clickListener
                 binding.customerNameTextView.text = c.name
-                binding.customerAddressTextView.text = c.address
+                binding.customerAddressTextView.text = Util.addressShortener(address = c.address, offset = 3)
                 binding.noteTextView.text = c.note
 
                 when(c.impression) {

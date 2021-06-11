@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import name.lmj0011.courierlocker.database.GateCode
 import name.lmj0011.courierlocker.databinding.ListItemGateCodeBinding
+import name.lmj0011.courierlocker.helpers.Util
 
 class GateCodeListAdapter(private val clickListener: GateCodeListener): PagingDataAdapter<GateCode, GateCodeListAdapter.ViewHolder>(GateCodeDiffCallback()) {
     class ViewHolder private constructor(val binding: ListItemGateCodeBinding) : RecyclerView.ViewHolder(binding.root){
@@ -15,7 +16,7 @@ class GateCodeListAdapter(private val clickListener: GateCodeListener): PagingDa
             gc?.let {
                 binding.gateCode = gc
                 binding.clickListener = clickListener
-                binding.addressString.text = gc.address
+                binding.addressString.text = Util.addressShortener(address = gc.address, offset = 3)
                 binding.gateCode1.text = ""
                 binding.otherGateCodes.text = ""
 

@@ -14,6 +14,7 @@ import name.lmj0011.courierlocker.fragments.MapsFragmentDirections
 import name.lmj0011.courierlocker.fragments.bottomsheets.BottomSheetNavigableBuildingsFragment
 import name.lmj0011.courierlocker.fragments.dialogs.DeleteApartmentDialogFragment
 import name.lmj0011.courierlocker.helpers.ListLock
+import name.lmj0011.courierlocker.helpers.Util
 
 
 class MapListAdapter(private val clickListener: MapListener, private val parentFragment: Fragment, private val viewMode: Int = VIEW_MODE_NORMAL): PagingDataAdapter<Apartment, MapListAdapter.ViewHolder>(MapDiffCallback())
@@ -54,7 +55,7 @@ class MapListAdapter(private val clickListener: MapListener, private val parentF
             apt?.let {
                 binding.apartment = apt
                 binding.aptNameTextView.text = apt.name
-                binding.aptAddressTextView.text = apt.address
+                binding.aptAddressTextView.text = Util.addressShortener(address = apt.address, offset = 3)
                 binding.clickListener = clickListener
 
                 if(apt.gateCodeId > 0L) {

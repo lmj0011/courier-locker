@@ -16,26 +16,28 @@
             android:padding="@dimen/default_list_item_padding_8dp">
 
         <TextView
-                android:id="@+id/aptNameTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="Joey Diaz Apartments" />
+            android:id="@+id/aptNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Joey Diaz Apartments" />
 
         <TextView
-                android:id="@+id/aptAddressTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/aptNameTextView"
-                tools:text="3245 Joey Diaz Ave." />
+            android:id="@+id/aptAddressTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/aptNameTextView"
+            tools:text="3245 Joey Diaz Ave." />
 
         <ImageButton
             android:id="@+id/deleteImageBtn"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
+            android:layout_marginTop="8dp"
             android:background="@drawable/shape_default_outlined_button"
             android:padding="@dimen/default_image_button_padding"
             app:layout_constraintStart_toStartOf="parent"
@@ -47,6 +49,7 @@
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:layout_marginStart="2dp"
+            android:layout_marginTop="8dp"
             android:background="@drawable/shape_default_outlined_button"
             android:padding="@dimen/default_image_button_padding"
             app:layout_constraintStart_toEndOf="@+id/deleteImageBtn"
@@ -58,6 +61,7 @@
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:layout_marginStart="2dp"
+            android:layout_marginTop="8dp"
             android:background="@drawable/shape_default_outlined_button"
             android:padding="@dimen/default_image_button_padding"
             app:layout_constraintStart_toEndOf="@+id/gateCodeImageBtn"
@@ -69,6 +73,7 @@
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:layout_marginStart="2dp"
+            android:layout_marginTop="8dp"
             android:background="@drawable/shape_default_outlined_button"
             android:padding="@dimen/default_image_button_padding"
             android:textSize="12sp"
