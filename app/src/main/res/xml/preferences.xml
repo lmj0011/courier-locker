@@ -14,7 +14,7 @@
 
         <SwitchPreferenceCompat
                 app:key="showCurrentStatusAsBubble"
-                app:title="Display as a Bubble notification"
+                app:title="@string/display_in_a_bubble"
                 app:defaultValue="false"
                 app:isPreferenceVisible="false"/>
     </PreferenceCategory>

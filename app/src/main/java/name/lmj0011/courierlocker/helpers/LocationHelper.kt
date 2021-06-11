@@ -82,16 +82,18 @@ class LocationHelper(val context: Context) {
     }
 
 
-    fun getFromLocation(v: View?, latitude: Double, longitude: Double, results: Int): List<Address> {
-        return try {
-          geocoder.getFromLocation(latitude, longitude, results)
-        } catch (ex: IOException) {
-            when{
-                (v != null && ex.message == "grpc failed") -> {
-                    showNoGpsMessage(v.context)
-                    listOf()
+    suspend fun getFromLocation(v: View?, latitude: Double, longitude: Double, results: Int): List<Address> {
+        return withDefaultContext {
+            try {
+                geocoder.getFromLocation(latitude, longitude, results)
+            } catch (ex: IOException) {
+                when{
+                    (v != null && ex.message == "grpc failed") -> {
+                        showNoGpsMessage(v.context)
+                        listOf()
+                    }
+                    else -> throw ex
                 }
-                else -> throw ex
             }
         }
     }

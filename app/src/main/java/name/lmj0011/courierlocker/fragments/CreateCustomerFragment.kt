@@ -29,7 +29,7 @@ import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.database.Customer
 import name.lmj0011.courierlocker.databinding.FragmentCreateCustomerBinding
 import name.lmj0011.courierlocker.factories.CustomerViewModelFactory
-import name.lmj0011.courierlocker.helpers.LocationHelper
+import name.lmj0011.courierlocker.helpers.*
 import name.lmj0011.courierlocker.viewmodels.CustomerViewModel
 import org.kodein.di.instance
 
@@ -139,16 +139,18 @@ class CreateCustomerFragment : Fragment() {
 
         /// setting current location's address into the address textview
         binding.createCustomerInsertMyLocationButton.setOnClickListener {
-            val address = locationHelper.getFromLocation(binding.root, locationHelper.lastLatitude.value!!, locationHelper.lastLongitude.value!!, 1)
+            launchUI {
+                val address = locationHelper.getFromLocation(binding.root, locationHelper.lastLatitude.value!!, locationHelper.lastLongitude.value!!, 1)
 
-            when{
-                address.isNotEmpty() -> {
-                    binding.createCustomerAddressAutoCompleteTextView.setText(address[0].getAddressLine(0))
-                    this.customer.addressLatitude = address[0].latitude
-                    this.customer.addressLongitude = address[0].longitude
-                }
-                else -> {
-                    mainActivity.showToastMessage("Unable to resolve an Address from current location")
+                when{
+                    address.isNotEmpty() -> {
+                        binding.createCustomerAddressAutoCompleteTextView.setText(address[0].getAddressLine(0))
+                        this@CreateCustomerFragment.customer.addressLatitude = address[0].latitude
+                        this@CreateCustomerFragment.customer.addressLongitude = address[0].longitude
+                    }
+                    else -> {
+                        mainActivity.showToastMessage("Unable to resolve an Address from current location")
+                    }
                 }
             }
         }

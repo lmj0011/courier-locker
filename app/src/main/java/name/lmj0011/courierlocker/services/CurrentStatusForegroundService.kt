@@ -380,9 +380,7 @@ class CurrentStatusForegroundService : LifecycleService() {
                             t.stops.add(stop)
                         }
 
-                        launchIO {
-                            service.tripViewModel.updateTrip(t)
-                        }
+                        service.tripViewModel.updateTrip(t)
 
                         val notificationActionIntent =
                             Intent(context, SetTripDropoffReceiver::class.java).apply {

@@ -27,6 +27,7 @@ import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.databinding.FragmentCreateOrEditApartmentMapBinding
 import name.lmj0011.courierlocker.factories.ApartmentViewModelFactory
 import name.lmj0011.courierlocker.helpers.LocationHelper
+import name.lmj0011.courierlocker.helpers.launchUI
 import name.lmj0011.courierlocker.viewmodels.ApartmentViewModel
 import org.kodein.di.instance
 
@@ -151,25 +152,27 @@ class CreateOrEditApartmentMapFragment : Fragment() {
 
         /// setting current location's address into the address textview
         binding.createApartmentMapInsertMyLocationButton.setOnClickListener {
-            val address = locationHelper.getFromLocation(
-                binding.root,
-                locationHelper.lastLatitude.value!!,
-                locationHelper.lastLongitude.value!!,
-                1
-            )
+            launchUI {
+                val address = locationHelper.getFromLocation(
+                    binding.root,
+                    locationHelper.lastLatitude.value!!,
+                    locationHelper.lastLongitude.value!!,
+                    1
+                )
 
-            when {
-                address.isNotEmpty() -> {
-                    binding.createApartmentMapAddressAutoCompleteTextView.setText(
-                        address[0].getAddressLine(
-                            0
+                when {
+                    address.isNotEmpty() -> {
+                        binding.createApartmentMapAddressAutoCompleteTextView.setText(
+                            address[0].getAddressLine(
+                                0
+                            )
                         )
-                    )
-                    this@CreateOrEditApartmentMapFragment.aptAddressLatitude = address[0].latitude
-                    this@CreateOrEditApartmentMapFragment.aptAddressLongitude = address[0].longitude
-                }
-                else -> {
-                    mainActivity.showToastMessage("Unable to resolve an Address from current location")
+                        this@CreateOrEditApartmentMapFragment.aptAddressLatitude = address[0].latitude
+                        this@CreateOrEditApartmentMapFragment.aptAddressLongitude = address[0].longitude
+                    }
+                    else -> {
+                        mainActivity.showToastMessage("Unable to resolve an Address from current location")
+                    }
                 }
             }
         }

@@ -108,7 +108,7 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
                 btnView.isEnabled = false
                 showProgressBar()
 
-                launchIO {
+                launchUI {
                     try {
                         val address = locationHelper.getFromLocation(null, locationHelper.lastLatitude.value!!, locationHelper.lastLongitude.value!!, 1)
                         if(address.isNotEmpty()) {
@@ -118,19 +118,17 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
 
                             mTrip.value?.let { trip ->
                                 trip.stops.add(stop)
-                                val newTrip = tripViewModel.updateTrip(trip)
-                                withUIContext { injectTripIntoView(newTrip) }
+                                val newTrip = withIOContext { tripViewModel.updateTrip(trip) }
+                                injectTripIntoView(newTrip)
                             }
                         }
                     } catch (ex: Exception) {
                         ex.message?.let { msg -> activity.showToastMessage(msg) }
                     } finally {
-                        withUIContext {
-                            btnView.postDelayed({
-                                btnView.isEnabled = true
-                                hideProgressBar()
-                            }, 500)
-                        }
+                        btnView.postDelayed({
+                            btnView.isEnabled = true
+                            hideProgressBar()
+                        }, 500)
                     }
                 }
 

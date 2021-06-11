@@ -25,6 +25,9 @@ import name.lmj0011.courierlocker.adapters.AddressAutoSuggestAdapter
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.factories.GateCodeViewModelFactory
 import name.lmj0011.courierlocker.helpers.LocationHelper
+import name.lmj0011.courierlocker.helpers.launchDefault
+import name.lmj0011.courierlocker.helpers.launchUI
+import name.lmj0011.courierlocker.helpers.withUIContext
 import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
 import org.kodein.di.instance
 import kotlin.collections.ArrayList
@@ -131,16 +134,18 @@ class CreateGateCodeFragment : Fragment() {
 
         /// setting current location's address into the address textview
         binding.createGateCodeInsertMyLocationButton.setOnClickListener {
-            val address = locationHelper.getFromLocation(binding.root, locationHelper.lastLatitude.value!!, locationHelper.lastLongitude.value!!, 1)
+            launchUI {
+                val address = locationHelper.getFromLocation(binding.root, locationHelper.lastLatitude.value!!, locationHelper.lastLongitude.value!!, 1)
 
-            when{
-                address.isNotEmpty() -> {
-                    binding.createGateCodeAddressAutoCompleteTextView.setText(address[0].getAddressLine(0))
-                    this@CreateGateCodeFragment.gateCodeAddressLatitude = address[0].latitude
-                    this@CreateGateCodeFragment.gateCodeAddressLongitude = address[0].longitude
-                }
-                else -> {
-                    mainActivity.showToastMessage("Unable to resolve an Address from current location")
+                when{
+                    address.isNotEmpty() -> {
+                        binding.createGateCodeAddressAutoCompleteTextView.setText(address[0].getAddressLine(0))
+                        this@CreateGateCodeFragment.gateCodeAddressLatitude = address[0].latitude
+                        this@CreateGateCodeFragment.gateCodeAddressLongitude = address[0].longitude
+                    }
+                    else -> {
+                        mainActivity.showToastMessage("Unable to resolve an Address from current location")
+                    }
                 }
             }
         }

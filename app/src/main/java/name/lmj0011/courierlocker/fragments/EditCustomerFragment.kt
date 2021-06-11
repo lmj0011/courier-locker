@@ -31,6 +31,7 @@ import name.lmj0011.courierlocker.databinding.FragmentEditCustomerBinding
 import name.lmj0011.courierlocker.factories.CustomerViewModelFactory
 import name.lmj0011.courierlocker.fragments.dialogs.DeleteCustomerDialogFragment
 import name.lmj0011.courierlocker.helpers.LocationHelper
+import name.lmj0011.courierlocker.helpers.launchUI
 import name.lmj0011.courierlocker.viewmodels.CustomerViewModel
 import org.kodein.di.instance
 
@@ -165,16 +166,18 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
 
         /// setting current location's address into the address textview
         binding.editCustomerInsertMyLocationButton.setOnClickListener {
-            val address = locationHelper.getFromLocation(binding.root, locationHelper.lastLatitude.value!!, locationHelper.lastLongitude.value!!, 1)
+            launchUI {
+                val address = locationHelper.getFromLocation(binding.root, locationHelper.lastLatitude.value!!, locationHelper.lastLongitude.value!!, 1)
 
-            when{
-                address.isNotEmpty() -> {
-                    binding.editCustomerAddressAutoCompleteTextView.setText(address[0].getAddressLine(0))
-                    this@EditCustomerFragment.customerAddressLatitude = address[0].latitude
-                    this@EditCustomerFragment.customerAddressLongitude = address[0].longitude
-                }
-                else -> {
-                    mainActivity.showToastMessage("Unable to resolve an Address from current location")
+                when{
+                    address.isNotEmpty() -> {
+                        binding.editCustomerAddressAutoCompleteTextView.setText(address[0].getAddressLine(0))
+                        this@EditCustomerFragment.customerAddressLatitude = address[0].latitude
+                        this@EditCustomerFragment.customerAddressLongitude = address[0].longitude
+                    }
+                    else -> {
+                        mainActivity.showToastMessage("Unable to resolve an Address from current location")
+                    }
                 }
             }
         }

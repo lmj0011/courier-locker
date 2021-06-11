@@ -24,6 +24,7 @@ import name.lmj0011.courierlocker.databinding.FragmentCreateTripBinding
 import name.lmj0011.courierlocker.factories.TripViewModelFactory
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.launchIO
+import name.lmj0011.courierlocker.helpers.launchUI
 import name.lmj0011.courierlocker.helpers.withUIContext
 import name.lmj0011.courierlocker.viewmodels.TripViewModel
 import org.kodein.di.instance
@@ -189,27 +190,29 @@ class CreateTripFragment : Fragment() {
         containerLayout.addView(horizontalLinearLayout)
 
         binding.createTripFragmentScrollView.post {
-            // inserting the current location address into this AutoCompleteTextView
-            val address = locationHelper.getFromLocation(binding.root, locationHelper.lastLatitude.value!!, locationHelper.lastLongitude.value!!, 1)
+            launchUI {
+                // inserting the current location address into this AutoCompleteTextView
+                val address = locationHelper.getFromLocation(binding.root, locationHelper.lastLatitude.value!!, locationHelper.lastLongitude.value!!, 1)
 
-            when{
-                stop != null -> {
-                    addressTextView.setText(stop.address)
-                    horizontalLinearLayout.tag = stop
+                when{
+                    stop != null -> {
+                        addressTextView.setText(stop.address)
+                        horizontalLinearLayout.tag = stop
+                    }
+                    address.isNotEmpty() -> {
+                        val newStop = Stop(address[0].getAddressLine(0), address[0].latitude, address[0].longitude)
+                        addressTextView.setText(newStop.address)
+                        horizontalLinearLayout.tag = newStop
+                    }
+                    else -> {
+                        containerLayout.removeView(view)
+                        mainActivity.showToastMessage("Unable to resolve an Address from current location")
+                    }
                 }
-                address.isNotEmpty() -> {
-                    val newStop = Stop(address[0].getAddressLine(0), address[0].latitude, address[0].longitude)
-                    addressTextView.setText(newStop.address)
-                    horizontalLinearLayout.tag = newStop
-                }
-                else -> {
-                    containerLayout.removeView(view)
-                    mainActivity.showToastMessage("Unable to resolve an Address from current location")
-                }
+
+                val scroll = binding.createTripFragmentScrollView
+                scroll.scrollTo(0, scroll.height)
             }
-
-            val scroll = binding.createTripFragmentScrollView
-            scroll.scrollTo(0, scroll.height)
         }
     }
 

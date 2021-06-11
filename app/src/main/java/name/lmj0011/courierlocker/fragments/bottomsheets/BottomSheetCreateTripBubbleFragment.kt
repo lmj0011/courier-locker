@@ -204,19 +204,17 @@ class BottomSheetCreateTripBubbleFragment(private val dismissCallback: () -> Uni
     }
 
     private fun fetchCurrentAddressForAutoCompleteTextView() {
-        launchIO {
+        launchUI {
             try {
                 // inserting the current location address into this AutoCompleteTextView
                 val address = locationHelper.getFromLocation(binding.root, locationHelper.lastLatitude.value!!, locationHelper.lastLongitude.value!!, 1)
 
-                withUIContext {
-                    if (address.isNotEmpty()) {
-                        binding.autoCompleteTextView.setText(address[0].getAddressLine(0))
-                        val stop = Stop(address[0].getAddressLine(0), address[0].latitude, address[0].longitude)
-                        binding.autoCompleteTextView.tag = stop
-                    } else {
-                        activity.showToastMessage("Unable to resolve an Address from current location")
-                    }
+                if (address.isNotEmpty()) {
+                    binding.autoCompleteTextView.setText(address[0].getAddressLine(0))
+                    val stop = Stop(address[0].getAddressLine(0), address[0].latitude, address[0].longitude)
+                    binding.autoCompleteTextView.tag = stop
+                } else {
+                    activity.showToastMessage("Unable to resolve an Address from current location")
                 }
             } catch (ex: Exception) {
                 ex.message?.let { msg -> activity.showToastMessage(msg) }
