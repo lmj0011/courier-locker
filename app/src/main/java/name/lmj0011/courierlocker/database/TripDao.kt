@@ -44,8 +44,14 @@ interface TripDao: BaseDao {
     @Query("SELECT payAmount FROM trips_table WHERE date(timestamp, 'localtime') >= date('now', 'localtime') AND date(timestamp, 'localtime') < date('now', 'localtime', '+1 day')")
     fun getAllTodayTripPayAmounts(): List<String>
 
+    @Query("SELECT payAmount FROM trips_table WHERE strftime('%Y-%W',date(timestamp, 'localtime')) = strftime('%Y-%W',date('now', 'localtime'))")
+    fun getAllThisWeekTripPayAmounts(): List<String>
+
     @Query("SELECT payAmount FROM trips_table WHERE strftime('%Y-%m',date(timestamp, 'localtime')) = strftime('%Y-%m',date('now', 'localtime'))")
-    fun getAllMonthTripPayAmounts(): List<String>
+    fun getAllThisMonthTripPayAmounts(): List<String>
+
+    @Query("SELECT payAmount FROM trips_table WHERE strftime('%Y',date(timestamp, 'localtime')) = strftime('%Y',date('now', 'localtime'))")
+    fun getAllYearToDateTripPayAmounts(): List<String>
 
     @Query("SELECT * FROM trips_table WHERE date(timestamp, 'localtime') >= date(:startDate, 'unixepoch') AND date(timestamp, 'localtime') <= date(:endDate, 'unixepoch')")
     fun getAllTripsInDateRange(startDate: Long, endDate: Long): List<Trip>

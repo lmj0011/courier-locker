@@ -91,8 +91,34 @@ class TripViewModel(
         return database.getAllTodayTrips().size.toString()
     }
 
+    fun weekTotalMoney(): String {
+        val result = database.getAllThisWeekTripPayAmounts().fold(0.0) { sum, pa ->
+            val toAdd = pa.toDoubleOrNull()
+            if (toAdd == null){
+                sum
+            } else {
+                sum + toAdd
+            }
+        }
+
+        return Util.numberFormatInstance.format(result)
+    }
+
     fun monthTotalMoney(): String {
-        val result = database.getAllMonthTripPayAmounts().fold(0.0) { sum, pa ->
+        val result = database.getAllThisMonthTripPayAmounts().fold(0.0) { sum, pa ->
+            val toAdd = pa.toDoubleOrNull()
+            if (toAdd == null){
+                sum
+            } else {
+                sum + toAdd
+            }
+        }
+
+        return Util.numberFormatInstance.format(result)
+    }
+
+    fun yearToDateTotalMoney(): String {
+        val result = database.getAllYearToDateTripPayAmounts().fold(0.0) { sum, pa ->
             val toAdd = pa.toDoubleOrNull()
             if (toAdd == null){
                 sum

@@ -39,13 +39,15 @@ class TripsStatsDialogFragment : DialogFragment() {
 
         launchIO {
             val totalToday = tripViewModel.todayTotalMoney()
+            val totalWeek = tripViewModel.weekTotalMoney()
             val totalMonth = tripViewModel.monthTotalMoney()
-            val totalToDate = tripViewModel.totalMoney()
+            val totalYearToDate = tripViewModel.yearToDateTotalMoney()
 
             withUIContext {
-                dialogView.findViewById<TextView>(R.id.todayTotalPayTextView).text = totalToday
-                dialogView.findViewById<TextView>(R.id.monthTotalPayTextView).text = totalMonth
-                dialogView.findViewById<TextView>(R.id.toDateTotalPayTextView).text = totalToDate
+                dialogView.findViewById<TextView>(R.id.todayTotalPayTextView).text = "Today: $totalToday"
+                dialogView.findViewById<TextView>(R.id.weekTotalPayTextView).text = "This Week: $totalWeek"
+                dialogView.findViewById<TextView>(R.id.monthTotalPayTextView).text = "This Month: $totalMonth"
+                dialogView.findViewById<TextView>(R.id.yearToDateTextView).text = "YTD: $totalYearToDate"
             }
         }
     }
