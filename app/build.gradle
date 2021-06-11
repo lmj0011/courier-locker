@@ -62,15 +62,6 @@ android {
                     appThemeLauncher: "@style/AppTheme.NoActionBar"
             ]
         }
-        beta { // public testing
-            applicationIdSuffix ".beta"
-            resValue("string", "app_name", "Courier Locker (beta)")
-            manifestPlaceholders = [
-                    appIcon: "@mipmap/ic_launcher_beta",
-                    appRoundIcon: "@mipmap/ic_launcher_beta_round",
-                    appThemeLauncher: "@style/AppTheme.NoActionBar"
-            ]
-        }
         prod { // official release
             applicationIdSuffix ".prod"
             resValue("string", "app_name", "Courier Locker")
