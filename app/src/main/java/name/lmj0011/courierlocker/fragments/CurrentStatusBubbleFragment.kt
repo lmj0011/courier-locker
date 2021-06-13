@@ -114,12 +114,10 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
                         if(address.isNotEmpty()) {
                             val stop = Stop(address[0].getAddressLine(0), address[0].latitude, address[0].longitude)
 
-                            resetRecentTripsOrder = false
-
                             mTrip.value?.let { trip ->
                                 trip.stops.add(stop)
                                 val newTrip = withIOContext { tripViewModel.updateTrip(trip) }
-                                injectTripIntoView(newTrip)
+                                mTrip.postValue(newTrip)
                             }
                         }
                     } catch (ex: Exception) {
@@ -224,27 +222,9 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
         listOfRecentTrips = trips.toMutableList()
         recentTripsListIterator = listOfRecentTrips.listIterator()
 
-        /**
-         * Here we're determining whether to update the Trip currently in the view
-         * or show the first Trip in [recentTripsListIterator], which would normally
-         * mean we created a new Trip
-         *
-         * for example, we'll want to update the Trip currently in View if we performed an
-         * "Add Stop" action from the Current Status Bubble
-         */
-        val trip = listOfRecentTrips.find { ele ->
-            val targetTrip: Trip? = mTrip.value
-            (targetTrip != null && ele.id == targetTrip.id)
-        }
-
-        if (trip is Trip && !resetRecentTripsOrder) {
-            mTrip.postValue(trip)
-            resetRecentTripsOrder = true
-        } else {
-            if(recentTripsListIterator.hasNext()) {
-                recentTripsListIterator.next().let { t ->
-                    mTrip.postValue(t)
-                }
+        if(recentTripsListIterator.hasNext()) {
+            recentTripsListIterator.next().let { t ->
+                mTrip.postValue(t)
             }
         }
     }
