@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'androidx.navigation.safeargs'
+apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 
 // get the first 8 chars of the latest git commit, and use it as the version build name
@@ -10,14 +11,14 @@ def appBuildPrefix =  ['sh', '-c', 'git rev-parse --short=8 HEAD'].execute().tex
 
 android {
     compileSdkVersion 30
-    buildToolsVersion "29.0.3"
+    ndkVersion "21.3.6528147"
 
     defaultConfig {
         applicationId "name.lmj0011.courierlocker"
         minSdkVersion 26
         targetSdkVersion 30
-        versionCode 82
-        versionName "2.2.0-beta07"
+        versionCode 83
+        versionName "2.2.0-beta08"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
@@ -29,6 +30,7 @@ android {
             }
         }
     }
+
     buildTypes {
         release {
             minifyEnabled true
@@ -38,8 +40,10 @@ android {
             resValue("bool", "DEBUG_MODE", "false")
             resValue("string", "app_build", appBuildPrefix)
             resValue("string", "google_maps_key", (project.findProperty("GOOGLE_MAPS_API_KEY_RELEASE") ?: ""))
-            resValue("string", "google_directions_key", (project.findProperty("GOOGLE_DIRECTIONS_API_KEY_DEBUG") ?: ""))
             manifestPlaceholders = [usesCleartextTraffic:"false"]
+            ndk {
+                debugSymbolLevel 'FULL'
+            }
         }
 
         debug {
@@ -47,7 +51,6 @@ android {
             resValue("bool", "DEBUG_MODE", "true")
             resValue("string", "app_build", appBuildPrefix)
             resValue("string", "google_maps_key", (project.findProperty("GOOGLE_MAPS_API_KEY_DEBUG") ?: ""))
-            resValue("string", "google_directions_key", (project.findProperty("GOOGLE_DIRECTIONS_API_KEY_DEBUG") ?: ""))
             manifestPlaceholders = [usesCleartextTraffic:"true"]
         }
     }
@@ -190,8 +193,3 @@ dependencies {
     // https://github.com/Zhuinden/livedata-combinetuple-kt#livedata-combinetuple-kt
     implementation 'com.github.Zhuinden:livedata-combinetuple-kt:1.2.1'
 }
-
-
-// ref: https://firebase.google.com/docs/android/setup#add-config-file
-// Add the following line to the bottom of the file ??
-apply plugin: 'com.google.gms.google-services'  // Google Play services Gradle plugin

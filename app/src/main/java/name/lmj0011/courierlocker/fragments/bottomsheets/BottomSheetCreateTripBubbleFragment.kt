@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -187,7 +188,7 @@ class BottomSheetCreateTripBubbleFragment(private val dismissCallback: () -> Uni
         })
 
         tripViewModel.errorMsg.observe(viewLifecycleOwner, {
-            if (it.isNotBlank()) activity.showToastMessage(it)
+            if (it.isNotBlank()) activity.showToastMessage(it, Toast.LENGTH_LONG)
         })
 
         bottomSheetDialog.behavior.addBottomSheetCallback(object :BottomSheetBehavior.BottomSheetCallback() {

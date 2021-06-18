@@ -1,5 +1,6 @@
 package name.lmj0011.courierlocker
 
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.Gravity
@@ -34,6 +35,8 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
         finish()
         return true
     }

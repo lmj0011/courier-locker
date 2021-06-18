@@ -1,5 +1,8 @@
 package name.lmj0011.courierlocker.helpers
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.text.Html
 import android.text.Spanned
 import androidx.paging.PagingConfig
@@ -211,6 +214,14 @@ object Util {
             enablePlaceholders = false,
             initialLoadSize = Const.DEFAULT_PAGE_COUNT
         )
+    }
+
+    fun openUrlInWebBrowser(context: Context, url: String) {
+        val webpage: Uri = Uri.parse(url)
+        val intent = Intent(Intent.ACTION_VIEW, webpage)
+        if (intent.resolveActivity(context.packageManager) != null) {
+            context.startActivity(intent)
+        }
     }
 }
 

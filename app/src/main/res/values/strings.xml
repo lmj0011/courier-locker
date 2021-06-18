@@ -29,10 +29,17 @@
 
     <!-- Preference Keys -->
     <string name="pref_key_map_feed_list">pref_key_map_feed_list</string>
-    <string name="pref_key_bounding_coordinates_distance">pref_key_bounding_coordinates_distance</string>
     <string name="pref_enable_current_status_service">pref_enable_current_status_service</string>
     <string name="pref_google_map_type">pref_google_map_type</string>
     <string name="pref_key_mode_night">PREF_MODE_NIGHT</string>
+
+    <string name="pref_gate_codes_is_ordered_by_nearest">pref_gate_codes_is_ordered_by_nearest</string>
+    <string name="pref_maps_is_ordered_by_nearest">pref_maps_is_ordered_by_nearest</string>
+
+    <string name="pref_dev_options_enabled">pref_dev_options_enabled</string>
+    <string name="pref_dev_controls_enabled">pref_dev_controls_enabled</string>
+    <string name="pref_key_bounding_coordinates_distance">pref_key_bounding_coordinates_distance</string>
+    <string name="pref_google_directions_api_key">pref_google_directions_api_key</string>
 
     <!-- Preference Summaries -->
     <string name="pref_bounding_coordinates_distance_summary">Increase or decrease the radius (in miles) of the bounding box used for address suggestions</string>
@@ -75,4 +82,5 @@
     <string name="gatecodes_selectable_map_list">Select a Map to associate with this GateCode list</string>
     <string name="building_navigation_list">Swipe left on a Building, then tap \"Directions\"</string>
     <string name="display_in_a_bubble">Display in a Bubble</string>
+    <string name="calculated_trip_error_message">Error calculating Trip distance, is the Directions api key valid?</string>
 </resources>

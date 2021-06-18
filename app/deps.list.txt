@@ -1,8 +1,8 @@
 # auto-generated from app; this file should be checked into version control
-androidx.databinding:databinding-common:7.0.0-beta03
-androidx.databinding:databinding-runtime:7.0.0-beta03
-androidx.databinding:databinding-adapters:7.0.0-beta03
-androidx.databinding:databinding-ktx:7.0.0-beta03
+androidx.databinding:databinding-common:7.0.0-beta04
+androidx.databinding:databinding-runtime:7.0.0-beta04
+androidx.databinding:databinding-adapters:7.0.0-beta04
+androidx.databinding:databinding-ktx:7.0.0-beta04
 org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.5.10
 org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.10
 androidx.navigation:navigation-fragment-ktx:2.3.5

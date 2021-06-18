@@ -46,7 +46,7 @@ class MapsFragment : Fragment(), SearchableRecyclerView {
     private lateinit var binding: FragmentMapsBinding
     private lateinit var mainActivity: MainActivity
     private lateinit var listAdapter: MapListAdapter
-    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var preferences: PreferenceHelper
     private lateinit var viewModelFactory: ApartmentViewModelFactory
     private lateinit var apartmentViewModel: ApartmentViewModel
     private lateinit var locationHelper: LocationHelper
@@ -86,8 +86,8 @@ class MapsFragment : Fragment(), SearchableRecyclerView {
         mainActivity = activity as MainActivity
         setHasOptionsMenu(true)
 
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity)
-        val application = requireNotNull(this.activity).application
+        val application = requireActivity().application as CourierLockerApplication
+        preferences = application.kodein.instance()
         val dataSource = CourierLockerDatabase.getInstance(application).apartmentDao
         viewModelFactory = ApartmentViewModelFactory(dataSource, application)
         apartmentViewModel = ViewModelProvider(this, viewModelFactory).get(ApartmentViewModel::class.java)
@@ -158,13 +158,10 @@ class MapsFragment : Fragment(), SearchableRecyclerView {
         binding.liveLocationUpdatingSwitch.setOnCheckedChangeListener { _, isChecked ->
             ListLock.unlock()
             apartmentViewModel.isOrderedByNearest.postValue(isChecked)
-            sharedPreferences.edit().apply {
-                putBoolean("mapsLocationUpdating", isChecked)
-                commit()
-            }
+            preferences.mapsIsOrderedByNearest = isChecked
         }
 
-        if(!sharedPreferences.getBoolean("enableDebugMode", false)!!) {
+        if(!preferences.devControlsEnabled) {
             binding.generateMapBtn.visibility = View.GONE
         }
 
@@ -275,7 +272,7 @@ class MapsFragment : Fragment(), SearchableRecyclerView {
     }
 
     private fun applyPreferences() {
-        val isChecked = sharedPreferences.getBoolean("mapsLocationUpdating", false)
+        val isChecked = preferences.mapsIsOrderedByNearest
         binding.liveLocationUpdatingSwitch.isChecked = isChecked
         apartmentViewModel.isOrderedByNearest.postValue(isChecked)
     }

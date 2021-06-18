@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.InputType
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.documentfile.provider.DocumentFile
 import androidx.preference.*
@@ -14,12 +15,9 @@ import com.github.salomonbrys.kotson.*
 import com.google.gson.Gson
 import com.google.gson.JsonParser
 import kotlinx.coroutines.*
-import name.lmj0011.courierlocker.CourierLockerApplication
-import name.lmj0011.courierlocker.MainActivity
+import name.lmj0011.courierlocker.*
 import name.lmj0011.courierlocker.R
-import name.lmj0011.courierlocker.SettingsActivity
 import name.lmj0011.courierlocker.database.*
-import name.lmj0011.courierlocker.fragments.dialogs.AboutDialogFragment
 import name.lmj0011.courierlocker.helpers.*
 import name.lmj0011.courierlocker.workers.CalculateAllTripDistanceWorker
 import name.lmj0011.courierlocker.workers.CreateBackupWorker
@@ -36,17 +34,21 @@ class SettingsFragment : PreferenceFragmentCompat() {
     private var fragmentJob: Job = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
     private lateinit var preferences: PreferenceHelper
+    private var devOptionsCountDown = 0
 
     private lateinit var createBackupPref: Preference
     private lateinit var restoreBackupPref: Preference
     private lateinit var enableAutomaticBackupsPref: SwitchPreferenceCompat
-    private lateinit var googleDirectionsKeyPref: Preference
-    private lateinit var aboutPref: Preference
     private lateinit var automaticBackupLocationPref: Preference
     private lateinit var boundingCoordinatesDistance: EditTextPreference
     private lateinit var enableCurrentStatusService: SwitchPreferenceCompat
     private lateinit var showCurrentStatusAsBubble: SwitchPreferenceCompat
     private lateinit var appThemeListPreference: ListPreference
+    private lateinit var appVersionPref: Preference
+    private lateinit var appBuildPref: Preference
+    private lateinit var appChangelogPref: Preference
+    private lateinit var enableDevOptionsPref: SwitchPreferenceCompat
+    private lateinit var googleDirectionsApiKeyPref: EditTextPreference
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         settingsActivity = activity as SettingsActivity
@@ -60,35 +62,28 @@ class SettingsFragment : PreferenceFragmentCompat() {
         createBackupPref = findPreference("createBackup")!!
         restoreBackupPref = findPreference("restoreBackup")!!
         enableAutomaticBackupsPref = findPreference("enableAutomaticBackups")!!
-        googleDirectionsKeyPref = findPreference("googleDirectionsKey")!!
-        aboutPref = findPreference("about")!!
         automaticBackupLocationPref = findPreference("automaticBackupLocation")!!
         boundingCoordinatesDistance = findPreference(application.getString(R.string.pref_key_bounding_coordinates_distance))!!
         enableCurrentStatusService = findPreference(application.getString(R.string.pref_enable_current_status_service))!!
         showCurrentStatusAsBubble = findPreference("showCurrentStatusAsBubble")!!
         appThemeListPreference = findPreference(application.getString(R.string.pref_key_mode_night))!!
+        appVersionPref = findPreference("appVersion")!!
+        appBuildPref = findPreference("appBuild")!!
+        appChangelogPref = findPreference("appChangelog")!!
+        enableDevOptionsPref = findPreference(application.getString(R.string.pref_dev_options_enabled))!!
+        googleDirectionsApiKeyPref = findPreference(application.getString(R.string.pref_google_directions_api_key))!!
 
-        if(!resources.getBoolean(R.bool.DEBUG_MODE)) {
-            val prfScreen = findPreference<PreferenceScreen>("preferenceScreen")
-            val debugCategory = findPreference<PreferenceCategory>("debugCategory")
-            prfScreen?.removePreference(debugCategory)
-        } else {
-            boundingCoordinatesDistance.apply {
-                val v = preferences.boundingCoordinatesDistance
-                title = context.getString(R.string.pref_bounding_coordinates_distance_title, v.toString())
 
-                setOnBindEditTextListener {
-                    it.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
-                    it.setSelection(it.text.toString().length)
-                }
-
-                setOnPreferenceChangeListener { pref, newValue ->
-                    val v = newValue as String
-                    pref.title = pref.context.getString(R.string.pref_bounding_coordinates_distance_title, newValue.toDouble().toString())
-                    preferences.boundingCoordinatesDistance = v.toDouble()
-                    true
-                }
+        when {
+            BuildConfig.DEBUG -> {
+                enableDevOptionsPref.isChecked = true
+                enableDevOptionsPref.isEnabled = false
+                setupDevOptions()
             }
+            enableDevOptionsPref.isChecked -> {
+                setupDevOptions()
+            }
+            else -> removeDevOptions()
         }
 
         /**
@@ -97,31 +92,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
         showCurrentStatusAsBubble.isVisible =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && enableCurrentStatusService.isChecked
 
-
-        googleDirectionsKeyPref.setOnPreferenceChangeListener { _, newValue ->
-            when(newValue) {
-                true -> {
-                    val constraints = Constraints.Builder()
-                        .setRequiredNetworkType(NetworkType.CONNECTED)
-                        .build()
-
-                    val workerRequest = OneTimeWorkRequestBuilder<CalculateAllTripDistanceWorker>()
-                        .setConstraints(constraints)
-                        .addTag(settingsActivity.getString(R.string.calculate_all_trip_distance_one_time_worker_tag))
-                        .build()
-
-                    WorkManager.getInstance(application).enqueue(workerRequest)
-                }
-                else -> {}
-            }
-            true
-        }
-
-        aboutPref.setOnPreferenceClickListener {
-            val dialog = AboutDialogFragment()
-            dialog.show(childFragmentManager, "AboutDialogFragment")
-            true
-        }
 
         createBackupPref.setOnPreferenceClickListener {
             this.createBackup()
@@ -225,6 +195,81 @@ class SettingsFragment : PreferenceFragmentCompat() {
             }
             true
         }
+
+        appVersionPref.summary = BuildConfig.VERSION_NAME
+
+        appBuildPref.summary = "${resources.getString(R.string.app_build)}, ${if(BuildConfig.DEBUG) "debug" else "production"}"
+
+        /**
+         * developer options unlocking sequence, only if we're not using a DEBUG build nor
+         * have dev options enabled in preferences
+         */
+        if(!BuildConfig.DEBUG && !enableDevOptionsPref.isChecked) {
+            appBuildPref.setOnPreferenceClickListener {
+                val maxCount = 8
+                devOptionsCountDown ++
+
+                if(maxCount == devOptionsCountDown) {
+                    enableDevOptionsPref.isChecked = true
+                    (requireActivity() as SettingsActivity)
+                        .showToastMessage("Developer Options unlocked!", Toast.LENGTH_LONG)
+                    requireActivity().recreate()
+                } else {
+                    (requireActivity() as SettingsActivity)
+                        .showToastMessage("${maxCount - devOptionsCountDown} taps away from unlocking Developer Options")
+                }
+
+                true
+            }
+        }
+
+        enableDevOptionsPref.setOnPreferenceClickListener {
+            if(!enableDevOptionsPref.isChecked) {
+                preferences.resetDevOptionsPrefs()
+                removeDevOptions()
+            }
+            true
+        }
+
+
+        val changeLogUrl = "https://github.com/lmj0011/courier-locker/commits/v${BuildConfig.VERSION_NAME}"
+        appChangelogPref.summary = changeLogUrl
+
+        appChangelogPref.setOnPreferenceClickListener { _ ->
+            Util.openUrlInWebBrowser(requireContext(), changeLogUrl)
+            true
+        }
+
+        googleDirectionsApiKeyPref.apply {
+            text?.map { "•" }?.joinToString("").let { str ->
+                summary = str
+            }
+        }
+
+        googleDirectionsApiKeyPref.setOnPreferenceChangeListener { _, newValue ->
+            // update the summary
+            (newValue as String)
+
+            newValue.map { "•" }.joinToString("").let { str ->
+                googleDirectionsApiKeyPref.summary = str
+            }
+
+            // dispatch Worker to update distance values for all Trips
+            if(newValue.isNotBlank())  {
+                val constraints = Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
+
+                val workerRequest = OneTimeWorkRequestBuilder<CalculateAllTripDistanceWorker>()
+                    .setConstraints(constraints)
+                    .addTag(settingsActivity.getString(R.string.calculate_all_trip_distance_one_time_worker_tag))
+                    .build()
+
+                WorkManager.getInstance(application).enqueue(workerRequest)
+            }
+            true
+        }
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
@@ -268,6 +313,31 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 }
             }
         }
+    }
+
+    private fun setupDevOptions() {
+        boundingCoordinatesDistance.apply {
+            val v = preferences.boundingCoordinatesDistance
+            title = context.getString(R.string.pref_bounding_coordinates_distance_title, v.toString())
+
+            setOnBindEditTextListener {
+                it.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+                it.setSelection(it.text.toString().length)
+            }
+
+            setOnPreferenceChangeListener { pref, newValue ->
+                val v = newValue as String
+                pref.title = pref.context.getString(R.string.pref_bounding_coordinates_distance_title, newValue.toDouble().toString())
+                preferences.boundingCoordinatesDistance = v.toDouble()
+                true
+            }
+        }
+    }
+
+    private fun removeDevOptions() {
+        val prfScreen = findPreference<PreferenceScreen>("preferenceScreen")
+        val debugCategory = findPreference<PreferenceCategory>("debugCategory")
+        prfScreen?.removePreference(debugCategory)
     }
 
     private fun createBackup () {

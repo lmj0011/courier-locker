@@ -102,7 +102,7 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
         })
 
         tripViewModel.errorMsg.observe(viewLifecycleOwner, {
-            if (it.isNotBlank()) mainActivity.showToastMessage(it)
+            if (it.isNotBlank()) mainActivity.showToastMessage(it, Toast.LENGTH_LONG)
         })
 
         mainActivity.hideFab()

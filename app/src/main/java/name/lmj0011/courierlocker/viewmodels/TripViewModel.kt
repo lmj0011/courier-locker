@@ -10,12 +10,14 @@ import com.github.kittinunf.fuel.json.responseJson
 import com.github.kittinunf.result.Result
 import com.mooveit.library.Fakeit
 import kotlinx.coroutines.*
+import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.database.Stop
 import name.lmj0011.courierlocker.database.Trip
 import name.lmj0011.courierlocker.database.TripDao
 import name.lmj0011.courierlocker.helpers.*
 import name.lmj0011.courierlocker.helpers.Util
+import org.kodein.di.instance
 import timber.log.Timber
 import java.net.URLEncoder
 
@@ -24,13 +26,11 @@ class TripViewModel(
     application: Application
 ) : AndroidViewModel(application) {
     private var viewModelJob = Job()
+    private val preferences: PreferenceHelper = (application as CourierLockerApplication).kodein.instance()
 
     private val uiScope = CoroutineScope(Dispatchers.IO +  viewModelJob)
 
-    private val googleApiKey = when(PreferenceManager.getDefaultSharedPreferences(application).getBoolean("googleDirectionsKey", false)) {
-        true -> application.resources.getString(R.string.google_directions_key)
-        else -> ""
-    }
+    private val googleApiKey = preferences.googleDirectionsApiKey
 
     var filterText = MutableLiveData<String>().apply { postValue(null) }
 
@@ -265,10 +265,10 @@ class TripViewModel(
 
     fun calculateTripDistance(trip: Trip?): Double {
         val defaultValue = 0.0
-        if (trip == null || googleApiKey.isNullOrBlank()) return defaultValue
+        if (trip == null || googleApiKey.isBlank()) return defaultValue
 
         val sb = StringBuilder()
-        // TODO will need to add waypoints for "Stops" https://developers.google.com/maps/documentation/directions/intro#Waypoints
+
         sb.append("https://maps.googleapis.com/maps/api/directions/json")
         sb.append("?mode=driving")
         sb.append("&origin=${trip.pickupAddressLatitude},${trip.pickupAddressLongitude}")
@@ -286,20 +286,26 @@ class TripViewModel(
             is Result.Failure -> {
                 val ex = result.getException()
                 Timber.e("Result.Failure: ${ex.message}")
+                errorMsg.postValue(ex.message)
                 defaultValue
             }
             is Result.Success -> {
-                var totalDistance = defaultValue
-                val data = result.value.obj()
-                val route = data.getJSONArray("routes").getJSONObject(0)
-                val legs = route.getJSONArray("legs")
+                try {
+                    var totalDistance = defaultValue
+                    val data = result.value.obj()
+                    val route = data.getJSONArray("routes").getJSONObject(0)
+                    val legs = route.getJSONArray("legs")
 
-                for (i in 0 until legs.length()) {
-                    val leg = legs.getJSONObject(i)
-                    totalDistance += leg.getJSONObject("distance").getDouble("value")
+                    for (i in 0 until legs.length()) {
+                        val leg = legs.getJSONObject(i)
+                        totalDistance += leg.getJSONObject("distance").getDouble("value")
+                    }
+                    totalDistance
+                } catch (ex: org.json.JSONException) {
+                    errorMsg.postValue(getApplication<Application>().getString(R.string.calculated_trip_error_message))
+                    defaultValue
                 }
 
-                totalDistance
             }
         }
     }

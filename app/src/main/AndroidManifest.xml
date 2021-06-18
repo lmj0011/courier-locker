@@ -6,6 +6,14 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
+
     <application
             android:name=".CourierLockerApplication"
             android:allowBackup="true"
@@ -63,6 +71,7 @@
 
         <activity
                 android:name=".SettingsActivity"
+                android:launchMode="standard"
                 android:theme="@style/AppTheme" />
 
         <service

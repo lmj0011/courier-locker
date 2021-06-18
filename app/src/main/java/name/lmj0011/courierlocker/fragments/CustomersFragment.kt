@@ -19,6 +19,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import kotlinx.coroutines.*
+import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.DeepLinkActivity
 import name.lmj0011.courierlocker.MainActivity
 
@@ -29,8 +30,10 @@ import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.factories.CustomerViewModelFactory
 import name.lmj0011.courierlocker.fragments.dialogs.ClearAllCustomersDialogFragment
 import name.lmj0011.courierlocker.helpers.Const
+import name.lmj0011.courierlocker.helpers.PreferenceHelper
 import name.lmj0011.courierlocker.helpers.interfaces.SearchableRecyclerView
 import name.lmj0011.courierlocker.viewmodels.CustomerViewModel
+import org.kodein.di.instance
 
 /**
  * A simple [Fragment] subclass.
@@ -47,7 +50,7 @@ class CustomersFragment :
     private lateinit var viewModelFactory: CustomerViewModelFactory
     private lateinit var listAdapter: CustomerListAdapter
     private lateinit var customerViewModel: CustomerViewModel
-    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var preferences: PreferenceHelper
     private var fragmentJob: Job = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
 
@@ -61,8 +64,8 @@ class CustomersFragment :
         mainActivity = activity as MainActivity
         setHasOptionsMenu(true)
 
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity)
-        val application = requireNotNull(this.activity).application
+        val application = requireActivity().application as CourierLockerApplication
+        preferences = application.kodein.instance()
         val dataSource = CourierLockerDatabase.getInstance(application).customerDao
         viewModelFactory = CustomerViewModelFactory(dataSource, application)
         customerViewModel = ViewModelProviders.of(this, viewModelFactory).get(CustomerViewModel::class.java)
@@ -85,7 +88,7 @@ class CustomersFragment :
 
         binding.lifecycleOwner = this
 
-        if(!sharedPreferences.getBoolean("enableDebugMode", false)) {
+        if(!preferences.devControlsEnabled) {
             binding.generateCustomerBtn.visibility = View.GONE
         }
 

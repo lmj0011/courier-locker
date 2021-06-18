@@ -66,6 +66,7 @@
 
         <activity
                 android:name=".SettingsActivity"
+                android:launchMode="standard"
                 android:theme="@style/AppTheme" />
 
         <service

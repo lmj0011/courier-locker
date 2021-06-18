@@ -30,6 +30,7 @@ import name.lmj0011.courierlocker.factories.GateCodeViewModelFactory
 import name.lmj0011.courierlocker.helpers.Const
 import name.lmj0011.courierlocker.helpers.ListLock
 import name.lmj0011.courierlocker.helpers.LocationHelper
+import name.lmj0011.courierlocker.helpers.PreferenceHelper
 import name.lmj0011.courierlocker.helpers.interfaces.SearchableRecyclerView
 import org.kodein.di.instance
 
@@ -44,7 +45,7 @@ class GateCodesFragment : Fragment(), SearchableRecyclerView {
     private lateinit var viewModelFactory: GateCodeViewModelFactory
     private lateinit var listAdapter: GateCodeListAdapter
     private lateinit var gateCodeViewModel: GateCodeViewModel
-    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var preferences: PreferenceHelper
     private lateinit var locationHelper: LocationHelper
     private var fragmentJob: Job = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
@@ -81,8 +82,8 @@ class GateCodesFragment : Fragment(), SearchableRecyclerView {
         mainActivity = activity as MainActivity
         setHasOptionsMenu(true)
 
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity)
-        val application = requireNotNull(this.activity).application
+        val application = requireActivity().application as CourierLockerApplication
+        preferences = application.kodein.instance()
         val dataSource = CourierLockerDatabase.getInstance(application).gateCodeDao
         viewModelFactory = GateCodeViewModelFactory(dataSource, application)
         gateCodeViewModel = ViewModelProviders.of(this, viewModelFactory).get(GateCodeViewModel::class.java)
@@ -111,13 +112,10 @@ class GateCodesFragment : Fragment(), SearchableRecyclerView {
         binding.liveLocationUpdatingSwitch.setOnCheckedChangeListener { _, isChecked ->
             ListLock.unlock()
             gateCodeViewModel.isOrderedByNearest.postValue(isChecked)
-            sharedPreferences.edit().apply {
-                putBoolean("gateCodesLocationUpdating", isChecked)
-                commit()
-            }
+            preferences.gateCodesIsOrderedByNearest = isChecked
         }
 
-        if(!sharedPreferences.getBoolean("enableDebugMode", false)) {
+        if(!preferences.devControlsEnabled) {
             binding.generateGateCodesBtn.visibility = View.GONE
         }
 
@@ -216,7 +214,7 @@ class GateCodesFragment : Fragment(), SearchableRecyclerView {
     }
 
     private fun applyPreferences() {
-        val isChecked = sharedPreferences.getBoolean("gateCodesLocationUpdating", false)
+        val isChecked = preferences.gateCodesIsOrderedByNearest
         binding.liveLocationUpdatingSwitch.isChecked = isChecked
         gateCodeViewModel.isOrderedByNearest.postValue(isChecked)
     }

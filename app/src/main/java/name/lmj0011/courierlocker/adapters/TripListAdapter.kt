@@ -13,18 +13,19 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.database.Trip
 import name.lmj0011.courierlocker.databinding.ListItemTripBinding
+import name.lmj0011.courierlocker.helpers.PreferenceHelper
 import name.lmj0011.courierlocker.helpers.Util
+import org.kodein.di.instance
 
 class TripListAdapter(private val clickListener: TripListener): PagingDataAdapter<Trip, TripListAdapter.ViewHolder>(TripDiffCallback()) {
     class ViewHolder private constructor(val binding: ListItemTripBinding, val context: Context) : RecyclerView.ViewHolder(binding.root){
 
-        private val googleApiKey = when(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("googleDirectionsKey", false)) {
-            true -> context.resources.getString(R.string.google_directions_key)
-            else -> ""
-        }
+        private val preferences: PreferenceHelper = (context.applicationContext as CourierLockerApplication).kodein.instance()
+        private val googleApiKey = preferences.googleDirectionsApiKey
 
         fun bind(clickListener: TripListener, trip: Trip?) {
             trip?.let {

@@ -17,6 +17,7 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.google.android.material.datepicker.MaterialDatePicker
 import kotlinx.coroutines.*
+import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.DeepLinkActivity
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
@@ -29,6 +30,7 @@ import name.lmj0011.courierlocker.fragments.dialogs.TripsStatsDialogFragment
 import name.lmj0011.courierlocker.helpers.*
 import name.lmj0011.courierlocker.helpers.interfaces.SearchableRecyclerView
 import name.lmj0011.courierlocker.viewmodels.TripViewModel
+import org.kodein.di.instance
 import timber.log.Timber
 import java.io.FileOutputStream
 
@@ -45,7 +47,7 @@ class TripsFragment : Fragment(R.layout.fragment_trips),
     private lateinit var viewModelFactory: TripViewModelFactory
     private lateinit var tripViewModel: TripViewModel
     private lateinit var listAdapter: TripListAdapter
-    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var preferences: PreferenceHelper
     private lateinit var dateRangePair: androidx.core.util.Pair<Long, Long>
     private var fragmentJob: Job = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
@@ -55,8 +57,8 @@ class TripsFragment : Fragment(R.layout.fragment_trips),
         setHasOptionsMenu(true)
         mainActivity = requireActivity() as MainActivity
 
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity)
-        val application = requireNotNull(this.activity).application
+        val application = requireActivity().application as CourierLockerApplication
+        preferences = application.kodein.instance()
         val dataSource = CourierLockerDatabase.getInstance(application).tripDao
         viewModelFactory = TripViewModelFactory(dataSource, application)
         tripViewModel = ViewModelProviders.of(this, viewModelFactory).get(TripViewModel::class.java)
@@ -206,7 +208,7 @@ class TripsFragment : Fragment(R.layout.fragment_trips),
         }
 
 
-        if(!sharedPreferences.getBoolean("enableDebugMode", false)) {
+        if(!preferences.devControlsEnabled) {
             binding.generateCustomerBtn.visibility = View.GONE
         }
 
