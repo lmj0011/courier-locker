@@ -5,7 +5,9 @@ import android.content.Intent
 import android.net.Uri
 import android.text.Html
 import android.text.Spanned
+import android.view.View
 import androidx.paging.PagingConfig
+import kotlinx.coroutines.delay
 import name.lmj0011.courierlocker.database.GateCode
 import name.lmj0011.courierlocker.database.Trip
 import org.threeten.bp.Instant
@@ -221,6 +223,14 @@ object Util {
         val intent = Intent(Intent.ACTION_VIEW, webpage)
         if (intent.resolveActivity(context.packageManager) != null) {
             context.startActivity(intent)
+        }
+    }
+
+    fun simulatePressedView(view: View) {
+        launchUI {
+            view.isPressed = true
+            delay(250)
+            view.isPressed = false
         }
     }
 }

@@ -134,6 +134,8 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
         }
 
         binding.nextTripImageButton.setOnClickListener {
+            Util.simulatePressedView(binding.recentTripsContainer)
+
             val trip = recentTripsListIterator.withIndex().next()
             mTrip.postValue(trip.value)
 
@@ -169,6 +171,8 @@ class CurrentStatusBubbleFragment : Fragment(R.layout.fragment_bubble_current_st
         }
 
         binding.nextAddressableImageButton.setOnClickListener {
+            Util.simulatePressedView(binding.nearestAddressableContainer)
+
             /**
              * disable this observer for undisturbed navigating the recentGateCodesList,
              * the user can tap the current gatecode to start observing nearby gatecodes again
