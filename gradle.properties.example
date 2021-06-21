@@ -23,8 +23,14 @@ android.enableJetifier=true
 # Kotlin code style for this project: "official" or "obsolete":
 kotlin.code.style=official
 
-GOOGLE_MAPS_API_KEY_DEBUG=PASTE-YOUR-API-KEY-HERE
+kotlinVersionProp=1.5.10
+navigationVersionProp=2.3.5
+fragmentVersionProp=2.3.0
+roomVersionProp=2.3.0
+lifecycleVersionProp=2.2.0
+coroutineVersionProp=1.2.2
+pagingVersonProp=3.0.0
+fuelVersionProp=2.2.0
 
-GOOGLE_MAPS_API_KEY_PRODUCTION=PASTE-YOUR-API-KEY-HERE
-
-GOOGLE_DIRECTIONS_API_KEY_DEBUG=PASTE-YOUR-API-KEY-HERE
+googleMapsApiKeyDebugProp=YOUR-API-KEY-HERE
+googleMapsApiKeyReleaseProp=YOUR-API-KEY-HERE
