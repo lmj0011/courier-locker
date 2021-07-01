@@ -25,8 +25,7 @@ class GigLabelViewModel(
         uiScope.launch(Dispatchers.IO) {
             val list = database.getAllGigsBlocking()
 
-            if (list.any()) // do nothing
-            else createDefaultGigs()
+            if (!list.any()) createDefaultGigs()
         }
     }
 

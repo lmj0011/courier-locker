@@ -71,10 +71,11 @@ class CourierLockerApplication : Application() {
             bindService(intent, boundServiceConn, Context.BIND_AUTO_CREATE)
         }
 
-        // TODO - this probably should be moved into a DB migration
-        // initializing this view model here in order to set up some default values in a fresh database
-        val gigLabelDataSource = CourierLockerDatabase.getInstance(this).gigLabelDao
-        GigLabelViewModel(gigLabelDataSource, this)
+        launchIO {
+            // initializing this view model here in order to set up some default values in a fresh database
+            val gigLabelDataSource = CourierLockerDatabase.getInstance(this@CourierLockerApplication).gigLabelDao
+            GigLabelViewModel(gigLabelDataSource, this@CourierLockerApplication)
+        }
     }
 
     fun startCurrentStatusService() {

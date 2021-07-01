@@ -1,13 +1,14 @@
 package name.lmj0011.courierlocker.fragments
 
 
+import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.*
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -59,7 +60,7 @@ class GigLabelsFragment : Fragment() {
         val application = requireNotNull(this.activity).application
         val dataSource = CourierLockerDatabase.getInstance(application).gigLabelDao
         viewModelFactory = GigLabelViewModelFactory(dataSource, application)
-        gigLabelViewModel = ViewModelProviders.of(this, viewModelFactory).get(GigLabelViewModel::class.java)
+        gigLabelViewModel = ViewModelProvider(this, viewModelFactory).get(GigLabelViewModel::class.java)
 
         listAdapter = GigLabelListAdapter( GigLabelListAdapter.GigLabelListener(
             mutableMapOf(
@@ -193,6 +194,7 @@ class GigLabelsFragment : Fragment() {
         dialog.show(this.childFragmentManager, this.tag)
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun submitListToAdapter (list: MutableList<GigLabel>) {
         if(backoffListAdapterUpdate) {
             backoffListAdapterUpdate = false

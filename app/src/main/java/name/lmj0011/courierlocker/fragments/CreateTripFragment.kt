@@ -11,7 +11,7 @@ import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.CourierLockerApplication
@@ -55,7 +55,7 @@ class CreateTripFragment : Fragment() {
         val application = requireNotNull(this.activity).application
         val dataSource = CourierLockerDatabase.getInstance(application).tripDao
         val viewModelFactory = TripViewModelFactory(dataSource, application)
-        this.tripViewModel = ViewModelProviders.of(this, viewModelFactory).get(TripViewModel::class.java)
+        this.tripViewModel = ViewModelProvider(this, viewModelFactory).get(TripViewModel::class.java)
         locationHelper = (requireContext().applicationContext as CourierLockerApplication).kodein.instance()
 
         binding.tripViewModel = this.tripViewModel
@@ -162,13 +162,13 @@ class CreateTripFragment : Fragment() {
         addressTextView.threshold = 1
 
         addressTextView.onItemClickListener = AdapterView.OnItemClickListener{
-                parent,_view,position,id ->
+                _,_,position,_ ->
             val address: Address? = adapter.getItem(position)
 
             address?.let {
                 addressTextView.setText(it.getAddressLine(0))
-                val stop = Stop(it.getAddressLine(0), it.latitude, it.longitude)
-                horizontalLinearLayout.tag = stop
+                val stopp = Stop(it.getAddressLine(0), it.latitude, it.longitude)
+                horizontalLinearLayout.tag = stopp
             }
 
         }

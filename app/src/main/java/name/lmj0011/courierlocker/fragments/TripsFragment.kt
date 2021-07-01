@@ -2,7 +2,6 @@ package name.lmj0011.courierlocker.fragments
 
 import android.app.Activity
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.SearchView
@@ -11,12 +10,14 @@ import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asLiveData
 import androidx.navigation.fragment.findNavController
-import androidx.preference.PreferenceManager
+import androidx.paging.map
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.google.android.material.datepicker.MaterialDatePicker
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collectLatest
 import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.DeepLinkActivity
 import name.lmj0011.courierlocker.MainActivity
@@ -61,7 +62,7 @@ class TripsFragment : Fragment(R.layout.fragment_trips),
         preferences = application.kodein.instance()
         val dataSource = CourierLockerDatabase.getInstance(application).tripDao
         viewModelFactory = TripViewModelFactory(dataSource, application)
-        tripViewModel = ViewModelProviders.of(this, viewModelFactory).get(TripViewModel::class.java)
+        tripViewModel = ViewModelProvider(this, viewModelFactory).get(TripViewModel::class.java)
 
         setupBinding(view)
         setupObservers()
@@ -177,7 +178,10 @@ class TripsFragment : Fragment(R.layout.fragment_trips),
 
     override fun onDialogPositiveClick(dialog: DialogFragment) {
         // User touched the dialog's positive button
-        tripViewModel.clearAllTrips()
+        launchIO {
+            tripViewModel.clearAllTrips().join()
+            updateTodaysTotalMoneyUI()
+        }
     }
 
     override fun onDialogNegativeClick(dialog: DialogFragment) {
@@ -228,8 +232,8 @@ class TripsFragment : Fragment(R.layout.fragment_trips),
             false
         }
 
-        binding.tripsSearchView.setOnQueryTextFocusChangeListener { view, hasFocus ->
-            if (hasFocus) { } else{
+        binding.tripsSearchView.setOnQueryTextFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
                 binding.tripsSearchView.setQuery("", true)
                 this@TripsFragment.toggleSearch(mainActivity, binding.tripsSearchView, false)
             }
@@ -262,6 +266,9 @@ class TripsFragment : Fragment(R.layout.fragment_trips),
 
             listAdapter.notifyItemRangeChanged(0, Const.DEFAULT_PAGE_COUNT)
             binding.tripList.scrollToPosition(0)
+
+            Timber.d("listAdapter.snapshot().size: ${listAdapter.snapshot().size}")
+            Timber.d("listAdapter.snapshot().items: ${listAdapter.snapshot().items}")
         })
 
         binding.swipeRefresh.isRefreshing = false

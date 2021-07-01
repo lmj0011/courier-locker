@@ -15,7 +15,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -66,7 +66,7 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
         val dataSource = CourierLockerDatabase.getInstance(application).customerDao
         val viewModelFactory = CustomerViewModelFactory(dataSource, application)
         val args = EditCustomerFragmentArgs.fromBundle(requireArguments())
-        this.customerViewModel = ViewModelProviders.of(this, viewModelFactory).get(CustomerViewModel::class.java)
+        this.customerViewModel = ViewModelProvider(this, viewModelFactory).get(CustomerViewModel::class.java)
         locationHelper = (requireContext().applicationContext as CourierLockerApplication).kodein.instance()
 
         binding.customerViewModel = this.customerViewModel

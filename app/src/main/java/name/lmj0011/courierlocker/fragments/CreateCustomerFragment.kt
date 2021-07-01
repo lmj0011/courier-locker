@@ -11,11 +11,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -61,7 +60,7 @@ class CreateCustomerFragment : Fragment() {
         val application = requireNotNull(this.activity).application
         val dataSource = CourierLockerDatabase.getInstance(application).customerDao
         val viewModelFactory = CustomerViewModelFactory(dataSource, application)
-        this.customerViewModel = ViewModelProviders.of(this, viewModelFactory).get(CustomerViewModel::class.java)
+        this.customerViewModel = ViewModelProvider(this, viewModelFactory).get(CustomerViewModel::class.java)
         locationHelper = (requireContext().applicationContext as CourierLockerApplication).kodein.instance()
 
         binding.customerViewModel = this.customerViewModel
@@ -100,7 +99,7 @@ class CreateCustomerFragment : Fragment() {
 
         // Set an item click listener for auto complete text view
         binding.createCustomerAddressAutoCompleteTextView.onItemClickListener = AdapterView.OnItemClickListener{
-                parent,view,position,id->
+                _,_,position,_->
             val address: Address? = adapter.getItem(position)
 
             address?.let {
@@ -129,7 +128,7 @@ class CreateCustomerFragment : Fragment() {
 
 
         // Set a focus change listener for auto complete text view
-        binding.createCustomerAddressAutoCompleteTextView.onFocusChangeListener = View.OnFocusChangeListener { view, b ->
+        binding.createCustomerAddressAutoCompleteTextView.onFocusChangeListener = View.OnFocusChangeListener { _, b ->
             if(b){
                 binding.createCustomerAddressAutoCompleteTextView.showDropDown()
             }

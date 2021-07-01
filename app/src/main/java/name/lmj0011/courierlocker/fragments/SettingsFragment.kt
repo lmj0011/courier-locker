@@ -1,5 +1,6 @@
 package name.lmj0011.courierlocker.fragments
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -272,6 +273,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     }
 
+    @SuppressLint("WrongConstant")
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
         super.onActivityResult(requestCode, resultCode, intent)
 

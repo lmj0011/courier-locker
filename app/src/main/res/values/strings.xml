@@ -1,34 +1,21 @@
 <resources>
 <!--    <string name="app_name">Courier Locker</string>-->
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Courier Locker</string>
-    <string name="nav_header_subtitle">Made with ♥ by lmj0011</string>
-    <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
-    <string name="exporting_app_data_starting">exporting app data...</string>
+    <string name="exporting_app_data_starting">exporting app data&#8230;</string>
     <string name="exported_app_data_successfully">app data successfully exported.</string>
-    <string name="importing_app_data_starting">importing from backup file...</string>
+    <string name="importing_app_data_starting">importing from backup file&#8230;</string>
     <string name="imported_app_data_successfully">app data successfully imported, now restarting app.</string>
 
     <!-- notifications -->
     <string name="notification_action_button_cancel">Cancel</string>
     <string name="notification_calculate_all_trip_distance">calculating trip distances</string>
 
-
-    <string name="menu_home">Home</string>
-    <string name="menu_gallery">Gallery</string>
-    <string name="menu_slideshow">Slideshow</string>
-    <string name="menu_tools">Tools</string>
-    <string name="menu_share">Share</string>
-    <string name="menu_send">Send</string>
     <string name="menu_gate_codes">Gate Codes</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_customers">Customers</string>
     <string name="menu_maps">Maps</string>
 
     <!-- Preference Keys -->
-    <string name="pref_key_map_feed_list">pref_key_map_feed_list</string>
     <string name="pref_enable_current_status_service">pref_enable_current_status_service</string>
     <string name="pref_google_map_type">pref_google_map_type</string>
     <string name="pref_key_mode_night">PREF_MODE_NIGHT</string>
@@ -73,9 +60,6 @@
     <string name="pay">pay</string>
     <string name="gig">gig</string>
     <string name="miles">miles</string>
-    <string name="number_of_stops">Number of stops</string>
-    <string name="trip_payment">Trip payment</string>
-    <string name="total_distance">Total distance</string>
     <string name="trip_start_time">Trip start time</string>
     <string name="add_to_home_screen">Add to Home Screen</string>
     <string name="cant_pinned_shortcuts">The current Launcher does not support pinned Shortcuts</string>
@@ -83,4 +67,7 @@
     <string name="building_navigation_list">Swipe left on a Building, then tap \"Directions\"</string>
     <string name="display_in_a_bubble">Display in a Bubble</string>
     <string name="calculated_trip_error_message">Error calculating Trip distance, is the Directions api key valid?</string>
+
+    <!-- Content Descriptions   -->
+    <string name="cd_use_current_location">use current location</string>
 </resources>

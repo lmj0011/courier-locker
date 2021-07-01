@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
-import android.view.Gravity
+import android.util.AttributeSet
 import androidx.core.view.GravityCompat
 import android.view.MenuItem
 import com.google.android.material.navigation.NavigationView
@@ -13,13 +13,12 @@ import android.view.Menu
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
-import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
+import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.navigation.ui.*
 import androidx.preference.PreferenceManager
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import kotlinx.android.synthetic.main.app_bar_main.view.*
 import timber.log.Timber
 import name.lmj0011.courierlocker.databinding.ActivityMainBinding
 import name.lmj0011.courierlocker.fragments.MapsFragmentDirections
@@ -46,28 +45,33 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         preferences = (applicationContext as CourierLockerApplication).kodein.instance()
         locationHelper = (applicationContext as CourierLockerApplication).kodein.instance()
-        val sendCrashReports = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("sendCrashReports", true)!!
+        val sendCrashReports = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("sendCrashReports", true)
 
         if(sendCrashReports) {
             FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
         } else FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false)
 
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        navController = findNavController(R.id.navHostFragment)
-        setContentView(binding.root)
 
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        navController = Navigation.findNavController(this, R.id.navHostFragment)
         // AppBar Navigation configuration
         topLevelDestinations = setOf(R.id.tripsFragment, R.id.gateCodesFragment, R.id.customersFragment, R.id.mapsFragment)
         appBarConfiguration = AppBarConfiguration.Builder(topLevelDestinations)
             .setOpenableLayout(binding.drawerLayout)
             .build()
 
-        setSupportActionBar(binding.drawerLayout.toolbar)
+        setSupportActionBar(binding.toolbar)
         setupActionBarWithNavController(navController, appBarConfiguration)
         binding.navView.setNavigationItemSelectedListener(this::onNavigationItemSelected)
 
         // hide the fab initially
-        binding.drawerLayout.fab.hide()
+        binding.fab.hide()
     }
 
     override fun onRestart() {
@@ -237,7 +241,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         (application as CourierLockerApplication).applyTheme()
-
         recreate()
     }
 
@@ -247,9 +250,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     fun showFabAndSetListener(cb: () -> Unit, imgSrcId: Int) {
-        binding.drawerLayout.fab.isEnabled = false
+       binding.fab.isEnabled = false
 
-        binding.drawerLayout.fab.let {
+       binding.fab.let {
             it.setOnClickListener(null) // should remove all attached listeners
             it.setOnClickListenerThrottled(block = { cb() })
 
@@ -261,11 +264,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             it.show()
         }
 
-        binding.drawerLayout.fab.isEnabled = true
+       binding.fab.isEnabled = true
     }
 
     fun hideFab() {
-        binding.drawerLayout.fab.hide()
+        binding.fab.hide()
     }
 
     fun showKeyBoard(v: View) {

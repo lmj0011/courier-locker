@@ -18,6 +18,7 @@ import kotlin.math.max
  *
  *  ref: https://stackoverflow.com/a/62265008/2445763
  */
+@SuppressLint("ClickableViewAccessibility")
 abstract class SwipeHelper(
     private val recyclerView: RecyclerView
 ) : ItemTouchHelper.SimpleCallback(

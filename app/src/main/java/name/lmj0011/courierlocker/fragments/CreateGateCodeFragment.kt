@@ -12,7 +12,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -25,9 +25,7 @@ import name.lmj0011.courierlocker.adapters.AddressAutoSuggestAdapter
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.factories.GateCodeViewModelFactory
 import name.lmj0011.courierlocker.helpers.LocationHelper
-import name.lmj0011.courierlocker.helpers.launchDefault
 import name.lmj0011.courierlocker.helpers.launchUI
-import name.lmj0011.courierlocker.helpers.withUIContext
 import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
 import org.kodein.di.instance
 import kotlin.collections.ArrayList
@@ -62,7 +60,7 @@ class CreateGateCodeFragment : Fragment() {
         val application = requireNotNull(this.activity).application
         val dataSource = CourierLockerDatabase.getInstance(application).gateCodeDao
         val viewModelFactory = GateCodeViewModelFactory(dataSource, application)
-        this.gateCodeViewModel = ViewModelProviders.of(this, viewModelFactory).get(GateCodeViewModel::class.java)
+        this.gateCodeViewModel = ViewModelProvider(this, viewModelFactory).get(GateCodeViewModel::class.java)
         locationHelper = (requireContext().applicationContext as CourierLockerApplication).kodein.instance()
 
         binding.gateCodeViewModel = this.gateCodeViewModel
@@ -96,7 +94,7 @@ class CreateGateCodeFragment : Fragment() {
 
         // Set an item click listener for auto complete text view
         binding.createGateCodeAddressAutoCompleteTextView.onItemClickListener = AdapterView.OnItemClickListener{
-                parent,view,position,id->
+                _, _, position, _ ->
             val address: Address? = adapter.getItem(position)
 
             address?.let {

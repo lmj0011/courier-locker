@@ -1,6 +1,7 @@
 package name.lmj0011.courierlocker.fragments
 
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -76,6 +77,7 @@ class MapsFragment : Fragment(), SearchableRecyclerView {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?

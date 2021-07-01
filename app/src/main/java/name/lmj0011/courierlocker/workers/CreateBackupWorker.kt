@@ -46,7 +46,7 @@ class CreateBackupWorker (private val appContext: Context, parameters: WorkerPar
             putExtra(appContext.getString(R.string.intent_extra_key_worker_tags), tagArray)
         }
 
-        notificationCancelWorkerPendingIntent = PendingIntent.getBroadcast(appContext, 0, notificationCancelWorkerIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+        notificationCancelWorkerPendingIntent = PendingIntent.getBroadcast(appContext, 0, notificationCancelWorkerIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT)
     }
 
     override suspend fun doWork(): Result {

@@ -1,11 +1,12 @@
 package name.lmj0011.courierlocker.fragments.dialogs
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
@@ -17,6 +18,7 @@ import name.lmj0011.courierlocker.viewmodels.TripViewModel
 class TripsStatsDialogFragment : DialogFragment() {
     lateinit var dialogView: View
 
+    @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let{
             val builder = MaterialAlertDialogBuilder(requireContext())
@@ -35,7 +37,7 @@ class TripsStatsDialogFragment : DialogFragment() {
         super.onResume()
         val dataSource = CourierLockerDatabase.getInstance(requireActivity().application).tripDao
         val viewModelFactory = TripViewModelFactory(dataSource, requireActivity().application)
-        val tripViewModel = ViewModelProviders.of(this, viewModelFactory).get(TripViewModel::class.java)
+        val tripViewModel = ViewModelProvider(this, viewModelFactory).get(TripViewModel::class.java)
 
         launchIO {
             val totalToday = tripViewModel.todayTotalMoney()

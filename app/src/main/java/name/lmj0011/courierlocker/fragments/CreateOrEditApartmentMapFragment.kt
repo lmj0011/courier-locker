@@ -8,15 +8,15 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.AdapterView
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import kotlinx.android.synthetic.main.fragment_create_or_edit_apartment_map.view.*
 import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.MainActivity
@@ -30,6 +30,7 @@ import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.launchUI
 import name.lmj0011.courierlocker.viewmodels.ApartmentViewModel
 import org.kodein.di.instance
+import timber.log.Timber
 
 
 /**
@@ -66,7 +67,7 @@ class CreateOrEditApartmentMapFragment : Fragment() {
         val dataSource = CourierLockerDatabase.getInstance(application).apartmentDao
         viewModelFactory = ApartmentViewModelFactory(dataSource, application)
         val args = CreateOrEditApartmentMapFragmentArgs.fromBundle(requireArguments())
-        apartmentViewModel = ViewModelProviders.of(this, viewModelFactory).get(ApartmentViewModel::class.java)
+        apartmentViewModel = ViewModelProvider(this, viewModelFactory).get(ApartmentViewModel::class.java)
         locationHelper = (requireContext().applicationContext as CourierLockerApplication).kodein.instance()
 
         selectedApt.observe(viewLifecycleOwner, Observer {
@@ -105,7 +106,7 @@ class CreateOrEditApartmentMapFragment : Fragment() {
 
         // Set an item click listener for auto complete text view
         binding.createApartmentMapAddressAutoCompleteTextView.onItemClickListener =
-            AdapterView.OnItemClickListener { parent, view, position, id ->
+            AdapterView.OnItemClickListener { _, _, position, _ ->
                 val address: Address? = adapter.getItem(position)
 
                 address?.let {
@@ -142,9 +143,13 @@ class CreateOrEditApartmentMapFragment : Fragment() {
 
         // Set a focus change listener for auto complete text view
         binding.createApartmentMapAddressAutoCompleteTextView.onFocusChangeListener =
-            View.OnFocusChangeListener { view, b ->
-                if (b) {
-                    binding.createApartmentMapAddressAutoCompleteTextView.showDropDown()
+            View.OnFocusChangeListener { _, b ->
+                try {
+                    if (b) {
+                        binding.createApartmentMapAddressAutoCompleteTextView.showDropDown()
+                    }
+                } catch (ex: WindowManager.BadTokenException) {
+                    Timber.e(ex)
                 }
             }
 

@@ -77,7 +77,7 @@ class CurrentStatusForegroundService : LifecycleService() {
         }
 
         val notificationIntent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0)
+        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
 
         val notificationBuilder = Notification.Builder(this, NotificationHelper.CURRENT_STATUS_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_action_name)
@@ -178,9 +178,9 @@ class CurrentStatusForegroundService : LifecycleService() {
                 addCategory("next trip")
             }
 
-            val actionPendingIntent = PendingIntent.getBroadcast(context, 0, notificationActionIntent, PendingIntent.FLAG_CANCEL_CURRENT)
-            val contentPendingIntent = PendingIntent.getActivity(context, 0, notificationContentIntent, PendingIntent.FLAG_CANCEL_CURRENT)
-            val actionNextRecentTripIntent = PendingIntent.getBroadcast(context, 0, notificationNextRecentTripIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+            val actionPendingIntent = PendingIntent.getBroadcast(context, 0, notificationActionIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT)
+            val contentPendingIntent = PendingIntent.getActivity(context, 0, notificationContentIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT)
+            val actionNextRecentTripIntent = PendingIntent.getBroadcast(context, 0, notificationNextRecentTripIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT)
 
             val notification = NotificationHelper.getRecentTripNotificationBuilder(context)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(Util.formatRecentTripMessage(t)))
@@ -209,7 +209,7 @@ class CurrentStatusForegroundService : LifecycleService() {
             putExtra("menuItemId", R.id.nav_trips)
         }
 
-        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0)
+        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
         var notification: Notification
 
         launchIO {
@@ -248,7 +248,7 @@ class CurrentStatusForegroundService : LifecycleService() {
             putExtra("menuItemId", R.id.nav_gate_codes)
         }
 
-        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0)
+        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
         var notification: Notification
 
         gateCodesObserver = Observer {
@@ -301,7 +301,7 @@ class CurrentStatusForegroundService : LifecycleService() {
         val target = Intent(this, CurrentStatusBubbleActivity::class.java).apply {
             action = CurrentStatusBubbleActivity.INTENT_VIEW
         }
-        val bubbleIntent = PendingIntent.getActivity(this, 0, target, 0 )
+        val bubbleIntent = PendingIntent.getActivity(this, 0, target, PendingIntent.FLAG_IMMUTABLE)
 
 
         // now create dynamic shortcut
@@ -404,15 +404,15 @@ class CurrentStatusForegroundService : LifecycleService() {
                             context,
                             0,
                             notificationActionIntent,
-                            PendingIntent.FLAG_CANCEL_CURRENT
+                            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT
                         )
                         val contentPendingIntent =
-                            PendingIntent.getActivity(context, 0, notificationContentIntent, 0)
+                            PendingIntent.getActivity(context, 0, notificationContentIntent, PendingIntent.FLAG_IMMUTABLE)
                         val actionNextRecentTripIntent = PendingIntent.getBroadcast(
                             context,
                             0,
                             notificationNextRecentTripIntent,
-                            PendingIntent.FLAG_CANCEL_CURRENT
+                            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT
                         )
 
                         val notification =

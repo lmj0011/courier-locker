@@ -9,6 +9,7 @@
     <color name="colorSadFace">#FF0000</color>
 
     <color name="colorDefaultIcon">#008577</color>
+    <color name="defaultTextColorHint">#008577</color>
+    <color name="defaultTextColorHighlight">#05BDAC</color>
     <color name="colorDefaultButtonBackground">@color/foreground_material_light</color>
-    <color name="colorDefaultTint">#878787</color>
 </resources>

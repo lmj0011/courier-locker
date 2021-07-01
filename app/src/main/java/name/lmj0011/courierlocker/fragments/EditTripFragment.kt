@@ -12,7 +12,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.*
 import name.lmj0011.courierlocker.CourierLockerApplication
@@ -61,7 +61,7 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
         val dataSource = CourierLockerDatabase.getInstance(application).tripDao
         val viewModelFactory = TripViewModelFactory(dataSource, application)
         val args = EditTripFragmentArgs.fromBundle(requireArguments())
-        this.tripViewModel = ViewModelProviders.of(this, viewModelFactory).get(TripViewModel::class.java)
+        this.tripViewModel = ViewModelProvider(this, viewModelFactory).get(TripViewModel::class.java)
         locationHelper = (requireContext().applicationContext as CourierLockerApplication).kodein.instance()
 
         binding.tripViewModel = this.tripViewModel

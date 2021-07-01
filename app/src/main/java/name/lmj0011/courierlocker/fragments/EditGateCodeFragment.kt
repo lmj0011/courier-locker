@@ -1,6 +1,7 @@
 package name.lmj0011.courierlocker.fragments
 
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.text.InputType
 import android.view.*
@@ -11,6 +12,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.MainActivity
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
@@ -24,6 +26,7 @@ import name.lmj0011.courierlocker.helpers.launchIO
 import name.lmj0011.courierlocker.helpers.withUIContext
 import name.lmj0011.courierlocker.viewmodels.ApartmentViewModel
 import name.lmj0011.courierlocker.viewmodels.GateCodeViewModel
+import timber.log.Timber
 
 /**
  * A simple [Fragment] subclass.
@@ -138,6 +141,11 @@ class EditGateCodeFragment : Fragment(), DeleteGateCodeDialogFragment.NoticeDial
 
     override fun onDialogNegativeClick(dialog: DialogFragment) {
 
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        findNavController().navigateUp()
     }
 
     private fun injectGateCodeIntoView(gc: GateCode?) {

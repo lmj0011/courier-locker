@@ -39,7 +39,7 @@
             <LinearLayout
                     android:id="@+id/createTripFragmentLinearLayout"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical">
 
             </LinearLayout>
@@ -72,6 +72,7 @@
                 android:layout_height="43dp"
                 android:ems="10"
                 android:hint="3.00"
+                android:importantForAutofill="no"
                 android:includeFontPadding="false"
                 android:inputType="text|numberDecimal"
                 app:layout_constraintBottom_toTopOf="@+id/guideline3"

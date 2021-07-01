@@ -2,7 +2,6 @@ package name.lmj0011.courierlocker.fragments
 
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.SearchView
@@ -12,9 +11,8 @@ import androidx.core.graphics.drawable.IconCompat
 import androidx.fragment.app.Fragment
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.*
@@ -86,7 +84,7 @@ class GateCodesFragment : Fragment(), SearchableRecyclerView {
         preferences = application.kodein.instance()
         val dataSource = CourierLockerDatabase.getInstance(application).gateCodeDao
         viewModelFactory = GateCodeViewModelFactory(dataSource, application)
-        gateCodeViewModel = ViewModelProviders.of(this, viewModelFactory).get(GateCodeViewModel::class.java)
+        gateCodeViewModel = ViewModelProvider(this, viewModelFactory).get(GateCodeViewModel::class.java)
         locationHelper = (requireContext().applicationContext as CourierLockerApplication).kodein.instance()
 
         listAdapter = GateCodeListAdapter( GateCodeListAdapter.GateCodeListener { gateCodeId ->

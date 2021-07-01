@@ -45,7 +45,7 @@ class TripViewModel(
                     database.getAllTripsByThePage().asPagingSourceFactory()
                 ).flow.cachedIn(viewModelScope).asLiveData()
             } else {
-                val query = SimpleSQLiteQuery("SELECT * FROM trips_table, json_each(stops) WHERE payAmount LIKE '%$mQuery%' OR gigName LIKE '%$mQuery%' OR json_extract(json_each.value, '\$.address') LIKE '%$mQuery%' ORDER BY id DESC")
+                val query = SimpleSQLiteQuery("SELECT * FROM trips_table, json_each(stops) WHERE payAmount LIKE '%$mQuery%' OR gigName LIKE '%$mQuery%' OR json_extract(json_each.value, '\$.address') LIKE '%$mQuery%' GROUP BY trips_table.id ORDER BY trips_table.id DESC")
                 Pager(
                     config = Util.getDefaultPagingConfig(),
                     initialKey = null,
@@ -256,11 +256,8 @@ class TripViewModel(
     /**
      * Deletes all Trips permanently
      */
-    fun clearAllTrips() {
-        uiScope.launch {
-            this@TripViewModel.database.clear()
-
-        }
+    suspend fun clearAllTrips(): Job {
+        return launchIO { this@TripViewModel.database.clear() }
     }
 
     fun calculateTripDistance(trip: Trip?): Double {

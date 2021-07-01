@@ -51,7 +51,7 @@ class GigLabelListAdapter(private val clickListener: GigLabelListener, private v
 
                 binding.editGigLabelButton.setOnClickListener {
                     val dialog = EditGigLabelNameDialogFragment(gigLabel){ newName ->
-                        newName?.let { name -> gigLabel.name = name }
+                        newName.let { name -> gigLabel.name = name }
                         clickListeners.onEditGigLabel(gigLabel)
                     }
 

@@ -11,6 +11,8 @@
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:ems="10"
+            android:hint="name of gig"
+            android:importantForAutofill="no"
             android:inputType="textPersonName"
             tools:text="Name" />
 

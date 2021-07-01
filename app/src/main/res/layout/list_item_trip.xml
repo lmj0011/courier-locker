@@ -54,10 +54,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
-                android:drawableStart="@drawable/ic_baseline_timeline_24"
                 android:text="@string/miles"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tripDropoffAddressTextView" />
+                app:layout_constraintTop_toBottomOf="@+id/tripDropoffAddressTextView"
+                app:drawableStartCompat="@drawable/ic_baseline_timeline_24" />
 
         <TextView
                 android:id="@+id/tripPayTextView"
@@ -65,10 +65,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
-                android:drawableStart="@drawable/ic_baseline_attach_money_24"
                 android:text="@string/pay"
                 app:layout_constraintStart_toEndOf="@+id/tripDistanceTextView"
-                app:layout_constraintTop_toBottomOf="@+id/tripDropoffAddressTextView" />
+                app:layout_constraintTop_toBottomOf="@+id/tripDropoffAddressTextView"
+                app:drawableStartCompat="@drawable/ic_baseline_attach_money_24" />
 
         <TextView
                 android:id="@+id/tripGigTextView"
@@ -76,10 +76,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
-                android:drawableStart="@drawable/ic_menu_trips"
                 android:text="@string/gig"
                 app:layout_constraintStart_toEndOf="@+id/tripPayTextView"
-                app:layout_constraintTop_toBottomOf="@+id/tripDropoffAddressTextView" />
+                app:layout_constraintTop_toBottomOf="@+id/tripDropoffAddressTextView"
+                app:drawableStartCompat="@drawable/ic_menu_trips" />
 
         <TextView
                 android:id="@+id/multipleStopTextView"
@@ -87,12 +87,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
-                android:drawableStart="@drawable/ic_baseline_multiple_stop_24"
                 android:visibility="gone"
                 app:layout_constraintStart_toEndOf="@+id/tripGigTextView"
                 app:layout_constraintTop_toBottomOf="@+id/tripDropoffAddressTextView"
                 tools:text="3"
-                tools:visibility="visible" />
+                tools:visibility="visible"
+                app:drawableStartCompat="@drawable/ic_baseline_multiple_stop_24" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

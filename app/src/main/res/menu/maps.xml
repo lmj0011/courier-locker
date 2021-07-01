@@ -5,7 +5,7 @@
             android:title="Search"
             android:icon="@drawable/ic_search"
             android:orderInCategory="100"
-            app:showAsAction="always"/>
+            app:showAsAction="ifRoom"/>
     <item android:id="@+id/action_maps_add_to_home"
         android:title="@string/add_to_home_screen"
         android:orderInCategory="101"

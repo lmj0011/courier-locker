@@ -7,24 +7,33 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.commitNow
 import name.lmj0011.courierlocker.fragments.CurrentStatusBubbleFragment
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.PermissionHelper
 import org.kodein.di.instance
+import timber.log.Timber
 
 class CurrentStatusBubbleActivity: AppCompatActivity(R.layout.activity_current_status_bubble) {
     private val currentStatusFragment = CurrentStatusBubbleFragment()
     private lateinit var locationHelper: LocationHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        locationHelper = (applicationContext as CourierLockerApplication).kodein.instance()
-        if (savedInstanceState == null) {
-            supportFragmentManager.commitNow {
-                // The home fragment for this Bubble
-                replace(R.id.container, currentStatusFragment, CURRENT_STATUS_BUBBLE_FRAGMENT_TAG)
+        try {
+            super.onCreate(savedInstanceState)
+            locationHelper = (applicationContext as CourierLockerApplication).kodein.instance()
+            if (savedInstanceState == null) {
+                supportFragmentManager.commitNow {
+                    // The home fragment for this Bubble
+                    replace(R.id.container, currentStatusFragment, CURRENT_STATUS_BUBBLE_FRAGMENT_TAG)
+                }
             }
+        } catch (ex: Fragment.InstantiationException) {
+            val error = ex.message
+            if (error is String && error.contains("name.lmj0011.courierlocker.fragments.bottomsheets")) {
+                recreate()
+            } else finish()
         }
     }
 

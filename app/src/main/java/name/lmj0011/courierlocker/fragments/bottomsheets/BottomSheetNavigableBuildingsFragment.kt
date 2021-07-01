@@ -1,5 +1,6 @@
 package name.lmj0011.courierlocker.fragments.bottomsheets
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Intent
 import android.net.Uri
@@ -58,6 +59,7 @@ class BottomSheetNavigableBuildingsFragment(private val apartment: Apartment): B
         )
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun setupRecyclerView() {
         listAdapter = BuildingListAdapter(BuildingListAdapter.BuildingListener { bldg ->
 

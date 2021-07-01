@@ -2,11 +2,13 @@ package name.lmj0011.courierlocker
 
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.google.android.material.progressindicator.LinearProgressIndicator
 
 /**
@@ -31,6 +33,8 @@ class SettingsActivity : AppCompatActivity() {
         progressIndicator = findViewById(R.id.progress_indicator)
         supportActionBar?.title = "Settings"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setBackgroundDrawable(ColorDrawable(ContextCompat.getColor(this, R.color.colorPrimary)))
+
 
     }
 

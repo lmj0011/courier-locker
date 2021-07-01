@@ -58,7 +58,7 @@ class PreferenceHelper(val context: Context) {
         }
 
     var googleMapType: Int
-            get() = prefs.getInt(context.getString(R.string.pref_google_map_type), GoogleMap.MAP_TYPE_NORMAL)
+            get() = prefs.getInt(context.getString(R.string.pref_google_map_type), GoogleMap.MAP_TYPE_HYBRID)
             set(value) {
                 prefs.edit {
                     putInt(context.getString(R.string.pref_google_map_type), value)

@@ -14,7 +14,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -68,7 +68,7 @@ class CustomersFragment :
         preferences = application.kodein.instance()
         val dataSource = CourierLockerDatabase.getInstance(application).customerDao
         viewModelFactory = CustomerViewModelFactory(dataSource, application)
-        customerViewModel = ViewModelProviders.of(this, viewModelFactory).get(CustomerViewModel::class.java)
+        customerViewModel = ViewModelProvider(this, viewModelFactory).get(CustomerViewModel::class.java)
 
         listAdapter = CustomerListAdapter( CustomerListAdapter.CustomerListener { customerId ->
             this.findNavController().navigate(CustomersFragmentDirections.actionCustomersFragmentToEditCustomerFragment(customerId.toInt()))
@@ -108,7 +108,7 @@ class CustomersFragment :
             false
         }
 
-        binding.customersSearchView.setOnQueryTextFocusChangeListener { view, hasFocus ->
+        binding.customersSearchView.setOnQueryTextFocusChangeListener { _, hasFocus ->
             if (hasFocus) { } else{
                 binding.customersSearchView.setQuery("", true)
                 this@CustomersFragment.toggleSearch(mainActivity, binding.customersSearchView, false)
