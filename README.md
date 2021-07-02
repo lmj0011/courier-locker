@@ -9,8 +9,8 @@ Courier Locker is a free and open source gig record book for Android.
 Features include:
 * Store and keep track of Trips, Apartment Codes, and Customers
 * Export Trips to a spreadsheet
-* See total earnings across multiple gigs (calculated from Trips)
-* Create personal maps of places that are difficult to navigate. (ie. apartment complexes)
+* See total earnings across multiple gigs
+* Create personal maps of places that are difficult to navigate, like apartment complexes
 
 ## Download
 Get the app from the [Google Play Store](https://play.google.com/store/apps/details?id=name.lmj0011.courierlocker.prod).
