@@ -38,7 +38,7 @@ android {
         targetSdk =30
 //        targetSdkPreview = "S"
         versionCode = getCommitCount().toInt()
-        versionName = "2.2.0-rc.1"
+        versionName = "2.2.0"
 
         vectorDrawables {
             useSupportLibrary = true
