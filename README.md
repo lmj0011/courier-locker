@@ -15,6 +15,12 @@ Features include:
 ## Download
 Get the app from the [Google Play Store](https://play.google.com/store/apps/details?id=name.lmj0011.courierlocker.prod).
 
+## Documentation
+
+app documentation can be found at:
+
+https://github.com/lmj0011/courier-locker/tree/master/docs
+
 ## Issues, Feature Requests and Contributing
 
 Please make sure to read the full guidelines. Your issue may be closed without warning if you do not.
