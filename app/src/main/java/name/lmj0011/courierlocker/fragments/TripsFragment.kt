@@ -70,12 +70,6 @@ class TripsFragment : Fragment(R.layout.fragment_trips),
 
     override fun onResume() {
         super.onResume()
-
-        mainActivity.showFabAndSetListener({
-            this.findNavController()
-                .navigate(TripsFragmentDirections.actionTripsFragmentToCreateTripFragment())
-        }, R.drawable.ic_fab_add)
-
         mainActivity.supportActionBar?.subtitle = null
     }
 

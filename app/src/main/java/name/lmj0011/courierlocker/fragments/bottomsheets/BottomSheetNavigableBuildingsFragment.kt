@@ -37,8 +37,7 @@ class BottomSheetNavigableBuildingsFragment(private val apartment: Apartment): B
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         bottomSheetDialog = super.onCreateDialog(savedInstanceState) as BottomSheetDialog
-        bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
-        bottomSheetDialog.behavior.peekHeight = 0
+        bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
 
         return bottomSheetDialog
     }
@@ -85,18 +84,7 @@ class BottomSheetNavigableBuildingsFragment(private val apartment: Apartment): B
         listAdapter.notifyDataSetChanged()
     }
 
-    private fun setupObservers() {
-        bottomSheetDialog.behavior.addBottomSheetCallback(object :BottomSheetBehavior.BottomSheetCallback() {
-            override fun onStateChanged(bottomSheet: View, newState: Int) {
-                // only need this BottomSheet in 2 states
-                if (newState != BottomSheetBehavior.STATE_EXPANDED || newState != BottomSheetBehavior.STATE_HIDDEN) {
-                    bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_HIDDEN
-                }
-            }
-
-            override fun onSlide(bottomSheet: View, slideOffset: Float) {}
-        })
-    }
+    private fun setupObservers() {}
 
     private fun getBuildingNavigateSwipeButton(bldg: Building) : SwipeHelper.UnderlayButton {
         return SwipeHelper.UnderlayButton(

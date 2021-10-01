@@ -230,7 +230,6 @@ class EditAptBuildingsMapsFragment : Fragment(){
 
     override fun onResume() {
         super.onResume()
-        mainActivity.hideFab()
         mainActivity.supportActionBar?.subtitle = "Long press to start marking building(s)"
     }
 

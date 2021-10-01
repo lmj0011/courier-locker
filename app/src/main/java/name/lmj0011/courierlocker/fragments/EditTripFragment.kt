@@ -105,8 +105,6 @@ class EditTripFragment : Fragment(), DeleteTripDialogFragment.NoticeDialogListen
             if (it.isNotBlank()) mainActivity.showToastMessage(it, Toast.LENGTH_LONG)
         })
 
-        mainActivity.hideFab()
-
         return binding.root
     }
 

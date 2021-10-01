@@ -71,8 +71,6 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
 
         binding.customerViewModel = this.customerViewModel
 
-        mainActivity.hideFab()
-
         blankfaces()
         forceRenderImageViews()
 

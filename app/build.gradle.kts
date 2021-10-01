@@ -173,7 +173,7 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:$navigationVersionProp")
     implementation("androidx.appcompat:appcompat:1.3.0")
     implementation("androidx.core:core-ktx:1.5.0")
-    implementation("com.google.android.material:material:1.4.0-rc01")
+    implementation("com.google.android.material:material:1.4.0")
     implementation("androidx.constraintlayout:constraintlayout:2.0.4")
     implementation("com.jakewharton.timber:timber:4.7.1")
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
@@ -241,6 +241,9 @@ dependencies {
 
     // https://github.com/Zhuinden/livedata-combinetuple-kt#livedata-combinetuple-kt
     implementation("com.github.Zhuinden:livedata-combinetuple-kt:1.2.1")
+
+    // KeyboardVisibilityEvent: https://github.com/yshrsmz/KeyboardVisibilityEvent/releases
+    implementation("net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:3.0.0-RC3")
 }
 
 // Git is needed in your system PATH for these commands to work.

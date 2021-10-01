@@ -13,6 +13,7 @@
         <item name="materialAlertDialogTheme">@style/DialogStyle</item>
         <item name="materialButtonStyle">@style/ButtonStyle</item>
         <item name="materialCalendarFullscreenTheme">@style/CalendarFullscreenStyle</item>
+        <item name="bottomSheetDialogTheme">@style/RoundedBottomSheetDialog</item>
     </style>
 
     <style name="AppTheme.NoActionBar" parent="AppTheme">

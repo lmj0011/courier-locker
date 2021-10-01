@@ -65,7 +65,6 @@ class CreateGateCodeFragment : Fragment() {
 
         binding.gateCodeViewModel = this.gateCodeViewModel
 
-        mainActivity.hideFab()
 
         binding.createGateCodeSaveButton.setOnClickListener(this::saveButtonOnClickListener)
 

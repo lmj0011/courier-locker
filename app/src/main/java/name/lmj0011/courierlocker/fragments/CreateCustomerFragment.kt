@@ -65,8 +65,6 @@ class CreateCustomerFragment : Fragment() {
 
         binding.customerViewModel = this.customerViewModel
 
-        mainActivity.hideFab()
-
         blankfaces()
         forceRenderImageViews()
 

@@ -4,8 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
-import android.util.AttributeSet
-import androidx.core.view.GravityCompat
 import android.view.MenuItem
 import com.google.android.material.navigation.NavigationView
 import androidx.appcompat.app.AppCompatActivity
@@ -15,7 +13,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
-import androidx.navigation.findNavController
 import androidx.navigation.ui.*
 import androidx.preference.PreferenceManager
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -23,9 +20,12 @@ import timber.log.Timber
 import name.lmj0011.courierlocker.databinding.ActivityMainBinding
 import name.lmj0011.courierlocker.fragments.MapsFragmentDirections
 import name.lmj0011.courierlocker.fragments.TripsFragmentDirections
+import name.lmj0011.courierlocker.fragments.bottomsheets.BottomSheetCreateNewFragment
 import name.lmj0011.courierlocker.helpers.LocationHelper
 import name.lmj0011.courierlocker.helpers.PermissionHelper
 import name.lmj0011.courierlocker.helpers.PreferenceHelper
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
+import net.yslibrary.android.keyboardvisibilityevent.Unregistrar
 import org.kodein.di.instance
 
 
@@ -38,6 +38,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var topLevelDestinations: Set<Int>
     private lateinit var preferences: PreferenceHelper
     private lateinit var locationHelper: LocationHelper
+    private lateinit var unregistrar: Unregistrar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +54,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
 
         binding = ActivityMainBinding.inflate(layoutInflater)
+
         setContentView(binding.root)
     }
 
@@ -63,15 +65,33 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // AppBar Navigation configuration
         topLevelDestinations = setOf(R.id.tripsFragment, R.id.gateCodesFragment, R.id.customersFragment, R.id.mapsFragment)
         appBarConfiguration = AppBarConfiguration.Builder(topLevelDestinations)
-            .setOpenableLayout(binding.drawerLayout)
             .build()
+
+        navController.addOnDestinationChangedListener { controller, destination, arguments ->
+            if (topLevelDestinations.contains(destination.id)) {
+                binding.navView.visibility = View.VISIBLE
+            } else binding.navView.visibility = View.GONE
+        }
+
+        unregistrar = KeyboardVisibilityEvent.registerEventListener(this) { isOpen ->
+            val destination = navController.currentDestination ?: return@registerEventListener
+
+            when {
+                isOpen -> {
+                    binding.navView.visibility = View.GONE
+                }
+                !isOpen && topLevelDestinations.contains(destination.id) -> {
+                    binding.navView.visibility = View.VISIBLE
+                }
+                !isOpen && !topLevelDestinations.contains(destination.id) -> {
+                    binding.navView.visibility = View.GONE
+                }
+            }
+        }
 
         setSupportActionBar(binding.toolbar)
         setupActionBarWithNavController(navController, appBarConfiguration)
-        binding.navView.setNavigationItemSelectedListener(this::onNavigationItemSelected)
-
-        // hide the fab initially
-        binding.fab.hide()
+        binding.navView.setOnItemSelectedListener(this::onNavigationItemSelected)
     }
 
     override fun onRestart() {
@@ -104,6 +124,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onStop() {
         super.onStop()
+        unregistrar.unregister()
         Timber.i("onStop Called")
     }
 
@@ -147,14 +168,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 
-    override fun onBackPressed() {
-        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            binding.drawerLayout.closeDrawer(GravityCompat.START)
-        }else {
-            super.onBackPressed()
-        }
-    }
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.main, menu)
@@ -179,9 +192,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
-        this.navigateTo(item.itemId)
 
-        binding.drawerLayout.closeDrawer(GravityCompat.START)
+        if (item.itemId == R.id.nav_add_new) {
+            // show BottomSheet
+            val bottomSheet = BottomSheetCreateNewFragment(navController)
+            bottomSheet.show(supportFragmentManager, "BottomSheetCreateNewFragment")
+            return false
+        }
+
+        this.navigateTo(item.itemId)
         return true
     }
 
@@ -249,28 +268,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         toast.show()
     }
 
-    fun showFabAndSetListener(cb: () -> Unit, imgSrcId: Int) {
-       binding.fab.isEnabled = false
-
-       binding.fab.let {
-            it.setOnClickListener(null) // should remove all attached listeners
-            it.setOnClickListenerThrottled(block = { cb() })
-
-            // hide and show to repaint the img src
-            it.hide()
-
-            it.setImageResource(imgSrcId)
-
-            it.show()
-        }
-
-       binding.fab.isEnabled = true
-    }
-
-    fun hideFab() {
-        binding.fab.hide()
-    }
-
     fun showKeyBoard(v: View) {
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
         imm?.showSoftInput(v, InputMethodManager.SHOW_IMPLICIT)
@@ -294,10 +291,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             R.id.nav_maps -> {
                 navController.navigate(R.id.mapsFragment)
-            }
-            R.id.nav_settings -> {
-                val intent = Intent(this, SettingsActivity::class.java)
-                startActivity(intent)
             }
         }
     }

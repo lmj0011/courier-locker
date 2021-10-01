@@ -66,8 +66,6 @@ class EditGateCodeFragment : Fragment(), DeleteGateCodeDialogFragment.NoticeDial
 
         binding.gateCodeViewModel = gateCodeViewModel
 
-        mainActivity.hideFab()
-
         gateCodeViewModel.gateCodes.observe(viewLifecycleOwner, {
             if(!binding.editGateCodeSaveButton.isEnabled || !binding.editGateCodeDeleteButton.isEnabled) {
                 hideProgressBar()

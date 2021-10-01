@@ -94,8 +94,6 @@ class CreateTripFragment : Fragment() {
             if (it.isNotBlank()) mainActivity.showToastMessage(it, Toast.LENGTH_LONG)
         })
 
-        mainActivity.hideFab()
-
         addStop()
 
         return binding.root

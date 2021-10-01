@@ -115,7 +115,8 @@
             android:label="Add a Place" >
         <argument
                 android:name="aptId"
-                app:argType="long" />
+                app:argType="long"
+            android:defaultValue="0L" />
     </fragment>
     <fragment
             android:id="@+id/gigLabelsFragment"

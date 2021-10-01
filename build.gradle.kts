@@ -14,7 +14,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:7.0.0-beta04")
+        classpath("com.android.tools.build:gradle:7.0.2")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersionProp")
         classpath("androidx.navigation:navigation-safe-args-gradle-plugin:$navigationVersionProp")
         classpath("com.google.gms:google-services:4.3.8")  // Google Services plugin

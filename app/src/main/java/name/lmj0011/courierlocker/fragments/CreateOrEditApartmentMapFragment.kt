@@ -201,7 +201,6 @@ class CreateOrEditApartmentMapFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        mainActivity.hideFab()
         mainActivity.supportActionBar?.subtitle = null
         this.applyPreferences()
     }

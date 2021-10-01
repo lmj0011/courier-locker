@@ -3,35 +3,28 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:showIn="navigation_view">
 
-    <group  android:id="@+id/nav_main_group1"
-            android:checkableBehavior="single">
-        <item
-                android:id="@+id/nav_trips"
-                android:icon="@drawable/ic_menu_trips"
-                android:title="Trips"/>
+    <item
+        android:id="@+id/nav_trips"
+        android:icon="@drawable/ic_menu_trips"
+        android:title="Trips"/>
 
-        <item
-                android:id="@+id/nav_maps"
-                android:icon="@drawable/ic_map"
-                android:title="@string/menu_maps"/>
+    <item
+        android:id="@+id/nav_maps"
+        android:icon="@drawable/ic_map"
+        android:title="@string/menu_maps"/>
 
-        <item
-                android:id="@+id/nav_gate_codes"
-                android:icon="@drawable/ic_menu_dialpad"
-                android:title="@string/menu_gate_codes"/>
-        <item
-                android:id="@+id/nav_customers"
-                android:icon="@drawable/ic_menu_customer"
-                android:title="@string/menu_customers"/>
+    <item
+        android:id="@+id/nav_add_new"
+        android:icon="@drawable/ic_add"
+        android:title=""/>
 
-    </group>
+    <item
+        android:id="@+id/nav_gate_codes"
+        android:icon="@drawable/ic_menu_dialpad"
+        android:title="@string/menu_gate_codes"/>
 
-    <group  android:id="@+id/nav_main_group2"
-            android:checkableBehavior="single">
-        <item
-                android:id="@+id/nav_settings"
-                android:icon="@drawable/ic_menu_settings"
-                android:title="@string/menu_settings"/>
-    </group>
-
+    <item
+        android:id="@+id/nav_customers"
+        android:icon="@drawable/ic_menu_customer"
+        android:title="@string/menu_customers"/>
 </menu>

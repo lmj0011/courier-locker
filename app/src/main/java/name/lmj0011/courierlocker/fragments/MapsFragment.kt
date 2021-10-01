@@ -213,7 +213,6 @@ class MapsFragment : Fragment(), SearchableRecyclerView {
 
     override fun onResume() {
         super.onResume()
-        mainActivity.showFabAndSetListener(this::fabOnClickListenerCallback, R.drawable.ic_fab_add)
         mainActivity.supportActionBar?.subtitle = null
         this.applyPreferences()
         this.refreshList()
