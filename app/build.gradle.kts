@@ -29,16 +29,14 @@ plugins {
 
 android {
     compileSdk = 30
-//    compileSdkVersion = "android-S"
     ndkVersion = "21.3.6528147"
 
     defaultConfig {
         applicationId = "name.lmj0011.courierlocker"
         minSdk = 26
         targetSdk =30
-//        targetSdkPreview = "S"
-        versionCode = getCommitCount().toInt()
-        versionName = "2.2.0"
+        versionCode = 97
+        versionName = "2.3.0-beta01"
 
         vectorDrawables {
             useSupportLibrary = true
