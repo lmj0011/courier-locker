@@ -3,7 +3,6 @@ package name.lmj0011.courierlocker.viewmodels
 import android.app.Application
 import androidx.lifecycle.*
 import androidx.paging.*
-import androidx.preference.PreferenceManager
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.json.responseJson
@@ -25,10 +24,9 @@ class TripViewModel(
     val database: TripDao,
     application: Application
 ) : AndroidViewModel(application) {
-    private var viewModelJob = Job()
     private val preferences: PreferenceHelper = (application as CourierLockerApplication).kodein.instance()
 
-    private val uiScope = CoroutineScope(Dispatchers.IO +  viewModelJob)
+    var ioScope = CoroutineScope(Dispatchers.IO + Job())
 
     private val googleApiKey = preferences.googleDirectionsApiKey
 
@@ -43,14 +41,14 @@ class TripViewModel(
                     config = Util.getDefaultPagingConfig(),
                     initialKey = null,
                     database.getAllTripsByThePage().asPagingSourceFactory()
-                ).flow.cachedIn(viewModelScope).asLiveData()
+                ).flow.cachedIn(ioScope).asLiveData()
             } else {
                 val query = SimpleSQLiteQuery("SELECT * FROM trips_table, json_each(stops) WHERE payAmount LIKE '%$mQuery%' OR gigName LIKE '%$mQuery%' OR json_extract(json_each.value, '\$.address') LIKE '%$mQuery%' GROUP BY trips_table.id ORDER BY trips_table.id DESC")
                 Pager(
                     config = Util.getDefaultPagingConfig(),
                     initialKey = null,
                     database.getAllTripsByThePageFiltered(query).asPagingSourceFactory()
-                ).flow.cachedIn(viewModelScope).asLiveData()
+                ).flow.cachedIn(ioScope).asLiveData()
             }
         }
     }
@@ -60,6 +58,11 @@ class TripViewModel(
     var payAmountValidated = MutableLiveData<Boolean?>()
 
     val trips = RefreshableLiveData { database.getAllTrips() }
+
+    override fun onCleared() {
+        super.onCleared()
+        ioScope.cancel()
+    }
 
     fun totalMoney(): String {
         val result = database.getAllTripPayAmounts().fold(0.0) { sum, pa ->
@@ -130,14 +133,8 @@ class TripViewModel(
         return Util.numberFormatInstance.format(result)
     }
 
-
-    override fun onCleared() {
-        super.onCleared()
-        viewModelJob.cancel()
-    }
-
     fun setTrip(idx: Int) {
-        uiScope.launch {
+        ioScope.launch {
 
             val trip = this@TripViewModel.database.get(idx.toLong())
 
@@ -232,13 +229,13 @@ class TripViewModel(
     }
 
     fun deleteTrip(idx: Long) {
-        uiScope.launch {
+        ioScope.launch {
             this@TripViewModel.database.deleteByTripId(idx)
         }
     }
 
     fun insertNewRandomTripRow() {
-        uiScope.launch {
+        ioScope.launch {
             val trip = Trip(
                 pickupAddress= "${Fakeit.address().streetAddress()}",
                 dropOffAddress= "${Fakeit.address().streetAddress()}",

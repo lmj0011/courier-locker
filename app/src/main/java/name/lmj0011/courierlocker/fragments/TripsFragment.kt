@@ -8,16 +8,14 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.asLiveData
 import androidx.navigation.fragment.findNavController
-import androidx.paging.map
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.google.android.material.datepicker.MaterialDatePicker
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collectLatest
 import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.DeepLinkActivity
 import name.lmj0011.courierlocker.MainActivity
@@ -71,6 +69,25 @@ class TripsFragment : Fragment(R.layout.fragment_trips),
     override fun onResume() {
         super.onResume()
         mainActivity.supportActionBar?.subtitle = null
+        updateTodaysTotalMoneyUI()
+        tripViewModel.tripsPaged.refresh()
+
+        /**
+         * Showing a progressbar here to hide that fact that [tripViewModel.tripsPaged] cache does not
+         * get updated fast enough to let the user know there's new data in the recyclerview
+         */
+        launchIO{
+            withUIContext {
+                binding.progressBar.isVisible = true
+            }
+
+            delay(1000)
+
+            withUIContext {
+                binding.tripList.scrollToPosition(0)
+                binding.progressBar.isVisible = false
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -237,7 +254,7 @@ class TripsFragment : Fragment(R.layout.fragment_trips),
     }
 
     private fun setupObservers() {
-        observeTrips()
+        observeTrips ()
     }
 
     private fun updateTodaysTotalMoneyUI() {
@@ -260,9 +277,6 @@ class TripsFragment : Fragment(R.layout.fragment_trips),
 
             listAdapter.notifyItemRangeChanged(0, Const.DEFAULT_PAGE_COUNT)
             binding.tripList.scrollToPosition(0)
-
-            Timber.d("listAdapter.snapshot().size: ${listAdapter.snapshot().size}")
-            Timber.d("listAdapter.snapshot().items: ${listAdapter.snapshot().items}")
         })
 
         binding.swipeRefresh.isRefreshing = false

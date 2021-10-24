@@ -35,7 +35,7 @@ android {
         applicationId = "name.lmj0011.courierlocker"
         minSdk = 26
         targetSdk =30
-        versionCode = 97
+        versionCode = 98
         versionName = "2.3.0-beta01"
 
         vectorDrawables {

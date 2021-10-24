@@ -1,5 +1,7 @@
 package name.lmj0011.courierlocker.helpers
 
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -40,3 +42,9 @@ suspend fun <T> withUIContext(block: suspend CoroutineScope.() -> T) = withConte
 suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T) = withContext(Dispatchers.IO, block)
 
 suspend fun <T> withDefaultContext(block: suspend CoroutineScope.() -> T) = withContext(Dispatchers.Default, block)
+
+
+// ref: https://stackoverflow.com/a/63029652/2445763
+fun RecyclerView?.getCurrentPosition() : Int {
+    return (this?.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+}
