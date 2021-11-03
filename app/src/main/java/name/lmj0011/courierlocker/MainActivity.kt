@@ -40,6 +40,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var locationHelper: LocationHelper
     private lateinit var unregistrar: Unregistrar
 
+    /**
+     * when true, prevents the CurrentStatusService from starting when this activity goes into the
+     * background
+     */
+    var navToSettingsActivity = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Timber.i("onCreate Called")
@@ -94,14 +100,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         binding.navView.setOnItemSelectedListener(this::onNavigationItemSelected)
     }
 
-    override fun onRestart() {
-        super.onRestart()
-        Timber.i("onRestart Called")
-    }
-
 
     override fun onResume() {
         (applicationContext as CourierLockerApplication).stopCurrentStatusService()
+        navToSettingsActivity = false
         Timber.i("onResume Called")
         if(!PermissionHelper.permissionAccessFineLocationApproved) {
             PermissionHelper.requestFineLocationAccess(this)
@@ -112,7 +114,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onPause() {
-        if (preferences.enableCurrentStatusService()) {
+        if (preferences.enableCurrentStatusService() && !navToSettingsActivity) {
             (applicationContext as CourierLockerApplication).startCurrentStatusService()
         }
         super.onPause()
@@ -129,9 +131,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onDestroy() {
-        if (preferences.enableCurrentStatusService()) {
-            (applicationContext as CourierLockerApplication).stopCurrentStatusService()
-        }
+        (applicationContext as CourierLockerApplication).stopCurrentStatusService()
 
         super.onDestroy()
         Timber.i("onDestroy Called")
@@ -181,6 +181,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         return when (item.itemId) {
             R.id.action_settings -> {
+                navToSettingsActivity = true
                 val intent = Intent(this, SettingsActivity::class.java)
                 startActivity(intent)
                 finish()

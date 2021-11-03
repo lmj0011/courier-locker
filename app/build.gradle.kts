@@ -28,14 +28,14 @@ plugins {
 }
 
 android {
-    compileSdk = 30
+    compileSdk = 31
     ndkVersion = "21.3.6528147"
 
     defaultConfig {
         applicationId = "name.lmj0011.courierlocker"
         minSdk = 26
-        targetSdk =30
-        versionCode = 98
+        targetSdk =31
+        versionCode = 99
         versionName = "2.3.0-beta01"
 
         vectorDrawables {
@@ -201,7 +201,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutineVersionProp")
 
     // WorkManager
-    implementation("androidx.work:work-runtime-ktx:2.5.0")
+    implementation("androidx.work:work-runtime-ktx:2.7.0")
 
     // HTTP lib
     implementation("com.github.kittinunf.fuel:fuel:$fuelVersionProp")
