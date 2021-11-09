@@ -133,6 +133,6 @@ class LocationHelper(val context: Context) {
         val c = 2.toDouble() * atan2(sqrt(a), sqrt(1 - a))
         val milesMultiplier = 0.621371 // if you want the return value in kilometers, change this to 1
 
-        return round(AVERAGE_RADIUS_OF_EARTH_KM * c) * milesMultiplier
+        return (AVERAGE_RADIUS_OF_EARTH_KM * c) * milesMultiplier
     }
 }
