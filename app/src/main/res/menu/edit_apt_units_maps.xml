@@ -7,8 +7,13 @@
             android:orderInCategory="100"
             app:showAsAction="always"/>
 
-    <item android:id="@+id/action_nav_to_units"
-        android:title="Switch to Units"
+    <item android:id="@+id/action_nav_to_buildings"
+        android:title="Switch to Buildings"
+        android:orderInCategory="101"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/action_show_floor_options"
+        android:title="Floor options"
         android:orderInCategory="101"
         app:showAsAction="never"/>
 </menu>

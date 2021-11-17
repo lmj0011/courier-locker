@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="5dp">
+
+        <TextView
+            android:id="@+id/floorOptionsHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/default_list_item_padding_10dp"
+            android:gravity="center"
+            android:textSize="24sp"
+            android:textStyle="normal"
+            android:text="Floor options" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:hintTextColor="@color/colorDefaultIcon"
+            app:boxStrokeColor="@color/colorDefaultIcon"
+            app:helperTextTextColor="@color/colorDefaultIcon"
+            app:placeholderTextColor="@color/colorDefaultIcon"
+            android:hint="Number of above ground floors:">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:id="@+id/floorsAboveGroundInput"
+                android:inputType="number"
+                android:layout_height="wrap_content"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:hintTextColor="@color/colorDefaultIcon"
+            app:boxStrokeColor="@color/colorDefaultIcon"
+            app:helperTextTextColor="@color/colorDefaultIcon"
+            app:placeholderTextColor="@color/colorDefaultIcon"
+            android:hint="Number of below ground floors:">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:id="@+id/floorsBelowGroundInput"
+                android:inputType="number"
+                android:layout_height="wrap_content" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/floorAsBlueprintSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="Use floor 1 as a template for other floors"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/applyButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cornerRadius="4dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:strokeWidth="1.25dp"
+            app:strokeColor="@color/colorDefaultIcon"
+            android:textColor="@color/colorDefaultIcon"
+            android:text="Apply"/>
+
+    </LinearLayout>
+</layout>

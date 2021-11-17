@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="5dp">
+
+        <TextView
+            android:id="@+id/buildingName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/default_list_item_padding_10dp"
+            android:gravity="center"
+            android:textSize="24sp"
+            android:textStyle="normal"
+            tools:text="Building 10" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/navigateButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            app:cornerRadius="4dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:strokeWidth="1.25dp"
+            app:strokeColor="@color/colorDefaultIcon"
+            android:textColor="@color/colorDefaultIcon"
+            app:icon="@drawable/ic_directions_28dp"
+            app:iconGravity="textStart"
+            app:iconPadding="10dp"
+            app:iconTint="@color/colorDefaultIcon"
+            android:text="Navigate" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/deleteButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cornerRadius="4dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:strokeWidth="1.25dp"
+            app:strokeColor="@color/colorDefaultIcon"
+            android:textColor="@color/colorDefaultIcon"
+            app:icon="@drawable/ic_delete"
+            app:iconGravity="textStart"
+            app:iconPadding="10dp"
+            app:iconTint="@color/colorDefaultIcon"
+            android:text="Remove"/>
+
+    </LinearLayout>
+</layout>

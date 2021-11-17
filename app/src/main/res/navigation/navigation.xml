@@ -95,19 +95,23 @@
             android:name="name.lmj0011.courierlocker.fragments.MapsFragment"
             android:label="Maps" >
         <action
-                android:id="@+id/action_mapsFragment_to_editAptBuildingsMapsFragment"
-                app:destination="@id/editAptBuildingsMapsFragment" />
+                android:id="@+id/action_mapsFragment_to_editAptBuildingsMapFragment"
+                app:destination="@id/editAptBuildingsMapFragment" />
         <action
                 android:id="@+id/action_mapsFragment_to_createOrEditApartmentMapFragment"
                 app:destination="@id/createOrEditApartmentMapFragment" />
     </fragment>
     <fragment
-            android:id="@+id/editAptBuildingsMapsFragment"
-            android:name="name.lmj0011.courierlocker.fragments.EditAptBuildingsMapsFragment"
+            android:id="@+id/editAptBuildingsMapFragment"
+            android:name="name.lmj0011.courierlocker.fragments.EditAptBuildingsMapFragment"
             android:label="Add/Remove Buildings">
         <argument
                 android:name="aptId"
                 app:argType="long" />
+        <action
+            android:id="@+id/action_editAptBuildingsMapFragment_to_editAptUnitsMapFragment"
+            app:destination="@id/editAptUnitsMapFragment"
+            app:popUpTo="@id/mapsFragment" />
     </fragment>
     <fragment
             android:id="@+id/createOrEditApartmentMapFragment"
@@ -116,10 +120,22 @@
         <argument
                 android:name="aptId"
                 app:argType="long"
-            android:defaultValue="0L" />
+                android:defaultValue="0L" />
     </fragment>
     <fragment
             android:id="@+id/gigLabelsFragment"
             android:name="name.lmj0011.courierlocker.fragments.GigLabelsFragment"
             android:label="Edit Gig Labels" />
+    <fragment
+        android:id="@+id/editAptUnitsMapFragment"
+        android:name="name.lmj0011.courierlocker.fragments.EditAptUnitsMapFragment"
+        android:label="Add/Remove Units" >
+        <argument
+            android:name="aptId"
+            app:argType="long" />
+        <action
+            android:id="@+id/action_editAptUnitsMapFragment_to_editAptBuildingsMapFragment"
+            app:destination="@id/editAptBuildingsMapFragment"
+            app:popUpTo="@id/mapsFragment" />
+    </fragment>
 </navigation>

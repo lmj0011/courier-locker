@@ -2,8 +2,6 @@ package name.lmj0011.courierlocker.fragments
 
 
 import android.annotation.SuppressLint
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.*
 import androidx.databinding.DataBindingUtil
@@ -12,6 +10,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import com.google.android.libraries.maps.CameraUpdateFactory
@@ -32,8 +31,10 @@ import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.databinding.FragmentCreateOrEditApartmentMapBinding
 import name.lmj0011.courierlocker.databinding.FragmentEditAptBuildingsMapBinding
 import name.lmj0011.courierlocker.factories.ApartmentViewModelFactory
+import name.lmj0011.courierlocker.fragments.bottomsheets.BottomSheetAptBuildingDetailsFragment
 import name.lmj0011.courierlocker.helpers.AptBldgClusterItem
 import name.lmj0011.courierlocker.helpers.PreferenceHelper
+import name.lmj0011.courierlocker.helpers.launchUI
 import name.lmj0011.courierlocker.viewmodels.ApartmentViewModel
 import org.kodein.di.instance
 import java.lang.Exception
@@ -43,7 +44,7 @@ import java.lang.Exception
  * A simple [Fragment] subclass.
  *
  */
-class EditAptBuildingsMapsFragment : Fragment(){
+class EditAptBuildingsMapFragment : Fragment(){
 
     private lateinit var binding: FragmentEditAptBuildingsMapBinding
     private lateinit var mainActivity: MainActivity
@@ -54,6 +55,7 @@ class EditAptBuildingsMapsFragment : Fragment(){
     private lateinit var clusterManager: ClusterManager<AptBldgClusterItem>
     private lateinit var pinDropMarker: Marker
     private lateinit var preferences: PreferenceHelper
+    private lateinit var args: EditAptBuildingsMapFragmentArgs
     private var selectedApt = MutableLiveData<Apartment>()
     private var selectedBldg: Building? = null
     private var fragmentJob = Job()
@@ -87,7 +89,7 @@ class EditAptBuildingsMapsFragment : Fragment(){
         val application = requireNotNull(this.activity).application
         val dataSource = CourierLockerDatabase.getInstance(application).apartmentDao
         viewModelFactory = ApartmentViewModelFactory(dataSource, application)
-        val args = EditAptBuildingsMapsFragmentArgs.fromBundle(requireArguments())
+        args = EditAptBuildingsMapFragmentArgs.fromBundle(requireArguments())
         apartmentViewModel = ViewModelProvider(this, viewModelFactory).get(ApartmentViewModel::class.java)
         mapFragment = childFragmentManager.findFragmentById(R.id.editAptBuildingsMapFragment) as SupportMapFragment
 
@@ -135,22 +137,44 @@ class EditAptBuildingsMapsFragment : Fragment(){
             gMap.setOnMarkerClickListener(clusterManager)
 
             gMap.setOnMapClickListener {
-                this.hideEditUI()
+                this.hideAddBuildingUI()
             }
 
             gMap.setOnMapLongClickListener {
                 pinDropMarker.position = it
                 pinDropMarker.isVisible = true
                 selectedBldg = Building("", it.latitude, it.longitude)
-                this.showEditUI(null)
+                this.showAddBuildingUI()
             }
 
             clusterManager.setOnClusterItemClickListener {
-                val marker = renderer.getMarker(it)
-                marker.showInfoWindow()
                 selectedBldg = it.bldg
                 pinDropMarker.isVisible = false
-                this.showEditUI(it.bldg)
+
+                val bottomSheet = BottomSheetAptBuildingDetailsFragment(it.bldg) {
+                        val builder = MaterialAlertDialogBuilder(requireContext())
+
+                        builder
+                            .setTitle("Building ${it.bldg.number}")
+                            .setMessage("Remove this building?")
+                            .setPositiveButton("Yes") { _, _ ->
+                                selectedBldg?.let{ selectedApt.value!!.buildings.remove(it) }
+                                launchUI {
+                                    withContext(Dispatchers.IO) {
+                                        apartmentViewModel.updateApartment(selectedApt.value)
+                                        selectedApt.postValue(selectedApt.value)
+                                    }
+                                }
+                            }
+                            .setNeutralButton("Cancel") { _,_ ->
+
+                            }
+
+                        builder.show()
+                }
+
+                bottomSheet
+                    .show(childFragmentManager, "BottomSheetAptBuildingDetailsFragment")
 
                 true
             }
@@ -200,26 +224,6 @@ class EditAptBuildingsMapsFragment : Fragment(){
                 }
 
                 mainActivity.hideKeyBoard(binding.buildingEditText)
-            }
-        }
-
-        binding.navToBldgImageButton.setOnClickListener {
-            val gmmIntentUri = Uri.parse("google.navigation:q=${selectedBldg?.latitude},${selectedBldg?.longitude}")
-            val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
-            mapIntent.setPackage("com.google.android.apps.maps")
-            startActivity(mapIntent)
-        }
-
-        binding.removeButton.setOnClickListener {
-            uiScope.launch {
-                selectedBldg?.let{ selectedApt.value!!.buildings.remove(it) }
-
-                withContext(Dispatchers.IO) {
-                    apartmentViewModel.updateApartment(selectedApt.value)
-                    selectedApt.postValue(selectedApt.value)
-                }
-
-                mainActivity.showToastMessage("removed building: ${selectedBldg?.number}")
             }
         }
 
@@ -275,6 +279,14 @@ class EditAptBuildingsMapsFragment : Fragment(){
                 builder.create().show()
                 true
             }
+            R.id.action_nav_to_units -> {
+                findNavController()
+                    .navigate(
+                        EditAptBuildingsMapFragmentDirections
+                            .actionEditAptBuildingsMapFragmentToEditAptUnitsMapFragment(args.aptId)
+                    )
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -315,63 +327,40 @@ class EditAptBuildingsMapsFragment : Fragment(){
                 ))
             }
         }
-        this.hideEditUI()
+        this.hideAddBuildingUI()
     }
 
-    private fun hideEditUI() {
+    private fun hideAddBuildingUI() {
         val transition = Slide(Gravity.TOP)
         transition.duration = 50
         transition.addTarget(binding.inputView)
         transition.addTarget(binding.addButton)
-        transition.addTarget(binding.navToBldgImageButton)
-        transition.addTarget(binding.removeButton)
         transition.addTarget(binding.buildingEditText)
 
         TransitionManager.beginDelayedTransition(binding.editAptBuildingsMapContainer, transition)
         binding.inputView.visibility = View.GONE
         binding.addButton.visibility = View.GONE
-        binding.navToBldgImageButton.visibility = View.GONE
-        binding.removeButton.visibility = View.GONE
         binding.buildingEditText.visibility = View.GONE
 
         pinDropMarker.isVisible = false
         mainActivity.hideKeyBoard(binding.buildingEditText)
     }
 
-    private fun showEditUI(bldg: Building?) {
+    private fun showAddBuildingUI() {
         val transition = Slide(Gravity.TOP)
         transition.duration = 50
         transition.addTarget(binding.inputView)
         transition.addTarget(binding.addButton)
-        transition.addTarget(binding.navToBldgImageButton)
-        transition.addTarget(binding.removeButton)
         transition.addTarget(binding.buildingEditText)
 
         TransitionManager.beginDelayedTransition(binding.editAptBuildingsMapContainer, transition)
-        this.addOrRemoveBldgUI(bldg)
-    }
 
-    private fun addOrRemoveBldgUI(bldg: Building?) {
-        when (bldg) {
-            is Building -> { // set edit ui to Remove a Building
-                binding.inputView.visibility = View.VISIBLE
-                binding.addButton.visibility = View.GONE
-                binding.navToBldgImageButton.visibility = View.VISIBLE
-                binding.removeButton.visibility = View.VISIBLE
-                binding.buildingEditText.visibility = View.GONE
-            }
-            else -> { // set edit ui to Add a Building to this Apartment
-                binding.inputView.visibility = View.VISIBLE
-                binding.addButton.visibility = View.VISIBLE
-                binding.navToBldgImageButton.visibility = View.GONE
-                binding.removeButton.visibility = View.GONE
-                binding.buildingEditText.visibility = View.VISIBLE
-                binding.buildingEditText.setText("")
-                binding.buildingEditText.requestFocus()
-                mainActivity.showKeyBoard(binding.buildingEditText)
-                binding.buildingEditText.isEnabled = true
-            }
-        }
+        binding.inputView.visibility = View.VISIBLE
+        binding.addButton.visibility = View.VISIBLE
+        binding.buildingEditText.visibility = View.VISIBLE
+        binding.buildingEditText.setText("")
+        binding.buildingEditText.requestFocus()
+        mainActivity.showKeyBoard(binding.buildingEditText)
+        binding.buildingEditText.isEnabled = true
     }
-
 }

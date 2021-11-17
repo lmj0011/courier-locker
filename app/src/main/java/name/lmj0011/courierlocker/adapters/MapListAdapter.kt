@@ -77,7 +77,7 @@ class MapListAdapter(private val clickListener: MapListener, private val parentF
                 }
 
                 binding.aptMapImageBtn.setOnClickListener {
-                    parentFragment.findNavController().navigate(MapsFragmentDirections.actionMapsFragmentToEditAptBuildingsMapsFragment(apt.id))
+                    parentFragment.findNavController().navigate(MapsFragmentDirections.actionMapsFragmentToEditAptBuildingsMapFragment(apt.id))
                 }
 
                 binding.deleteImageBtn.setOnClickListener {

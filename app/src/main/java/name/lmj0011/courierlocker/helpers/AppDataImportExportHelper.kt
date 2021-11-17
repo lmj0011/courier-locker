@@ -55,6 +55,9 @@ object AppDataImportExportHelper {
                         "address" to it.address,
                         "latitude" to it.latitude,
                         "longitude" to it.longitude,
+                        "aboveGroundFloorCount" to it.aboveGroundFloorCount,
+                        "belowGroundFloorCount" to it.belowGroundFloorCount,
+                        "floorOneAsBlueprint" to it.floorOneAsBlueprint,
                         "mapImageUrl" to it.mapImageUrl,
                         "sourceUrl" to it.sourceUrl,
                         "buildings" to jsonArray(
@@ -63,6 +66,16 @@ object AppDataImportExportHelper {
                                     "number" to bldg.number,
                                     "latitude" to bldg.latitude,
                                     "longitude" to bldg.longitude
+                                )
+                            }
+                        ),
+                        "buildingUnits" to jsonArray(
+                            it.buildingUnits.map { bldgUnit ->
+                                jsonObject(
+                                    "number" to bldgUnit.number,
+                                    "floorNumber" to bldgUnit.floorNumber,
+                                    "latitude" to bldgUnit.latitude,
+                                    "longitude" to bldgUnit.longitude
                                 )
                             }
                         )

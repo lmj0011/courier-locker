@@ -50,7 +50,7 @@ class ApartmentViewModel(
 
         return@switchMap if (query.isNullOrEmpty()) {
             Pager(
-                config = Util.getDefaultPagingConfig(),
+                config = Util.getApartmentsPagingConfig(),
                 initialKey = null,
                 database.getAllApartmentsByThePage().mapByPage { list ->
                     when(filterByLocation) {
@@ -70,7 +70,7 @@ class ApartmentViewModel(
             ).flow.cachedIn(viewModelScope).asLiveData()
         } else {
             Pager(
-                config = Util.getDefaultPagingConfig(),
+                config = Util.getApartmentsPagingConfig(),
                 initialKey = null,
                 database.getAllApartmentsByThePageFiltered("%$query%").mapByPage { list ->
                     when(filterByLocation) {
@@ -99,6 +99,35 @@ class ApartmentViewModel(
 
     fun getRelatedGateCode(gateCodeId: Long) = database.getRelatedGateCode(gateCodeId)
 
+    /**
+     * To be used for the "showing units on floor:" dropdown
+     */
+    fun getFloorArray(apt: Apartment): Array<String> {
+        val list = mutableListOf<String>()
+
+        /**
+         * add all above ground floors, if there are none then only 1st floor will be added
+         */
+        if (apt.aboveGroundFloorCount > 0) {
+            for ( i in apt.aboveGroundFloorCount downTo 1) {
+                list.add(i.toString())
+            }
+        } else {
+            list.add("1")
+        }
+
+
+        /**
+         * add all below ground floors
+         */
+        if (apt.belowGroundFloorCount > 0) {
+            for ( i in 1..apt.belowGroundFloorCount) {
+                list.add("${i}B")
+            }
+        }
+
+        return list.toTypedArray()
+    }
 
     fun insertApartments(apts: MutableList<Apartment>) {
         uiScope.launch {

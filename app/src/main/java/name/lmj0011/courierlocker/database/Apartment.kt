@@ -31,6 +31,15 @@ data class Apartment(
     @ColumnInfo(name = "longitude")
     override var longitude: Double = 0.0,
 
+    @ColumnInfo(name = "aboveGroundFloorCount")
+    var aboveGroundFloorCount: Int = 1,
+
+    @ColumnInfo(name = "belowGroundFloorCount")
+    var belowGroundFloorCount: Int = 0,
+
+    @ColumnInfo(name = "floorOneAsBlueprint")
+    var floorOneAsBlueprint: Boolean = true,
+
     // can be omitted
     @ColumnInfo(name = "mapImageUrl")
     var mapImageUrl: String = "",
@@ -40,5 +49,8 @@ data class Apartment(
     var sourceUrl: String = "",
 
     @ColumnInfo(name = "buildings")
-    var buildings: MutableList<Building> = mutableListOf()
+    var buildings: MutableList<Building> = mutableListOf(),
+
+    @ColumnInfo(name = "buildingUnits")
+    var buildingUnits: MutableList<BuildingUnit> = mutableListOf()
 ): Addressable

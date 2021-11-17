@@ -13,11 +13,14 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.*
 import androidx.preference.PreferenceManager
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import timber.log.Timber
 import name.lmj0011.courierlocker.databinding.ActivityMainBinding
+import name.lmj0011.courierlocker.fragments.EditAptBuildingsMapFragmentArgs
+import name.lmj0011.courierlocker.fragments.EditAptBuildingsMapFragmentDirections
 import name.lmj0011.courierlocker.fragments.MapsFragmentDirections
 import name.lmj0011.courierlocker.fragments.TripsFragmentDirections
 import name.lmj0011.courierlocker.fragments.bottomsheets.BottomSheetCreateNewFragment
@@ -146,7 +149,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 navController.navigate(R.id.tripsFragment)
                 return true
             }
-            R.id.editAptBuildingsMapsFragment -> {
+            R.id.editAptBuildingsMapFragment -> {
                 // resets the recyclerview to original state
                 navController.navigate(R.id.mapsFragment)
                 return true
@@ -236,7 +239,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             INTENT_EDIT_APARTMENT_MAP -> {
                 navController.navigate(R.id.mapsFragment)
                 navController.navigate(
-                    MapsFragmentDirections.actionMapsFragmentToEditAptBuildingsMapsFragment(
+                    MapsFragmentDirections.actionMapsFragmentToEditAptBuildingsMapFragment(
                         intent.getLongExtra("aptId", 0L)
                     )
                 )

@@ -213,8 +213,21 @@ object Util {
     fun getDefaultPagingConfig(): PagingConfig {
         return PagingConfig(
             pageSize = Const.DEFAULT_PAGE_COUNT,
+            prefetchDistance = Const.DEFAULT_PREFETCH_DISTANCE,
             enablePlaceholders = false,
-            initialLoadSize = Const.DEFAULT_PAGE_COUNT
+            initialLoadSize = Const.DEFAULT_PAGE_COUNT * 2
+        )
+    }
+
+    /**
+     * This is a workaround until a more direct method of sorting by a Map's lat/lng is created
+     */
+    fun getApartmentsPagingConfig(): PagingConfig {
+        return PagingConfig(
+            pageSize = 500,
+            prefetchDistance = Const.DEFAULT_PREFETCH_DISTANCE,
+            enablePlaceholders = false,
+            initialLoadSize = 500 * 2
         )
     }
 

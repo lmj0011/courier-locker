@@ -63,4 +63,26 @@ class DataConverters {
             }
         }
     }
+
+    @TypeConverter
+    fun fromBuildingUnitList(value: MutableList<BuildingUnit>): String {
+        val gson = Gson()
+        val type = object : TypeToken<MutableList<BuildingUnit>>() {}.type
+        return gson.toJson(value, type)
+    }
+
+    @TypeConverter
+    fun toBuildingUnitList(value: String): MutableList<BuildingUnit> {
+        val gson = Gson()
+        val type = object : TypeToken<MutableList<BuildingUnit>>() {}.type
+
+        return when {
+            gson.fromJson<BuildingUnit>(value, type) == null -> {
+                mutableListOf()
+            }
+            else -> {
+                gson.fromJson(value, type)
+            }
+        }
+    }
 }
