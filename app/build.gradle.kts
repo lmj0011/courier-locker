@@ -35,8 +35,8 @@ android {
         applicationId = "name.lmj0011.courierlocker"
         minSdk = 26
         targetSdk = 31
-        versionCode = 102
-        versionName = "2.3.0-beta01"
+        versionCode = 103
+        versionName = "2.3.0-beta02"
 
         vectorDrawables {
             useSupportLibrary = true
@@ -171,7 +171,7 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:$navigationVersionProp")
     implementation("androidx.appcompat:appcompat:1.3.0")
     implementation("androidx.core:core-ktx:1.5.0")
-    implementation("com.google.android.material:material:1.4.0")
+    implementation("com.google.android.material:material:1.5.0-beta01")
     implementation("androidx.constraintlayout:constraintlayout:2.0.4")
     implementation("com.jakewharton.timber:timber:4.7.1")
     implementation("androidx.legacy:legacy-support-v4:1.0.0")

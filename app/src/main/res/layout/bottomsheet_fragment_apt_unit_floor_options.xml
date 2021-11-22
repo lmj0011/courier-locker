@@ -25,10 +25,6 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:hintTextColor="@color/colorDefaultIcon"
-            app:boxStrokeColor="@color/colorDefaultIcon"
-            app:helperTextTextColor="@color/colorDefaultIcon"
-            app:placeholderTextColor="@color/colorDefaultIcon"
             android:hint="Number of above ground floors:">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -42,10 +38,6 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:hintTextColor="@color/colorDefaultIcon"
-            app:boxStrokeColor="@color/colorDefaultIcon"
-            app:helperTextTextColor="@color/colorDefaultIcon"
-            app:placeholderTextColor="@color/colorDefaultIcon"
             android:hint="Number of below ground floors:">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -70,8 +62,6 @@
             app:cornerRadius="4dp"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             app:strokeWidth="1.25dp"
-            app:strokeColor="@color/colorDefaultIcon"
-            android:textColor="@color/colorDefaultIcon"
             android:text="Apply"/>
 
     </LinearLayout>

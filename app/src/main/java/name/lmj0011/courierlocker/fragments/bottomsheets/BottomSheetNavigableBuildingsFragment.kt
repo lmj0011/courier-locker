@@ -2,18 +2,23 @@ package name.lmj0011.courierlocker.fragments.bottomsheets
 
 import android.annotation.SuppressLint
 import android.app.Dialog
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.annotation.AttrRes
+import androidx.annotation.ColorInt
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.color.MaterialColors
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.adapters.BuildingListAdapter
 import name.lmj0011.courierlocker.database.Apartment
@@ -21,6 +26,17 @@ import name.lmj0011.courierlocker.database.Building
 import name.lmj0011.courierlocker.databinding.BottomsheetFragmentBuildingsBinding
 import name.lmj0011.courierlocker.helpers.SwipeHelper
 import name.lmj0011.courierlocker.helpers.Util
+
+
+@ColorInt
+fun Context.getColorFromAttr(
+    @AttrRes attrColor: Int,
+    typedValue: TypedValue = TypedValue(),
+    resolveRefs: Boolean = true
+): Int {
+    theme.resolveAttribute(attrColor, typedValue, resolveRefs)
+    return typedValue.data
+}
 
 class BottomSheetNavigableBuildingsFragment(private val apartment: Apartment): BottomSheetDialogFragment() {
     private lateinit var binding: BottomsheetFragmentBuildingsBinding
@@ -87,11 +103,14 @@ class BottomSheetNavigableBuildingsFragment(private val apartment: Apartment): B
     private fun setupObservers() {}
 
     private fun getBuildingNavigateSwipeButton(bldg: Building) : SwipeHelper.UnderlayButton {
+        val typedValue = TypedValue()
+        requireContext().theme.resolveAttribute(R.attr.colorPrimary, typedValue, true)
+
         return SwipeHelper.UnderlayButton(
             requireContext(),
             "Directions",
             14.0f,
-            R.color.colorDefaultIcon,
+            typedValue.resourceId,
             object : SwipeHelper.UnderlayButtonClickListener {
                 override fun onClick() {
                     val gmmIntentUri: Uri = Uri.parse("geo:0,0?z=18&q=${bldg.latitude},${bldg.longitude}(bldg: ${bldg.number})")

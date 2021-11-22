@@ -164,9 +164,19 @@ class GigLabelsFragment : Fragment() {
 
         binding.lifecycleOwner = this
 
+        binding.gigLabelFloatingActionButton.setOnClickListener {
+            val dialog = AddNewGigLabelDialogFragment { newName ->
+                val gigLabel = GigLabel().apply {
+                    name = newName
+                }
+                gigLabelViewModel.insertGig(gigLabel)
+            }
+
+            dialog.show(this.childFragmentManager, this.tag)
+        }
+
         gigLabelViewModel.gigs.observe(viewLifecycleOwner, Observer {
             this.submitListToAdapter(it)
-
         })
 
         return binding.root
@@ -180,17 +190,6 @@ class GigLabelsFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         fragmentJob?.cancel()
-    }
-
-    private fun fabOnClickListenerCallback() {
-        val dialog = AddNewGigLabelDialogFragment { newName ->
-            val gigLabel = GigLabel().apply {
-                name = newName
-            }
-            gigLabelViewModel.insertGig(gigLabel)
-        }
-
-        dialog.show(this.childFragmentManager, this.tag)
     }
 
     @SuppressLint("NotifyDataSetChanged")

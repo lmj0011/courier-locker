@@ -31,9 +31,11 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_settings)
 
         progressIndicator = findViewById(R.id.progress_indicator)
+        setSupportActionBar(findViewById(R.id.toolbar))
+
         supportActionBar?.title = "Settings"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setBackgroundDrawable(ColorDrawable(ContextCompat.getColor(this, R.color.colorPrimary)))
+        supportActionBar?.setBackgroundDrawable(ColorDrawable(ContextCompat.getColor(this, R.color.md_theme_light_primary)))
 
 
     }

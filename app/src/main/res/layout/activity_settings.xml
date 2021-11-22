@@ -8,19 +8,30 @@
         tools:context=".SettingsActivity">
 
     <com.google.android.material.appbar.AppBarLayout
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:theme="@style/AppTheme">
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-    <com.google.android.material.progressindicator.LinearProgressIndicator
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/Theme.MaterialComponents.DayNight.DarkActionBar"
+            app:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+
+        <com.google.android.material.progressindicator.LinearProgressIndicator
             android:id="@+id/progress_indicator"
             style="@style/Widget.MaterialComponents.LinearProgressIndicator"
-            app:indicatorColor="@color/colorAccent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:indeterminate="true"
             android:indeterminateOnly="true"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

@@ -70,7 +70,6 @@ class TripsFragment : Fragment(R.layout.fragment_trips),
         super.onResume()
         mainActivity.supportActionBar?.subtitle = null
         updateTodaysTotalMoneyUI()
-        tripViewModel.tripsPaged.refresh()
 
         /**
          * Showing a progressbar here to hide that fact that [tripViewModel.tripsPaged] cache does not

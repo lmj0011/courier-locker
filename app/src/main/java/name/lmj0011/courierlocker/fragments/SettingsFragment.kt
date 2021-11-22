@@ -90,8 +90,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
         /**
          * Show some Preferences only on devices running Android 11 or higher
          */
-        showCurrentStatusAsBubble.isVisible =
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && enableCurrentStatusService.isChecked
+        showCurrentStatusAsBubble.isVisible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+        showCurrentStatusAsBubble.isEnabled = enableCurrentStatusService.isChecked
 
 
         createBackupPref.setOnPreferenceClickListener {
@@ -160,12 +160,12 @@ class SettingsFragment : PreferenceFragmentCompat() {
             when (newValue) {
                 true -> {
                     application.startCurrentStatusService()
-                    showCurrentStatusAsBubble.isVisible = true
-                    showCurrentStatusAsBubble.isEnabled = true
+                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        showCurrentStatusAsBubble.isEnabled = true
+                    }
                 }
                 else -> {
                     application.stopCurrentStatusService()
-                    showCurrentStatusAsBubble.isVisible = false
                     showCurrentStatusAsBubble.isEnabled = false
                 }
             }
@@ -174,17 +174,20 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         showCurrentStatusAsBubble.setOnPreferenceChangeListener { _, newValue ->
             settingsActivity.toggleProgressIndicator(true)
-            showCurrentStatusAsBubble.isEnabled = false
+
+            /**
+             * We need to restart the Service so the updated preferences take effect
+             */
             application.stopCurrentStatusService()
 
             launchIO {
                 delay(1000L)
                 withUIContext {
                     application.startCurrentStatusService()
-                    showCurrentStatusAsBubble.isEnabled = true
                     settingsActivity.toggleProgressIndicator(false)
                 }
             }
+
             true
         }
 

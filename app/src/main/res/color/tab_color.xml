@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- borrowed style from @color/mtrl_navigation_bar_item_tint -->
-    <item android:alpha="1.0" android:color="@color/defaultTextColorHighlight" android:state_checked="true"/>
-    <item android:alpha="0.6" android:color="?attr/colorOnSurface"/>
-</selector>

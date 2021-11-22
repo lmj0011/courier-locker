@@ -7,7 +7,9 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import android.os.SystemClock
+import android.util.TypedValue
 import android.view.View
+import androidx.annotation.ColorRes
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceManager
 import com.jakewharton.threetenabp.AndroidThreeTen
@@ -20,6 +22,7 @@ import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.singleton
 import timber.log.Timber
+import kotlin.properties.Delegates
 
 
 class CourierLockerApplication : Application() {
@@ -27,6 +30,8 @@ class CourierLockerApplication : Application() {
         private set
     var isCurrentStatusServiceBounded: Boolean = false
         private set
+
+    var colorPrimaryResId by Delegates.notNull<Int>()
 
     val kodein = DI.direct {
         bind<PreferenceHelper>() with singleton { PreferenceHelper(this@CourierLockerApplication) }
@@ -97,6 +102,9 @@ class CourierLockerApplication : Application() {
      */
     fun applyTheme() {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        val typedValue = TypedValue()
+        theme.resolveAttribute(R.attr.colorPrimary, typedValue, true)
+        colorPrimaryResId = typedValue.resourceId
 
         when(sharedPreferences.getString(getString(R.string.pref_key_mode_night), "dark")) {
             "light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)

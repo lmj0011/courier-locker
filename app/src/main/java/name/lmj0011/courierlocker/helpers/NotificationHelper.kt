@@ -6,7 +6,7 @@ import android.app.NotificationManager
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.GROUP_ALERT_SUMMARY
-import androidx.core.content.ContextCompat
+import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.R
 
 
@@ -56,6 +56,6 @@ object NotificationHelper {
             .setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
             .setOnlyAlertOnce(true)
             .setSortKey("a")
-            .setColor(ContextCompat.getColor(context, R.color.colorDefaultIcon))
+            .setColor((context.applicationContext as CourierLockerApplication).colorPrimaryResId)
     }
 }

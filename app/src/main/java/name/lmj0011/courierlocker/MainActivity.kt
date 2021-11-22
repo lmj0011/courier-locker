@@ -13,14 +13,11 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.*
 import androidx.preference.PreferenceManager
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import timber.log.Timber
 import name.lmj0011.courierlocker.databinding.ActivityMainBinding
-import name.lmj0011.courierlocker.fragments.EditAptBuildingsMapFragmentArgs
-import name.lmj0011.courierlocker.fragments.EditAptBuildingsMapFragmentDirections
 import name.lmj0011.courierlocker.fragments.MapsFragmentDirections
 import name.lmj0011.courierlocker.fragments.TripsFragmentDirections
 import name.lmj0011.courierlocker.fragments.bottomsheets.BottomSheetCreateNewFragment

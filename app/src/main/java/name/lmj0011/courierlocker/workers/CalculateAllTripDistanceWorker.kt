@@ -12,6 +12,7 @@ import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import kotlinx.coroutines.delay
+import name.lmj0011.courierlocker.CourierLockerApplication
 import name.lmj0011.courierlocker.R
 import name.lmj0011.courierlocker.database.CourierLockerDatabase
 import name.lmj0011.courierlocker.helpers.NotificationHelper
@@ -64,7 +65,7 @@ class CalculateAllTripDistanceWorker (private val appContext: Context, parameter
             .setSmallIcon(R.drawable.ic_baseline_sync_24)
             .setContentTitle(appContext.getString(R.string.notification_calculate_all_trip_distance))
             .setOnlyAlertOnce(true)
-            .setColor(ContextCompat.getColor(appContext, R.color.colorDefaultIcon))
+            .setColor((applicationContext as CourierLockerApplication).colorPrimaryResId)
             .addAction(0, appContext.getString(R.string.notification_action_button_cancel), notificationCancelWorkerPendingIntent)
             .build()
 
@@ -114,7 +115,7 @@ class CalculateAllTripDistanceWorker (private val appContext: Context, parameter
             .setContentTitle(appContext.getString(R.string.notification_calculate_all_trip_distance))
             .setContentText(message)
             .setProgress(100, progress, false)
-            .setColor(ContextCompat.getColor(appContext, R.color.colorDefaultIcon))
+            .setColor((applicationContext as CourierLockerApplication).colorPrimaryResId)
             .addAction(0, appContext.getString(R.string.notification_action_button_cancel), notificationCancelWorkerPendingIntent)
             .build()
 

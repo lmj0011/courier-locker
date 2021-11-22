@@ -58,7 +58,7 @@ class CreateBackupWorker (private val appContext: Context, parameters: WorkerPar
             .setSmallIcon(R.drawable.ic_baseline_sync_24)
             .setContentTitle(appContext.getString(R.string.creating_app_backup))
             .setOnlyAlertOnce(true)
-            .setColor(ContextCompat.getColor(appContext, R.color.colorDefaultIcon))
+            .setColor(application.colorPrimaryResId)
             .addAction(0, appContext.getString(R.string.notification_action_button_cancel), notificationCancelWorkerPendingIntent)
             .build()
 
@@ -127,7 +127,7 @@ class CreateBackupWorker (private val appContext: Context, parameters: WorkerPar
             .setContentTitle(appContext.getString(R.string.creating_app_backup))
             .setContentText(message)
             .setProgress(100, progress, false)
-            .setColor(ContextCompat.getColor(appContext, R.color.colorDefaultIcon))
+            .setColor((applicationContext as CourierLockerApplication).colorPrimaryResId)
             .addAction(0, appContext.getString(R.string.notification_action_button_cancel), notificationCancelWorkerPendingIntent)
             .build()
 

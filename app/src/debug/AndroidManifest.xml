@@ -39,7 +39,7 @@
                 android:configChanges="uiMode"
                 android:launchMode="singleTop"
                 android:label="@string/app_name"
-                android:theme="@style/AppTheme.NoActionBar"
+                android:theme="@style/AppTheme"
                 android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -59,7 +59,7 @@
 
         <activity
                 android:name=".CurrentStatusBubbleActivity"
-                android:theme="@style/AppTheme.NoActionBar"
+                android:theme="@style/AppTheme"
                 android:allowEmbedded="true"
                 android:exported="true"
                 android:documentLaunchMode="always"
