@@ -13,7 +13,7 @@ import name.lmj0011.courierlocker.BuildConfig
 import timber.log.Timber
 import io.requery.android.database.sqlite.RequerySQLiteOpenHelperFactory
 
-@Database(entities = [GateCode::class, Trip::class, Customer::class, Apartment::class, GigLabel::class], version = 8,  exportSchema = true)
+@Database(entities = [GateCode::class, Trip::class, Customer::class, Apartment::class, GigLabel::class], version = 9,  exportSchema = true)
 @TypeConverters(DataConverters::class)
 abstract class CourierLockerDatabase : RoomDatabase() {
 
@@ -95,6 +95,19 @@ abstract class CourierLockerDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_8_9 = object : Migration(8,9) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                /** Drop column isn't supported by SQLite, so emptying the column seems to be the painless method
+                 *  ref: https://www.sqlite.org/faq.html#q11 and https://stackoverflow.com/a/68621973/2445763
+                 */
+                with(database) {
+                    execSQL("UPDATE apartments_table SET uid = ''")
+                    execSQL("UPDATE apartments_table SET mapImageUrl = ''")
+                    execSQL("UPDATE apartments_table SET sourceUrl = ''")
+                }
+            }
+        }
+
         @Volatile
         private var INSTANCE: CourierLockerDatabase? = null
 
@@ -120,7 +133,7 @@ abstract class CourierLockerDatabase : RoomDatabase() {
                          */
                         MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4,
                         MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7,
-                        MIGRATION_7_8
+                        MIGRATION_7_8, MIGRATION_8_9
                     )
 
                     if (BuildConfig.DEBUG) {

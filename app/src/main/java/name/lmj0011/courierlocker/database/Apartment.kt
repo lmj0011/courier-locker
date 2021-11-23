@@ -15,7 +15,7 @@ data class Apartment(
     @ColumnInfo(name = "gateCodeId")
     var gateCodeId: Long = 0L,
 
-    // currently only relevant if Apartment was pulled from an external source. (ie. not self created)
+    @Deprecated("No longer used.")
     @ColumnInfo(name = "uid")
     var uid: String = "",
 
@@ -40,11 +40,11 @@ data class Apartment(
     @ColumnInfo(name = "floorOneAsBlueprint")
     var floorOneAsBlueprint: Boolean = true,
 
-    // can be omitted
+    @Deprecated("No longer used.")
     @ColumnInfo(name = "mapImageUrl")
     var mapImageUrl: String = "",
 
-    // currently only relevant if Apartment was pulled from an external source. (ie. not self created)
+    @Deprecated("No longer used.")
     @ColumnInfo(name = "sourceUrl")
     var sourceUrl: String = "",
 

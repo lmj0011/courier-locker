@@ -50,7 +50,6 @@ object AppDataImportExportHelper {
                     jsonObject(
                         "id" to it.id,
                         "gateCodeId" to it.gateCodeId,
-                        "uid" to it.uid,
                         "name" to it.name,
                         "address" to it.address,
                         "latitude" to it.latitude,
@@ -58,8 +57,6 @@ object AppDataImportExportHelper {
                         "aboveGroundFloorCount" to it.aboveGroundFloorCount,
                         "belowGroundFloorCount" to it.belowGroundFloorCount,
                         "floorOneAsBlueprint" to it.floorOneAsBlueprint,
-                        "mapImageUrl" to it.mapImageUrl,
-                        "sourceUrl" to it.sourceUrl,
                         "buildings" to jsonArray(
                             it.buildings.map {bldg ->
                                 jsonObject(
