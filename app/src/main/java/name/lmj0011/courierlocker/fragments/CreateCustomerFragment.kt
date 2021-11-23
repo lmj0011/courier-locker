@@ -46,7 +46,6 @@ class CreateCustomerFragment : Fragment() {
     private var customer = Customer()
     private var fragmentJob = Job()
     private var addressAutoCompleteJob: Job? = null
-    private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -65,8 +64,11 @@ class CreateCustomerFragment : Fragment() {
 
         binding.customerViewModel = this.customerViewModel
 
-        blankfaces()
-        forceRenderImageViews()
+        binding.createCustomerBadImpressionImageView.drawable
+            .setTint(resources.getColor(R.color.colorDefaultFace, null))
+
+        binding.createCustomerGoodImpressionImageView.drawable
+            .setTint(resources.getColor(R.color.colorDefaultFace, null))
 
         binding.createCustomerGoodImpressionImageView.setOnClickListener {
             colorHappyFace()
@@ -168,47 +170,21 @@ class CreateCustomerFragment : Fragment() {
     }
 
 
-    /**
-     * set faces to default color
-     */
-    private fun blankfaces() {
-        DrawableCompat.setTint(
-            ContextCompat.getDrawable(mainActivity, R.drawable.ic_happy_face)!!,
-            ContextCompat.getColor(mainActivity, R.color.colorDefaultFace)
-        )
-
-        DrawableCompat.setTint(
-            ContextCompat.getDrawable(mainActivity, R.drawable.ic_sad_face)!!,
-            ContextCompat.getColor(mainActivity, R.color.colorDefaultFace)
-        )
-    }
-
     private fun colorHappyFace() {
-        blankfaces()
-        DrawableCompat.setTint(
-            ContextCompat.getDrawable(mainActivity, R.drawable.ic_happy_face)!!,
-            ContextCompat.getColor(mainActivity, R.color.colorHappyFace)
-        )
-        forceRenderImageViews()
+        binding.createCustomerBadImpressionImageView.drawable
+            .setTint(resources.getColor(R.color.colorDefaultFace, null))
+
+        binding.createCustomerGoodImpressionImageView.drawable
+            .setTint(resources.getColor(R.color.colorHappyFace, null))
     }
 
     private fun colorSadFace() {
-        blankfaces()
-        DrawableCompat.setTint(
-            ContextCompat.getDrawable(mainActivity, R.drawable.ic_sad_face)!!,
-            ContextCompat.getColor(mainActivity, R.color.colorSadFace)
-        )
-        forceRenderImageViews()
+        binding.createCustomerGoodImpressionImageView.drawable
+            .setTint(resources.getColor(R.color.colorDefaultFace, null))
+
+        binding.createCustomerBadImpressionImageView.drawable
+            .setTint(resources.getColor(R.color.colorSadFace, null))
     }
-
-    private fun forceRenderImageViews() {
-        binding.createCustomerGoodImpressionImageView.setImageDrawable(null)
-        binding.createCustomerGoodImpressionImageView.setImageDrawable(ContextCompat.getDrawable(mainActivity, R.drawable.ic_happy_face)!!)
-
-        binding.createCustomerBadImpressionImageView.setImageDrawable(null)
-        binding.createCustomerBadImpressionImageView.setImageDrawable(ContextCompat.getDrawable(mainActivity, R.drawable.ic_sad_face)!!)
-    }
-
 
     @Suppress("UNUSED_PARAMETER")
     private fun saveButtonOnClickListener(v: View) {
@@ -224,7 +200,7 @@ class CreateCustomerFragment : Fragment() {
             this.customer.impression,
             this.customer.note
         )
-        mainActivity.showToastMessage("Saved customer")
+
         mainActivity.hideKeyBoard(v.rootView)
         this.findNavController().navigate(R.id.customersFragment)
     }

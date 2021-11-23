@@ -49,14 +49,13 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
     private var fragmentJob = Job()
     private var addressAutoCompleteJob: Job? = null
     private var customer: Customer? = null
-    private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
     private var customerAddressLatitude = 0.0
     private var customerAddressLongitude = 0.0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = DataBindingUtil.inflate(
             inflater, R.layout.fragment_edit_customer, container, false)
 
@@ -71,14 +70,17 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
 
         binding.customerViewModel = this.customerViewModel
 
-        blankfaces()
-        forceRenderImageViews()
-
         binding.editCustomerDeleteButton.setOnClickListener {
             val dialog = DeleteCustomerDialogFragment()
             dialog.show(childFragmentManager, "DeleteCustomerDialogFragment")
 
         }
+
+        binding.editCustomerBadImpressionImageView.drawable
+            .setTint(resources.getColor(R.color.colorDefaultFace, null))
+
+        binding.editCustomerGoodImpressionImageView.drawable
+            .setTint(resources.getColor(R.color.colorDefaultFace, null))
 
         customerViewModel.customers.observe(viewLifecycleOwner, {
             if (!binding.editCustomerSaveButton.isEnabled || !binding.editCustomerDeleteButton.isEnabled) {
@@ -125,7 +127,7 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
 
         // Set an item click listener for auto complete text view
         binding.editCustomerAddressAutoCompleteTextView.onItemClickListener = AdapterView.OnItemClickListener{
-                parent,view,position,id->
+                _, _, position, _ ->
             val address: Address? = adapter.getItem(position)
 
             address?.let {
@@ -154,7 +156,7 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
 
 
         // Set a focus change listener for auto complete text view
-        binding.editCustomerAddressAutoCompleteTextView.onFocusChangeListener = View.OnFocusChangeListener { view, b ->
+        binding.editCustomerAddressAutoCompleteTextView.onFocusChangeListener = View.OnFocusChangeListener { _, b ->
             if(b){
                 binding.editCustomerAddressAutoCompleteTextView.showDropDown()
             }
@@ -202,45 +204,20 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
     }
 
 
-    /**
-     * set faces to default color
-     */
-    private fun blankfaces() {
-        DrawableCompat.setTint(
-            ContextCompat.getDrawable(mainActivity, R.drawable.ic_happy_face)!!,
-            ContextCompat.getColor(mainActivity, R.color.colorDefaultFace)
-        )
-
-        DrawableCompat.setTint(
-            ContextCompat.getDrawable(mainActivity, R.drawable.ic_sad_face)!!,
-            ContextCompat.getColor(mainActivity, R.color.colorDefaultFace)
-        )
-    }
-
     private fun colorHappyFace() {
-        blankfaces()
-        DrawableCompat.setTint(
-            ContextCompat.getDrawable(mainActivity, R.drawable.ic_happy_face)!!,
-            ContextCompat.getColor(mainActivity, R.color.colorHappyFace)
-        )
-        forceRenderImageViews()
+        binding.editCustomerBadImpressionImageView.drawable
+            .setTint(resources.getColor(R.color.colorDefaultFace, null))
+
+        binding.editCustomerGoodImpressionImageView.drawable
+            .setTint(resources.getColor(R.color.colorHappyFace, null))
     }
 
     private fun colorSadFace() {
-        blankfaces()
-        DrawableCompat.setTint(
-            ContextCompat.getDrawable(mainActivity, R.drawable.ic_sad_face)!!,
-            ContextCompat.getColor(mainActivity, R.color.colorSadFace)
-        )
-        forceRenderImageViews()
-    }
+        binding.editCustomerGoodImpressionImageView.drawable
+            .setTint(resources.getColor(R.color.colorDefaultFace, null))
 
-    private fun forceRenderImageViews() {
-        binding.editCustomerGoodImpressionImageView.setImageDrawable(null)
-        binding.editCustomerGoodImpressionImageView.setImageDrawable(ContextCompat.getDrawable(mainActivity, R.drawable.ic_happy_face)!!)
-
-        binding.editCustomerBadImpressionImageView.setImageDrawable(null)
-        binding.editCustomerBadImpressionImageView.setImageDrawable(ContextCompat.getDrawable(mainActivity, R.drawable.ic_sad_face)!!)
+        binding.editCustomerBadImpressionImageView.drawable
+            .setTint(resources.getColor(R.color.colorSadFace, null))
     }
 
     private fun injectCustomerIntoView(c: Customer?) {
@@ -287,7 +264,6 @@ class EditCustomerFragment : Fragment(), DeleteCustomerDialogFragment.NoticeDial
         }
 
         this.customerViewModel.updateCustomer(customer)
-        mainActivity.showToastMessage("Updated customer")
         mainActivity.hideKeyBoard(v.rootView)
         this.findNavController().navigate(R.id.customersFragment)
     }
