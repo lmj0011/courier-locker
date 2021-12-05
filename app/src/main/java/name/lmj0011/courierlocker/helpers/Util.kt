@@ -7,6 +7,8 @@ import android.text.Html
 import android.text.Spanned
 import android.view.View
 import androidx.paging.PagingConfig
+import com.google.android.libraries.maps.GoogleMap
+import com.google.android.libraries.maps.model.*
 import kotlinx.coroutines.delay
 import name.lmj0011.courierlocker.database.GateCode
 import name.lmj0011.courierlocker.database.Trip
@@ -21,6 +23,42 @@ import java.text.NumberFormat
 
 object Util {
     val numberFormatInstance: NumberFormat = NumberFormat.getCurrencyInstance()
+
+    /**
+     * Styles the polyline, based on type.
+     * @param polyline The polyline object that needs styling.
+     */
+    fun stylePolyline(gMap: GoogleMap, polyline: Polyline): Pair<Polyline, Circle> {
+        val dot: PatternItem = Dot()
+        val gap: PatternItem = Gap(20f)
+        val dash: PatternItem = Dash(20f)
+        val circleRadius = 0.9144 // 0.9144m == 6ft
+        val lightOrangeColor = -0x657db
+        val darkOrangeColor = -0xa80e9
+
+        // Create a stroke pattern of a dot followed by a gap, a dash, and another gap.
+        val polylinePattern = listOf(dot, gap, dash, gap)
+
+        polyline.startCap = RoundCap()
+        polyline.endCap = RoundCap()
+        polyline.width = 8f
+        polyline.color = lightOrangeColor
+        polyline.pattern = polylinePattern
+        polyline.jointType = JointType.ROUND
+
+        val circle = gMap.addCircle(
+            CircleOptions()
+                .center(LatLng(polyline.points.first().latitude, polyline.points.first().longitude))
+                .radius(circleRadius)
+                .strokeWidth(10f)
+                .strokeColor(darkOrangeColor)
+                .fillColor(darkOrangeColor)
+                .clickable(false)
+        )
+
+        return Pair(polyline, circle)
+    }
+
 
     /**
      * Shortens a Postal Address to only the street name if possible

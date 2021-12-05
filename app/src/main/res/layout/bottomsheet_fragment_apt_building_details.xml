@@ -36,6 +36,32 @@
             android:text="Navigate" />
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/addWaypointButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            app:cornerRadius="4dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:strokeWidth="1.25dp"
+            app:icon="@drawable/ic_baseline_add_location_alt_24"
+            app:iconGravity="textStart"
+            app:iconPadding="10dp"
+            android:text="Add Waypoint" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/removeWaypointButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            app:cornerRadius="4dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:strokeWidth="1.25dp"
+            app:icon="@drawable/ic_baseline_wrong_location_24"
+            app:iconGravity="textStart"
+            app:iconPadding="10dp"
+            android:text="Remove Waypoint" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/deleteButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

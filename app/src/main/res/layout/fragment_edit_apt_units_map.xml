@@ -8,6 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <!--   For Adding a Building Unit    -->
         <View
             android:id="@+id/inputView"
             android:layout_width="0dp"
@@ -45,7 +46,49 @@
             app:layout_constraintStart_toStartOf="@id/inputView"
             app:layout_constraintTop_toTopOf="@+id/inputView"
             tools:visibility="visible" />
+        <!--        -->
 
+        <!--   For Adding a Waypoint     -->
+        <View
+            android:id="@+id/addWaypointInputView"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="8dp"
+            android:background="@android:color/transparent"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/inputView"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/addWaypointTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:ems="10"
+            android:gravity="center"
+            android:minHeight="48dp"
+            android:text="Long press to add a Waypoint"
+            android:visibility="gone"
+            app:layout_constraintEnd_toStartOf="@+id/addButton"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/inputView"
+            tools:visibility="visible" />
+
+        <Button
+            android:id="@+id/saveWaypointButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="Save"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/inputView"
+            tools:visibility="visible" />
+        <!--        -->
+
+        <!--  Floor Selection UI      -->
         <View
             android:id="@+id/floorSelectionView"
             android:layout_width="0dp"
@@ -55,7 +98,7 @@
             android:visibility="visible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/inputView" />
+            app:layout_constraintTop_toBottomOf="@id/addWaypointInputView" />
 
         <TextView
             android:id="@+id/showingUnitsFloorHeader"
@@ -78,6 +121,7 @@
             app:layout_constraintEnd_toEndOf="@id/floorSelectionView"
             app:layout_constraintTop_toTopOf="@+id/floorSelectionView"
             tools:ignore="SpeakableTextPresentCheck" />
+        <!--        -->
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/editAptUnitsMapFragment"

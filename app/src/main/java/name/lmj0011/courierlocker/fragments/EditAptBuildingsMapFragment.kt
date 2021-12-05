@@ -32,9 +32,8 @@ import name.lmj0011.courierlocker.databinding.FragmentCreateOrEditApartmentMapBi
 import name.lmj0011.courierlocker.databinding.FragmentEditAptBuildingsMapBinding
 import name.lmj0011.courierlocker.factories.ApartmentViewModelFactory
 import name.lmj0011.courierlocker.fragments.bottomsheets.BottomSheetAptBuildingDetailsFragment
-import name.lmj0011.courierlocker.helpers.AptBldgClusterItem
-import name.lmj0011.courierlocker.helpers.PreferenceHelper
-import name.lmj0011.courierlocker.helpers.launchUI
+import name.lmj0011.courierlocker.helpers.*
+import name.lmj0011.courierlocker.helpers.Util.stylePolyline
 import name.lmj0011.courierlocker.viewmodels.ApartmentViewModel
 import org.kodein.di.instance
 import java.lang.Exception
@@ -58,8 +57,10 @@ class EditAptBuildingsMapFragment : Fragment(){
     private lateinit var args: EditAptBuildingsMapFragmentArgs
     private var selectedApt = MutableLiveData<Apartment>()
     private var selectedBldg: Building? = null
+    private var activePolylinePairList: MutableList<Pair<Polyline, Circle>?> = mutableListOf()
     private var fragmentJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + fragmentJob)
+    private var selectionMode = Const.BUILDING_SELECTION_MODE
 
     @SuppressLint("MissingPermission")
     override fun onCreateView(
@@ -137,28 +138,74 @@ class EditAptBuildingsMapFragment : Fragment(){
             gMap.setOnMarkerClickListener(clusterManager)
 
             gMap.setOnMapClickListener {
+                selectionMode = Const.BUILDING_SELECTION_MODE // default mode
+
                 this.hideAddBuildingUI()
+                this.hideAddWaypointUI()
             }
 
             gMap.setOnMapLongClickListener {
                 pinDropMarker.position = it
                 pinDropMarker.isVisible = true
-                selectedBldg = Building("", it.latitude, it.longitude)
-                this.showAddBuildingUI()
+                clearPolylines()
+
+                when(selectionMode) {
+                    Const.BUILDING_SELECTION_MODE -> {
+                        selectedBldg = Building("", it.latitude, it.longitude)
+                        this.showAddBuildingUI()
+                    }
+                    Const.WAYPOINT_SELECTION_MODE -> {
+                        this.showAddWaypointUI()
+                        binding.saveWaypointButton.isEnabled = true
+
+                        selectedBldg?.let { bldg ->
+                            bldg.waypointLatitude = it.latitude
+                            bldg.waypointLongitude = it.longitude
+                            drawBldgPolyline(bldg)
+                        }
+                    }
+                }
             }
 
             clusterManager.setOnClusterItemClickListener {
                 selectedBldg = it.bldg
                 pinDropMarker.isVisible = false
 
-                val bottomSheet = BottomSheetAptBuildingDetailsFragment(it.bldg) {
+                val bottomSheet = BottomSheetAptBuildingDetailsFragment(
+                    building = it.bldg,
+                    addWaypointCallback = {
+                        selectionMode = Const.WAYPOINT_SELECTION_MODE
+                        this.showAddWaypointUI()
+                        binding.saveWaypointButton.isEnabled = false
+                    },
+                    removeWaypointCallback = {
+                        val oldBldg = selectedBldg!!
+
+                        val newBldg = Building(
+                            number = oldBldg.number,
+                            latitude = oldBldg.latitude,
+                            longitude = oldBldg.longitude,
+                            hasWaypoint = false,
+                        )
+
+                        selectedApt.value?.let { apt ->
+                            apt.buildings.remove(oldBldg)
+                            apt.buildings.add(newBldg)
+
+                            launchIO {
+                                apartmentViewModel.updateApartment(apt)
+                                selectedApt.postValue(apt)
+                            }
+                        }
+                    },
+                    removeBuildingCallback = {
                         val builder = MaterialAlertDialogBuilder(requireContext())
 
                         builder
                             .setTitle("Building ${it.bldg.number}")
                             .setMessage("Remove this building?")
                             .setPositiveButton("Yes") { _, _ ->
-                                selectedBldg?.let{ selectedApt.value!!.buildings.remove(it) }
+                                selectedBldg?.let{ bldg -> selectedApt.value!!.buildings.remove(bldg) }
                                 launchUI {
                                     withContext(Dispatchers.IO) {
                                         apartmentViewModel.updateApartment(selectedApt.value)
@@ -171,7 +218,13 @@ class EditAptBuildingsMapFragment : Fragment(){
                             }
 
                         builder.show()
-                }
+                    },
+                    dismissCallback = {
+                        clearPolylines()
+                    }
+                )
+
+                if (it.bldg.hasWaypoint) drawBldgPolyline(it.bldg)
 
                 bottomSheet
                     .show(childFragmentManager, "BottomSheetAptBuildingDetailsFragment")
@@ -205,25 +258,47 @@ class EditAptBuildingsMapFragment : Fragment(){
         }
 
         binding.addButton.setOnClickListener {
-            uiScope.launch {
-                val b = Building(
-                    binding.buildingEditText.text.toString(),
-                    pinDropMarker.position.latitude,
-                    pinDropMarker.position.longitude
-                )
+            val b = Building(
+                binding.buildingEditText.text.toString(),
+                pinDropMarker.position.latitude,
+                pinDropMarker.position.longitude
+            )
 
-                selectedBldg = b
+            selectedBldg = b
 
-                selectedApt.value?.let { apt ->
-                    apt.buildings.add(b)
+            selectedApt.value?.let { apt ->
+                apt.buildings.add(b)
 
-                    withContext(Dispatchers.IO) {
-                        apartmentViewModel.updateApartment(apt)
-                        selectedApt.postValue(apt)
-                    }
+                launchIO {
+                    apartmentViewModel.updateApartment(apt)
+                    selectedApt.postValue(apt)
                 }
+            }
 
-                mainActivity.hideKeyBoard(binding.buildingEditText)
+            mainActivity.hideKeyBoard(binding.buildingEditText)
+        }
+
+        binding.saveWaypointButton.setOnClickListener {
+            val oldBldg = selectedBldg!!
+
+            val newBldg = Building(
+                number = oldBldg.number,
+                latitude = oldBldg.latitude,
+                longitude = oldBldg.longitude,
+                hasWaypoint = true,
+                waypointLatitude = pinDropMarker.position.latitude,
+                waypointLongitude = pinDropMarker.position.longitude
+
+            )
+
+            selectedApt.value?.let { apt ->
+                apt.buildings.remove(oldBldg)
+                apt.buildings.add(newBldg)
+
+                launchIO {
+                    apartmentViewModel.updateApartment(apt)
+                    selectedApt.postValue(apt)
+                }
             }
         }
 
@@ -328,6 +403,30 @@ class EditAptBuildingsMapFragment : Fragment(){
             }
         }
         this.hideAddBuildingUI()
+        this.hideAddWaypointUI()
+    }
+
+    private fun drawBldgPolyline(bldg: Building) {
+        val polyline = gMap.addPolyline(
+            PolylineOptions()
+                .clickable(false)
+                .add(
+                    LatLng(bldg.waypointLatitude, bldg.waypointLongitude),
+                    LatLng(bldg.latitude, bldg.longitude)
+                )
+        )
+
+        val pair = stylePolyline(gMap, polyline)
+        activePolylinePairList.add(pair)
+    }
+
+    private fun clearPolylines() {
+        activePolylinePairList.forEach { pair ->
+            pair?.first?.remove()
+            pair?.second?.remove()
+        }
+
+        activePolylinePairList.clear()
     }
 
     private fun hideAddBuildingUI() {
@@ -362,5 +461,39 @@ class EditAptBuildingsMapFragment : Fragment(){
         binding.buildingEditText.requestFocus()
         mainActivity.showKeyBoard(binding.buildingEditText)
         binding.buildingEditText.isEnabled = true
+
+        hideAddWaypointUI()
+    }
+
+    private fun hideAddWaypointUI() {
+        val transition = Slide(Gravity.TOP)
+        transition.duration = 50
+        transition.addTarget(binding.addWaypointInputView)
+        transition.addTarget(binding.saveWaypointButton)
+        transition.addTarget(binding.addWaypointTextView)
+
+        TransitionManager.beginDelayedTransition(binding.editAptBuildingsMapContainer, transition)
+        binding.addWaypointInputView.visibility = View.GONE
+        binding.saveWaypointButton.visibility = View.GONE
+        binding.addWaypointTextView.visibility = View.GONE
+
+        pinDropMarker.isVisible = false
+        clearPolylines()
+
+    }
+
+    private fun showAddWaypointUI() {
+        val transition = Slide(Gravity.TOP)
+        transition.duration = 50
+        transition.addTarget(binding.addWaypointInputView)
+        transition.addTarget(binding.saveWaypointButton)
+        transition.addTarget(binding.addWaypointTextView)
+
+        TransitionManager.beginDelayedTransition(binding.editAptBuildingsMapContainer, transition)
+        binding.addWaypointInputView.visibility = View.VISIBLE
+        binding.saveWaypointButton.visibility = View.VISIBLE
+        binding.addWaypointTextView.visibility = View.VISIBLE
+
+        hideAddBuildingUI()
     }
 }

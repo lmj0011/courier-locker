@@ -62,7 +62,10 @@ object AppDataImportExportHelper {
                                 jsonObject(
                                     "number" to bldg.number,
                                     "latitude" to bldg.latitude,
-                                    "longitude" to bldg.longitude
+                                    "longitude" to bldg.longitude,
+                                    "hasWaypoint" to bldg.hasWaypoint,
+                                    "waypointLatitude" to bldg.waypointLatitude,
+                                    "waypointLongitude" to bldg.waypointLongitude
                                 )
                             }
                         ),
@@ -72,7 +75,10 @@ object AppDataImportExportHelper {
                                     "number" to bldgUnit.number,
                                     "floorNumber" to bldgUnit.floorNumber,
                                     "latitude" to bldgUnit.latitude,
-                                    "longitude" to bldgUnit.longitude
+                                    "longitude" to bldgUnit.longitude,
+                                    "hasWaypoint" to bldgUnit.hasWaypoint,
+                                    "waypointLatitude" to bldgUnit.waypointLatitude,
+                                    "waypointLongitude" to bldgUnit.waypointLongitude
                                 )
                             }
                         )

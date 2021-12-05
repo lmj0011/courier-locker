@@ -8,6 +8,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+        <!--   For Adding a Building     -->
         <View
             android:id="@+id/inputView"
             android:layout_width="0dp"
@@ -31,18 +32,6 @@
             app:layout_constraintTop_toTopOf="@+id/inputView"
             tools:visibility="visible" />
 
-        <androidx.fragment.app.FragmentContainerView
-                android:id="@+id/editAptBuildingsMapFragment"
-                android:name="com.google.android.libraries.maps.SupportMapFragment"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/inputView"
-                app:layout_constraintVertical_bias="1.0" />
-
         <EditText
             android:id="@+id/buildingEditText"
             android:layout_width="wrap_content"
@@ -54,9 +43,63 @@
             android:inputType="textVisiblePassword"
             android:minHeight="48dp"
             android:visibility="gone"
+            app:layout_constraintEnd_toStartOf="@+id/addButton"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/inputView"
             tools:visibility="visible" />
+        <!--        -->
+
+        <!--   For Adding a Waypoint     -->
+        <View
+            android:id="@+id/addWaypointInputView"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="8dp"
+            android:background="@android:color/transparent"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/inputView"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/addWaypointTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:ems="10"
+            android:gravity="center"
+            android:minHeight="48dp"
+            android:text="Long press to add a Waypoint"
+            android:visibility="gone"
+            app:layout_constraintEnd_toStartOf="@+id/addButton"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/inputView"
+            tools:visibility="visible" />
+
+        <Button
+            android:id="@+id/saveWaypointButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="Save"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/inputView"
+            tools:visibility="visible" />
+        <!--        -->
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/editAptBuildingsMapFragment"
+            android:name="com.google.android.libraries.maps.SupportMapFragment"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/addWaypointInputView"
+            app:layout_constraintVertical_bias="1.0" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
